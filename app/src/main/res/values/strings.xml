@@ -1,3 +1,5 @@
 <resources>
-    <string name="app_name">dewheel</string>
+    <string name="app_name">DeWheel</string>
+
+    <string name="app_pref">DEWHEEL APP PREFERENCE</string>
 </resources>

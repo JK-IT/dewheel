@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "312225800234",
+    "project_id": "de-wheel",
+    "storage_bucket": "de-wheel.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:312225800234:android:9f7fa15b10e95e7a20a353",
+        "android_client_info": {
+          "package_name": "desoft.studio.dewheel"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "312225800234-j3b3408dvahc6f1qa1kp177547cgeupa.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "desoft.studio.dewheel",
+            "certificate_hash": "437f39bfa7eade65c08583f03a1634c4749005d8"
+          }
+        },
+        {
+          "client_id": "312225800234-ma4shum70em5sgnv4qfnb895oo5j3evf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDgZDcIfDkb9XlkGUX9_mIJOB0hhMPqMpM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "312225800234-ma4shum70em5sgnv4qfnb895oo5j3evf.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
