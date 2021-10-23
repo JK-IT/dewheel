@@ -14,20 +14,39 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+        <TextView
+            android:text="Are you a return user ?"
+            android:textSize="@dimen/miniText"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
         <com.google.android.gms.common.SignInButton
             android:id="@+id/gate_google_btn"
-            android:layout_margin="20dp"
+            android:layout_marginBottom="20dp"
+            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <TextView
+            android:text="Give it a try by logging as a guest"
+            android:textSize="@dimen/miniText"
+            android:gravity="center"
             android:layout_gravity="center"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
         <Button
             android:id="@+id/gate_guest_btn"
             android:text="Quick Login"
-            android:layout_margin="20dp"
+            android:layout_marginBottom="20dp"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_gravity="center"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
+<!--        <Button
+            android:id="@+id/logout"
+            android:text="logout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>-->
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
