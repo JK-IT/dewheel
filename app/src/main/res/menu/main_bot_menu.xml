@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/wheelFragment"
+        android:icon="@drawable/ic_baseline_blur_wheel_24"
+        android:visible="true"
+        android:enabled="true"
+        app:showAsAction="always"/>
+
+    <item
+        android:id="@+id/windFragment"
+        android:icon="@drawable/ic_baseline_wind_24"
+        android:visible="true"
+        android:enabled="true"
+        app:showAsAction="always"/>
+
+    <item
+        android:id="@+id/userFragment"
+        android:icon="@drawable/ic_baseline_user_24"
+        android:visible="true"
+        android:enabled="true"
+        app:showAsAction="always"/>
+</menu>

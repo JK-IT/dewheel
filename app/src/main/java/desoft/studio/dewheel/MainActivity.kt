@@ -7,6 +7,10 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavController
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.setupWithNavController
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import desoft.studio.dewheel.katic.KONSTANT
@@ -21,6 +25,9 @@ class MainActivity : AppCompatActivity()
 	private var fbuser : FirebaseUser? = null;
 	private lateinit var appCache: SharedPreferences;
 	
+	private lateinit var navHost : NavHostFragment;
+	private lateinit var navContro : NavController;
+	
 	override fun onCreate(savedInstanceState: Bundle?)
 	{
 		super.onCreate(savedInstanceState);
@@ -30,8 +37,18 @@ class MainActivity : AppCompatActivity()
 		appCache = getSharedPreferences(getString(R.string.app_pref), Context.MODE_PRIVATE);
 		CheckUSERauthen();
 		
+		SetupNavHost();
 	}
 	
+	/**
+	 * Setup the navigation host
+	 */
+	private fun SetupNavHost()
+	{
+		navHost = supportFragmentManager.findFragmentById(R.id.main_nav_host) as NavHostFragment;
+		navContro = navHost.navController;
+		findViewById<BottomNavigationView>(R.id.main_bottom_bar).setupWithNavController(navContro);
+	}
 	/**
 	 * Check if user == null. true return to gateActi, else process saving to cache
 	 * if user != null -> save gid, uid, email, disname from google provider
