@@ -17,6 +17,7 @@
         <TextView
             android:text="Are you a return user ?"
             android:textSize="@dimen/miniText"
+            android:layout_marginVertical="5dp"
             android:gravity="center"
             android:layout_gravity="center"
             android:layout_width="wrap_content"
@@ -30,6 +31,7 @@
         <TextView
             android:text="Give it a try by logging as a guest"
             android:textSize="@dimen/miniText"
+            android:layout_marginVertical="5dp"
             android:gravity="center"
             android:layout_gravity="center"
             android:layout_width="wrap_content"

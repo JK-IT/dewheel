@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="miniText">10sp</dimen>
+    <dimen name="miniText">11sp</dimen>
 </resources>
