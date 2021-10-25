@@ -101,19 +101,19 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <androidx.cardview.widget.CardView
-                android:layout_marginVertical="15dp"
+            <com.google.android.material.card.MaterialCardView
+                app:cardElevation="3dp"
+                android:layout_marginVertical="@dimen/ele_vertical_margin_normal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
                 <LinearLayout
                     android:orientation="vertical"
+                    android:animateLayoutChanges="true"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
                     <TextView
-                        android:text="Email"
-                        android:textColor="#ff494949"
-                        android:textSize="@dimen/h2"
-                        android:textFontWeight="500"
+                        android:text="Name"
+                        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5"
                         android:paddingVertical="5dp"
                         android:paddingHorizontal="10dp"
                         android:layout_gravity="center"
@@ -122,8 +122,8 @@
 
                     <TextView
                         android:id="@+id/user_email_body"
-                        android:text="Update your email"
-                        android:textSize="20sp"
+                        android:text="Update your name"
+                        android:textSize="@dimen/bodyText1"
                         android:padding="10dp"
                         android:layout_gravity="center"
                         android:gravity="center"
@@ -131,41 +131,11 @@
                         android:layout_height="wrap_content"/>
                 </LinearLayout>
 
-            </androidx.cardview.widget.CardView>
+            </com.google.android.material.card.MaterialCardView>
 
-            <androidx.cardview.widget.CardView
-                android:layout_marginVertical="15dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-                <LinearLayout
-                    android:orientation="vertical"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-                    <TextView
-                        android:text="Phone Number"
-                        android:textColor="#ff494949"
-                        android:textSize="@dimen/h2"
-                        android:textFontWeight="500"
-                        android:paddingVertical="5dp"
-                        android:paddingHorizontal="10dp"
-                        android:layout_gravity="center"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"/>
-                    <TextView
-                        android:id="@+id/user_fonenumber_body"
-                        android:text="Update your phone number"
-                        android:textSize="20sp"
-                        android:padding="10dp"
-                        android:layout_gravity="center"
-                        android:gravity="center"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"/>
-                </LinearLayout>
-
-            </androidx.cardview.widget.CardView>
-
-            <androidx.cardview.widget.CardView
-                android:layout_marginVertical="15dp"
+            <com.google.android.material.card.MaterialCardView
+                app:cardElevation="3dp"
+                android:layout_marginVertical="@dimen/ele_vertical_margin_normal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
                 <LinearLayout
@@ -174,9 +144,7 @@
                     android:layout_height="wrap_content">
                     <TextView
                         android:text="Gender"
-                        android:textColor="#494949"
-                        android:textSize="@dimen/h2"
-                        android:textFontWeight="500"
+                        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5"
                         android:paddingVertical="5dp"
                         android:paddingHorizontal="10dp"
                         android:layout_gravity="center"
@@ -187,12 +155,102 @@
                         android:text="Update your gender"
                         android:layout_gravity="center"
                         android:gravity="center"
-                        android:textSize="20sp"
+                        android:textSize="@dimen/bodyText1"
                         android:padding="10dp"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"/>
                 </LinearLayout>
-            </androidx.cardview.widget.CardView>
+            </com.google.android.material.card.MaterialCardView>
+            <TextView
+                android:text="You cannot change your gender after confirming"
+                android:textSize="@dimen/miniText"
+                android:textColor="#757575"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <com.google.android.material.card.MaterialCardView
+                app:cardElevation="3dp"
+                android:layout_marginVertical="@dimen/ele_vertical_margin_normal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+                    <TextView
+                        android:text="Interested In"
+                        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5"
+                        android:paddingVertical="5dp"
+                        android:paddingHorizontal="10dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
+                    <LinearLayout
+                        android:orientation="horizontal"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+                        <TextView
+                            android:text="Man"
+                            android:textSize="@dimen/medText"
+                            android:gravity="center"
+                            android:layout_marginVertical="20dp"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"/>
+                        <TextView
+                            android:text="Woman"
+                            android:textSize="@dimen/medText"
+                            android:gravity="center"
+                            android:layout_marginVertical="20dp"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"/>
+                    </LinearLayout>
+                    <Button
+                        android:text="Update"
+                        style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                        android:textColor="#49AAEA"
+                        android:layout_gravity="end"
+                        android:layout_marginHorizontal="10dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                app:cardElevation="3dp"
+                android:layout_marginVertical="@dimen/ele_vertical_margin_normal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <TextView
+                        android:text="Favorites"
+                        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5"
+                        android:paddingVertical="5dp"
+                        android:paddingHorizontal="10dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                    <!--<com.google.android.material.textfield.TextInputLayout
+                        android:hint="Cooking, Games, Hiking , etc.,"
+                        app:hintEnabled="true"
+                        app:hintTextAppearance="?attr/hintTextAppearance"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_marginVertical="5dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:lines="3"
+                            android:maxLines="4"
+                            android:inputType="textMultiLine"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"/>
+                    </com.google.android.material.textfield.TextInputLayout>-->
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
         </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
