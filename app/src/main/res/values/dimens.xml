@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="miniText">11sp</dimen>
+    <dimen name="h2">24sp</dimen>
+    <dimen name="medText">20sp</dimen>
 </resources>
