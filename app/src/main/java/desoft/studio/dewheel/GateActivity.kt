@@ -164,8 +164,8 @@ class GateActivity : AppCompatActivity()
 		fbauth.signInWithCredential(cred)
 			.addOnCompleteListener {
 				if(it.isSuccessful){
-					Log.d(TAG, "SigninWITHgoogle: == success signin ");
 					fbuser = it.result.user;
+					Log.d(TAG, "SigninWITHgoogle: == success signin , size of fbuser ${fbuser?.providerData?.size}");
 					// set up cache
 					
 					StartMain();

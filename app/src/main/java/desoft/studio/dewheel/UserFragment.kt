@@ -41,7 +41,7 @@ class UserFragment : Fragment()
 	private lateinit var appcache : SharedPreferences;
 	
 	private lateinit var gooCLIENT : GoogleSignInClient;
-	private lateinit var gooACC : GoogleSignInAccount;
+	private var gooACC : GoogleSignInAccount? = null;
 	private var gooLauncher : ActivityResultLauncher<Intent> = GooSIGNINresultLAUNCHER();
 	
 	private lateinit var disnameLayout : TextInputLayout;
@@ -59,7 +59,7 @@ class UserFragment : Fragment()
 	override fun onCreate(savedInstanceState: Bundle?)
 	{
 		super.onCreate(savedInstanceState);
-		appcache = requireActivity().getSharedPreferences(getString(R.string.app_pref), Context.MODE_PRIVATE);
+		appcache = requireContext().getSharedPreferences(getString(R.string.app_pref), Context.MODE_PRIVATE);
 		fbauth = FirebaseAuth.getInstance();
 		fbuser = fbauth.currentUser!!;
 		
@@ -98,20 +98,32 @@ class UserFragment : Fragment()
 		if(fbuser.isAnonymous) {
 			verifiedImg.setColorFilter(ContextCompat.getColor(requireContext(),R.color.grey));
 			verifiedBtn.isEnabled = true;
-		} else
-		{
-			verifiedBtn.isEnabled = false;
-			verifiedImg.setColorFilter(ContextCompat.getColor(requireContext(), R.color.confirm));
-			var disname = appcache.getString(KONSTANT.username, "");
+			
+			/*val disname = appcache.getString(KONSTANT.username, "");
 			if(disname.isNullOrBlank()) // from appcache
 			{
 				Log.e(TAG, "FilloutUSERinfo: == Cache not working Error", RuntimeException("Failed to get cache data of already verifed user"));
 			}
+			Log.d(TAG, "FilloutUSERinfo: == NAME FROM CACHE ${disname}");
+			disnameTitle.setText(DefaultUSERname(disname!!));*/
+		} else
+		{
+			verifiedBtn.isEnabled = false;
+			verifiedImg.setColorFilter(ContextCompat.getColor(requireContext(), R.color.confirm));
+			val disname = appcache.getString(KONSTANT.username, "");
+			if(disname.isNullOrBlank()) // from appcache
+			{
+				Log.e(TAG, "FilloutUSERinfo: == Cache not working Error", RuntimeException("Failed to get cache data of already verifed user"));
+			}
+			Log.d(TAG, "FilloutUSERinfo: == NAME FROM CACHE ${disname}");
 			disnameTitle.setText(DefaultUSERname(disname!!));
 		}
 	}
 	private fun SetupVIEWfunc()
 	{
+		disnameLayout.setEndIconOnClickListener {
+			Log.d(TAG, "SetupVIEWfunc: uppo");
+		}
 		verifiedBtn.setOnClickListener {
 			var goointe = gooCLIENT.signInIntent;
 			gooLauncher.launch(goointe);
@@ -125,10 +137,10 @@ class UserFragment : Fragment()
 		{
 			if(it.resultCode == Activity.RESULT_OK){
 				GoogleSignIn.getSignedInAccountFromIntent(it.data)
-					.addOnSuccessListener {
-						gooACC = it;
-						UpdateUIwithGOO(gooACC);
-						FbAUTHgoogle(gooACC);
+					.addOnSuccessListener {goores ->
+						gooACC = goores;
+						UpdateUIwithGOO(gooACC!!);
+						FbAUTHgoogle(gooACC!!);
 					}
 					.addOnFailureListener {
 						Log.e(TAG, "GooSIGNINresultLAUNCHER: == FAILED TO LOGIN WITH GOOGLE");
@@ -139,7 +151,8 @@ class UserFragment : Fragment()
 	//#endregion
 	private fun UpdateUIwithGOO(param: GoogleSignInAccount)
 	{
-		disnameTitle.setText(DefaultUSERname(param.displayName!!));
+		//Log.d(TAG, "UpdateUIwithGOO: == parame is null ?? ${param == null}");
+		disnameTitle.setText(DefaultUSERname(param.displayName));
 	}
 	
 	/**
@@ -151,11 +164,13 @@ class UserFragment : Fragment()
 			{
 				var goocred = GoogleAuthProvider.getCredential(param.idToken, null);
 				fbauth.signInWithCredential(goocred)
-					.addOnCompleteListener {
-						if(it.isSuccessful)
+					.addOnCompleteListener {authres ->
+						if(authres.isSuccessful)
 						{
 							fbuser = fbauth.currentUser!!;
-							SavingTOcache();
+							SavingTOcache(fbuser);
+							verifiedBtn.isEnabled = false;
+							verifiedImg.setColorFilter(ContextCompat.getColor(requireContext(),R.color.confirm));
 							Toast.makeText(requireContext(), "You are now signed in with google", Toast.LENGTH_SHORT).show();
 						} else {
 							Toast.makeText(requireContext(), "Server Error, please try again later", Toast.LENGTH_LONG).show();
@@ -165,10 +180,14 @@ class UserFragment : Fragment()
 			}
 		}
 	}
-	private fun SavingTOcache()
+	
+	private fun SavingTOcache(user : FirebaseUser)
 	{
 		var editor = appcache.edit();
 		var usinfo = fbuser.providerData.get(0);
+		Log.d(TAG, "SavingTOcache: ${fbuser.providerData.size}");
+		Log.d(TAG, "SavingTOcache: ${usinfo.providerId}");
+		Log.d(TAG, "SavingTOcache: ${usinfo?.displayName}");
 		editor.apply {
 			putString(KONSTANT.username, usinfo?.displayName);
 			putString(KONSTANT.useruid, fbuser?.uid);
@@ -176,12 +195,18 @@ class UserFragment : Fragment()
 			putString(KONSTANT.usergmail, usinfo?.email);
 			putString(KONSTANT.fone, usinfo?.phoneNumber);
 			putLong(KONSTANT.cache_timestamp, System.currentTimeMillis());
-			apply();
+		}
+		if(editor.commit())
+		{
+			Log.d(TAG, "SavingTOcache: == DONE SAVING TO CACHE");
+		} else
+		{
+			Log.e(TAG, "SavingTOcache: == SOMETHING WRONG WITH CACHE", RuntimeException("FAILED TO WRITE TO CACHE"));
 		}
 	}
 	
-	private fun DefaultUSERname(iname : String): String{
-		if(iname.isBlank()){
+	private fun DefaultUSERname(iname : String?): String{
+		if(iname.isNullOrBlank()){
 			return "Set A Name";
 		}
 		return iname;

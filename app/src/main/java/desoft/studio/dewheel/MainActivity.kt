@@ -16,6 +16,7 @@ import com.google.firebase.auth.FirebaseUser
 import desoft.studio.dewheel.katic.KONSTANT
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.lang.RuntimeException
 
 class MainActivity : AppCompatActivity()
 {
@@ -97,4 +98,30 @@ class MainActivity : AppCompatActivity()
 		startActivity(inte);
 		finish();
 	}
+	
+	fun SavingTOcache()
+	{
+		Log.d(TAG, "SavingTOcache: == running");
+		var editor = appCache.edit();
+		fbuser = fbauth.currentUser;
+		var usinfo = fbuser?.providerData?.get(0);
+		Log.d(TAG, "SavingTOcache: ${fbuser?.providerId} - ${fbuser?.providerData?.size}");
+		Log.d(TAG, "SavingTOcache: ${usinfo?.displayName}");
+		editor.apply {
+			putString(KONSTANT.username, usinfo?.displayName);
+			putString(KONSTANT.useruid, fbuser?.uid);
+			putString(KONSTANT.usergid, usinfo?.uid);
+			putString(KONSTANT.usergmail, usinfo?.email);
+			putString(KONSTANT.fone, usinfo?.phoneNumber);
+			putLong(KONSTANT.cache_timestamp, System.currentTimeMillis());
+		}
+		if(editor.commit())
+		{
+			Log.d(TAG, "SavingTOcache: == DONE SAVING TO CACHE");
+		} else
+		{
+			Log.e(TAG, "SavingTOcache: == SOMETHING WRONG WITH CACHE", RuntimeException("FAILED TO WRITE TO CACHE"));
+		}
+	}
+
 }
