@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
@@ -98,14 +99,6 @@ class UserFragment : Fragment()
 		if(fbuser.isAnonymous) {
 			verifiedImg.setColorFilter(ContextCompat.getColor(requireContext(),R.color.grey));
 			verifiedBtn.isEnabled = true;
-			
-			/*val disname = appcache.getString(KONSTANT.username, "");
-			if(disname.isNullOrBlank()) // from appcache
-			{
-				Log.e(TAG, "FilloutUSERinfo: == Cache not working Error", RuntimeException("Failed to get cache data of already verifed user"));
-			}
-			Log.d(TAG, "FilloutUSERinfo: == NAME FROM CACHE ${disname}");
-			disnameTitle.setText(DefaultUSERname(disname!!));*/
 		} else
 		{
 			verifiedBtn.isEnabled = false;
@@ -113,7 +106,7 @@ class UserFragment : Fragment()
 			val disname = appcache.getString(KONSTANT.username, "");
 			if(disname.isNullOrBlank()) // from appcache
 			{
-				Log.e(TAG, "FilloutUSERinfo: == Cache not working Error", RuntimeException("Failed to get cache data of already verifed user"));
+				Log.e(TAG, "FilloutUSERinfo: == CACHE USERNAME IS NULL");
 			}
 			Log.d(TAG, "FilloutUSERinfo: == NAME FROM CACHE ${disname}");
 			disnameTitle.setText(DefaultUSERname(disname!!));
@@ -123,6 +116,11 @@ class UserFragment : Fragment()
 	{
 		disnameLayout.setEndIconOnClickListener {
 			Log.d(TAG, "SetupVIEWfunc: uppo");
+			disnameTitle.isEnabled = !(disnameTitle.isEnabled);
+		}
+		disnameTitle.setOnEditorActionListener { textView, i, keyEvent ->
+			
+			false;
 		}
 		verifiedBtn.setOnClickListener {
 			var goointe = gooCLIENT.signInIntent;
@@ -184,13 +182,13 @@ class UserFragment : Fragment()
 	private fun SavingTOcache(user : FirebaseUser)
 	{
 		var editor = appcache.edit();
-		var usinfo = fbuser.providerData.get(0);
+		var usinfo = fbuser.providerData.get(1);
 		Log.d(TAG, "SavingTOcache: ${fbuser.providerData.size}");
 		Log.d(TAG, "SavingTOcache: ${usinfo.providerId}");
 		Log.d(TAG, "SavingTOcache: ${usinfo?.displayName}");
 		editor.apply {
 			putString(KONSTANT.username, usinfo?.displayName);
-			putString(KONSTANT.useruid, fbuser?.uid);
+			putString(KONSTANT.useruid, fbuser.uid);
 			putString(KONSTANT.usergid, usinfo?.uid);
 			putString(KONSTANT.usergmail, usinfo?.email);
 			putString(KONSTANT.fone, usinfo?.phoneNumber);
