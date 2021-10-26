@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity()
 {
-	private val TAG = "-des- << MAIN ACTIVITY >>";
+	private val TAG = "-des- <<++ MAIN ACTIVITY ++>>";
 	private var iodis = Dispatchers.IO;
 	private lateinit var fbauth : FirebaseAuth;
 	private var fbuser : FirebaseUser? = null;

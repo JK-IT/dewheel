@@ -24,7 +24,7 @@ import com.google.firebase.auth.GoogleAuthProvider
 
 class GateActivity : AppCompatActivity()
 {
-	private val TAG = "-des- << GATE ACTIVITY >>";
+	private val TAG = "-des- <<++ GATE ACTIVITY ++>>";
 	private lateinit var fbauth : FirebaseAuth;
 	private var fbuser : FirebaseUser? = null;
 	private lateinit var gooInOptions : GoogleSignInOptions;
