@@ -80,6 +80,7 @@ class MainActivity : AppCompatActivity()
 						putString(KONSTANT.useruid, fbuser?.uid);
 						putString(KONSTANT.usergid, usinfo?.uid);
 						putString(KONSTANT.usergmail, usinfo?.email);
+						putString(KONSTANT.fone, usinfo?.phoneNumber);
 					}
 				}
 				editor.apply {

@@ -10,4 +10,6 @@
     <color name="title_color">#ff494949</color>
     <color name="my_butt_color">#49aaea</color>
     <color name="mtrl_textinput_default_box_stroke_color">#1E979797</color>
+    <color name="grey">#AA6A6A6A</color>
+    <color name="confirm">#F06292</color>
 </resources>

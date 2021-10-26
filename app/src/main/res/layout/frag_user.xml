@@ -34,12 +34,18 @@
             </FrameLayout>
 
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/user_disname_layout"
                 style="@style/Widget.Design.TextInputLayout"
+                app:endIconMode="custom"
+                app:endIconDrawable="@drawable/ic_baseline_edit_24"
+                app:errorEnabled="true"
+                android:enabled="false"
                 android:layout_gravity="center"
                 android:gravity="center"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
                 <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/user_disname_edt"
                     android:text="Hey, there"
                     android:inputType="text"
                     android:textSize="30sp"
@@ -119,6 +125,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"/>
                     <EditText
+                        android:id="@+id/user_gender_edt"
                         android:hint="Male/Female.,."
                         android:maxLines="1"
                         android:lines="1"
@@ -164,6 +171,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"/>
                     <EditText
+                        android:id="@+id/user_orientation_edt"
                         android:hint="Man/Woman/Both.,."
                         android:maxLines="1"
                         android:lines="1"
@@ -210,6 +218,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content">
                         <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/user_favor_edt"
                             android:lines="3"
                             android:maxLines="4"
                             android:inputType="text"
@@ -242,6 +251,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
             <Button
+                android:id="@+id/user_logout_btn"
                 android:text="Log out"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_marginVertical="10dp"
@@ -249,6 +259,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
             <Button
+                android:id="@+id/user_delete_btn"
                 android:text="Delete Account"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_marginVertical="10dp"
