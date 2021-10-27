@@ -50,8 +50,11 @@ class UserFragment : Fragment()
 	private lateinit var verifiedBtn : Button;
 	private lateinit var verifiedImg: ImageView;
 	private lateinit var gender: EditText;
+	private lateinit var genderbtn : Button;
 	private lateinit var sorient: EditText;
+	private lateinit var sorientbtn : Button;
 	private lateinit var favor: TextInputEditText;
+	private lateinit var favorbtn: Button;
 	private lateinit var logoutbtn: Button;
 	private lateinit var delebtn: Button;
 	/**
@@ -66,6 +69,7 @@ class UserFragment : Fragment()
 		
 		var gooOPTIONS  = GoogleSignInOptions.Builder().requestEmail().requestId()
 			.requestIdToken(getString(R.string.default_web_client_id))
+			.requestProfile()
 			.build();
 		gooCLIENT = GoogleSignIn.getClient(requireContext(), gooOPTIONS);
 	}
@@ -80,8 +84,11 @@ class UserFragment : Fragment()
 		verifiedBtn = v.findViewById(R.id.user_verified_btn);
 		verifiedImg = v.findViewById(R.id.user_verified_img);
 		gender = v.findViewById(R.id.user_gender_edt);
+		genderbtn = v.findViewById(R.id.user_gender_upbtn);
 		sorient = v.findViewById(R.id.user_orientation_edt);
+		sorientbtn = v.findViewById(R.id.user_sex_orient_upbtn);
 		favor = v.findViewById(R.id.user_favor_edt);
+		favorbtn = v.findViewById(R.id.user_favor_upbtn);
 		logoutbtn = v.findViewById(R.id.user_logout_btn);
 		delebtn = v.findViewById(R.id.user_delete_btn);
 		SetupVIEWfunc();
@@ -114,6 +121,7 @@ class UserFragment : Fragment()
 	}
 	private fun SetupVIEWfunc()
 	{
+		//_title layout
 		disnameLayout.setEndIconOnClickListener {
 			//Log.d(TAG, "SetupVIEWfunc: uppo");
 			disnameTitle.isEnabled = !(disnameTitle.isEnabled);
@@ -134,6 +142,7 @@ class UserFragment : Fragment()
 			}
 			
 		}
+		//_title input
 		disnameTitle.setOnEditorActionListener { textView, i, keyEvent ->
 			if(i == EditorInfo.IME_ACTION_DONE){
 				disnameTitle.clearFocus();
@@ -149,9 +158,53 @@ class UserFragment : Fragment()
 			}
 			false;
 		}
+		// _verified button
 		verifiedBtn.setOnClickListener {
 			var goointe = gooCLIENT.signInIntent;
 			gooLauncher.launch(goointe);
+		}
+		//_ gender button
+		genderbtn.setOnClickListener {
+			var value = gender.text.toString();
+			if( ! value.isBlank())
+			{
+				appcache.edit().putString(KONSTANT.gender, value).apply();
+				gender.isEnabled = false;
+			}
+		}
+		//_ sex orientation
+		sorientbtn.setOnClickListener {
+			var valu = sorient.text.toString();
+			if( ! valu.isBlank())
+			{
+				appcache.edit().putString(KONSTANT.sexori, valu).apply();
+			}
+		}
+		//_ favor things
+		favorbtn.setOnClickListener {
+			var valu = favor.text.toString();
+			if( ! valu.isBlank())
+			{
+				appcache.edit().putString(KONSTANT.favor, valu).apply();
+			}
+		}
+		//_logout button
+		logoutbtn.setOnClickListener {
+			fbauth.signOut();
+			(requireContext() as MainActivity).GoBACKtoGATE();
+		}
+		//_delete account button
+		delebtn.setOnClickListener {
+			fbuser.delete().addOnCompleteListener {
+				if(it.isSuccessful){
+					Toast.makeText(requireContext(), "Successful Delete Your Account", Toast.LENGTH_SHORT).show();
+					(requireContext() as MainActivity).GoBACKtoGATE();
+				}else
+				{
+					Log.e(TAG, "SetupVIEWfunc: == Failed to delete from server");
+					Toast.makeText(requireContext(), "Server Error, please try again later", Toast.LENGTH_SHORT).show();
+				}
+			}
 		}
 	}
 	
@@ -164,7 +217,6 @@ class UserFragment : Fragment()
 				GoogleSignIn.getSignedInAccountFromIntent(it.data)
 					.addOnSuccessListener {goores ->
 						gooACC = goores;
-						UpdateUIwithGOO(gooACC!!);
 						FbAUTHgoogle(gooACC!!);
 					}
 					.addOnFailureListener {
@@ -176,7 +228,7 @@ class UserFragment : Fragment()
 	//#endregion
 	private fun UpdateUIwithGOO(param: GoogleSignInAccount)
 	{
-		//Log.d(TAG, "UpdateUIwithGOO: == parame is null ?? ${param == null}");
+		Log.d(TAG, "UpdateUIwithGOO: == gOOGLE account name ${param.displayName}");
 		disnameTitle.setText(DefaultUSERname(param.displayName));
 	}
 	
@@ -192,7 +244,9 @@ class UserFragment : Fragment()
 					.addOnCompleteListener {authres ->
 						if(authres.isSuccessful)
 						{
+							Log.d(TAG, "FbAUTHgoogle: == FB NOW CONNECT TO GOOGLE");
 							fbuser = fbauth.currentUser!!;
+							UpdateUIwithGOO(gooACC!!);
 							SavingTOcache(fbuser);
 							verifiedBtn.isEnabled = false;
 							verifiedImg.setColorFilter(ContextCompat.getColor(requireContext(),R.color.confirm));

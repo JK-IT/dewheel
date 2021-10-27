@@ -128,6 +128,7 @@
                         android:layout_gravity="center"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"/>
+
                     <EditText
                         android:id="@+id/user_gender_edt"
                         android:hint="Male/Female.,."
@@ -140,6 +141,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"/>
                     <Button
+                        android:id="@+id/user_gender_upbtn"
                         android:text="Update"
                         style="@style/Widget.AppCompat.Button.Borderless.Colored"
                         android:textColor="@color/my_butt_color"
@@ -186,6 +188,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"/>
                     <Button
+                        android:id="@+id/user_sex_orient_upbtn"
                         android:text="Update"
                         style="@style/Widget.AppCompat.Button.Borderless.Colored"
                         android:textColor="@color/my_butt_color"
@@ -232,6 +235,7 @@
                             android:layout_height="wrap_content"/>
                     </com.google.android.material.textfield.TextInputLayout>
                     <Button
+                        android:id="@+id/user_favor_upbtn"
                         android:text="Update"
                         android:textColor="@color/my_butt_color"
                         style="@style/Widget.AppCompat.Button.Borderless.Colored"

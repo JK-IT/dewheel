@@ -92,7 +92,7 @@ class MainActivity : AppCompatActivity()
 		}
 	}
 	
-	private fun GoBACKtoGATE(){
+	fun GoBACKtoGATE(){
 		var inte = Intent(this, GateActivity::class.java);
 		inte.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK;
 		startActivity(inte);
