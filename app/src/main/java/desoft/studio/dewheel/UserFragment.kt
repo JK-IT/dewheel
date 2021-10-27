@@ -12,10 +12,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.Toast
+import android.widget.*
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
@@ -49,9 +46,11 @@ class UserFragment : Fragment()
 	private lateinit var disnameTitle :TextInputEditText;
 	private lateinit var verifiedBtn : Button;
 	private lateinit var verifiedImg: ImageView;
-	private lateinit var gender: EditText;
+	private lateinit var genderDropLayout: TextInputLayout;
+	private lateinit var genderDropLine: AutoCompleteTextView;
 	private lateinit var genderbtn : Button;
-	private lateinit var sorient: EditText;
+	private lateinit var sorientDropLayout: TextInputLayout;
+	private lateinit var sorientDropLine: AutoCompleteTextView;
 	private lateinit var sorientbtn : Button;
 	private lateinit var favor: TextInputEditText;
 	private lateinit var favorbtn: Button;
@@ -83,9 +82,11 @@ class UserFragment : Fragment()
 		disnameLayout = v.findViewById(R.id.user_disname_layout);
 		verifiedBtn = v.findViewById(R.id.user_verified_btn);
 		verifiedImg = v.findViewById(R.id.user_verified_img);
-		gender = v.findViewById(R.id.user_gender_edt);
+		genderDropLayout = v.findViewById(R.id.user_gender_drop_layout);
+		genderDropLine = v.findViewById(R.id.user_gender_drop_line);
 		genderbtn = v.findViewById(R.id.user_gender_upbtn);
-		sorient = v.findViewById(R.id.user_orientation_edt);
+		sorientDropLayout = v.findViewById(R.id.user_sexori_drop_layout);
+		sorientDropLine = v.findViewById(R.id.user_sexori_drop_line);
 		sorientbtn = v.findViewById(R.id.user_sex_orient_upbtn);
 		favor = v.findViewById(R.id.user_favor_edt);
 		favorbtn = v.findViewById(R.id.user_favor_upbtn);
@@ -163,22 +164,21 @@ class UserFragment : Fragment()
 			var goointe = gooCLIENT.signInIntent;
 			gooLauncher.launch(goointe);
 		}
+		//_set up gender list and gender spinner
+		var genderlist : ArrayList<String> = arrayListOf(*resources.getStringArray(R.array.gender_list));
+		var genderAdapter = ArrayAdapter<String>(requireContext(), R.layout.support_simple_spinner_dropdown_item, genderlist);
+		genderDropLine.setAdapter(genderAdapter);
 		//_ gender button
 		genderbtn.setOnClickListener {
-			var value = gender.text.toString();
-			if( ! value.isBlank())
-			{
-				appcache.edit().putString(KONSTANT.gender, value).apply();
-				gender.isEnabled = false;
-			}
+		
 		}
+		//_ set up sex list and sex spinner
+		var sexlist : ArrayList<String> = arrayListOf(*resources.getStringArray(R.array.sex_list));
+		var sexdapter = ArrayAdapter<String>(requireContext(), R.layout.support_simple_spinner_dropdown_item, sexlist);
+		sorientDropLine.setAdapter(sexdapter);
 		//_ sex orientation
 		sorientbtn.setOnClickListener {
-			var valu = sorient.text.toString();
-			if( ! valu.isBlank())
-			{
-				appcache.edit().putString(KONSTANT.sexori, valu).apply();
-			}
+		
 		}
 		//_ favor things
 		favorbtn.setOnClickListener {

@@ -128,18 +128,23 @@
                         android:layout_gravity="center"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"/>
-
-                    <EditText
-                        android:id="@+id/user_gender_edt"
-                        android:hint="Male/Female.,."
-                        android:maxLines="1"
-                        android:lines="1"
-                        android:inputType="text"
-                        android:imeOptions="actionDone"
-                        android:textSize="30dp"
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/user_gender_drop_layout"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                         android:layout_gravity="center"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
+                        android:gravity="center"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+                        <AutoCompleteTextView
+                            android:id="@+id/user_gender_drop_line"
+                            android:hint="Pick One"
+                            android:layout_marginHorizontal="40dp"
+                            android:layout_gravity="center"
+                            android:inputType="none"
+                            android:gravity="center"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"/>
+                    </com.google.android.material.textfield.TextInputLayout>
                     <Button
                         android:id="@+id/user_gender_upbtn"
                         android:text="Update"
@@ -176,17 +181,23 @@
                         android:paddingHorizontal="10dp"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"/>
-                    <EditText
-                        android:id="@+id/user_orientation_edt"
-                        android:hint="Man/Woman/Both.,."
-                        android:maxLines="1"
-                        android:lines="1"
-                        android:inputType="text"
-                        android:imeOptions="actionDone"
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/user_sexori_drop_layout"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                         android:layout_gravity="center"
-                        android:textSize="30sp"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
+                        android:gravity="center"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+                        <AutoCompleteTextView
+                            android:id="@+id/user_sexori_drop_line"
+                            android:hint="Pick One"
+                            android:layout_marginHorizontal="40dp"
+                            android:layout_gravity="center"
+                            android:inputType="none"
+                            android:gravity="center"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"/>
+                    </com.google.android.material.textfield.TextInputLayout>
                     <Button
                         android:id="@+id/user_sex_orient_upbtn"
                         android:text="Update"

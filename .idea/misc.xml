@@ -3,8 +3,11 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/comic/.gradle/caches/transforms-3/9a6d2f2d4c80d275f325f86bc9c2ae54/transformed/appcompat-1.3.1/res/layout/support_simple_spinner_dropdown_item.xml" value="0.3055555555555556" />
+        <entry key="..\:/Users/comic/K_Space/Android App/dewheel2/app/src/main/res/drawable/pink_outline.xml" value="0.3188034188034188" />
         <entry key="..\:/Users/comic/K_Space/Android App/dewheel2/app/src/main/res/layout/activity_gate.xml" value="0.25" />
         <entry key="..\:/Users/comic/K_Space/Android App/dewheel2/app/src/main/res/layout/activity_main.xml" value="0.15" />
+        <entry key="..\:/Users/comic/K_Space/Android App/dewheel2/app/src/main/res/layout/dropdown_selection.xml" value="0.3055555555555556" />
         <entry key="..\:/Users/comic/K_Space/Android App/dewheel2/app/src/main/res/layout/frag_user.xml" value="0.3723958333333333" />
         <entry key="..\:/Users/comic/K_Space/Android App/dewheel2/app/src/main/res/layout/frag_wheel.xml" value="0.33152173913043476" />
         <entry key="..\:/Users/comic/K_Space/Android App/dewheel2/app/src/main/res/layout/frag_wind.xml" value="0.33152173913043476" />
