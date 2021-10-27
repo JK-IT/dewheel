@@ -47,6 +47,9 @@
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/user_disname_edt"
                     android:text="Hey, there"
+                    android:textColor="@color/title_color_state"
+                    android:lines="1"
+                    android:maxLines="1"
                     android:enabled="false"
                     android:inputType="text"
                     android:textSize="30sp"

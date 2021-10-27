@@ -46,7 +46,7 @@ class UserFragment : Fragment()
 	private var gooLauncher : ActivityResultLauncher<Intent> = GooSIGNINresultLAUNCHER();
 	
 	private lateinit var disnameLayout : TextInputLayout;
-	private lateinit var disnameTitle :EditText;
+	private lateinit var disnameTitle :TextInputEditText;
 	private lateinit var verifiedBtn : Button;
 	private lateinit var verifiedImg: ImageView;
 	private lateinit var gender: EditText;
@@ -115,11 +115,38 @@ class UserFragment : Fragment()
 	private fun SetupVIEWfunc()
 	{
 		disnameLayout.setEndIconOnClickListener {
-			Log.d(TAG, "SetupVIEWfunc: uppo");
+			//Log.d(TAG, "SetupVIEWfunc: uppo");
 			disnameTitle.isEnabled = !(disnameTitle.isEnabled);
+			if(disnameTitle.isEnabled)
+			{
+				disnameTitle.requestFocus() ;
+			}
+			if(disnameTitle.text.toString().isBlank())
+			{
+				disnameTitle.text = SpannableStringBuilder("Set A Name");
+			} else
+			{
+				var inname = disnameTitle.text.toString().contains("Set A Name");
+				if( ! inname)
+				{
+					appcache.edit().putString(KONSTANT.username, disnameTitle.text.toString()).apply();
+				}
+			}
+			
 		}
 		disnameTitle.setOnEditorActionListener { textView, i, keyEvent ->
-			
+			if(i == EditorInfo.IME_ACTION_DONE){
+				disnameTitle.clearFocus();
+				disnameTitle.isEnabled = false;
+				if(disnameTitle.text.toString().isBlank())
+				{
+					disnameTitle.text = SpannableStringBuilder("Set A Name");
+				} else
+				{
+					appcache.edit().putString(KONSTANT.username, disnameTitle.text.toString()).apply();
+				}
+				Log.d(TAG, "SetupVIEWfunc: New text value ${disnameTitle.text}");
+			}
 			false;
 		}
 		verifiedBtn.setOnClickListener {
