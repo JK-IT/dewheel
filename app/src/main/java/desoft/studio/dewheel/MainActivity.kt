@@ -75,9 +75,16 @@ class MainActivity : AppCompatActivity()
 					}
 				} else
 				{
-					var usinfo = fbuser?.providerData?.get(0);
+					// at this step , mostly getting data from cache, not from provider
+					var usinfo = fbuser?.providerData?.get(1);
+					Log.d(TAG, "CheckUSERauthen: == Name from google provider ${usinfo?.displayName}");
+					var usname = appCache.getString(KONSTANT.username, "");
+					if(usname?.isBlank() == true)
+					{
+						usname = usinfo?.displayName;
+					}
 					editor.apply {
-						putString(KONSTANT.username, usinfo?.displayName);
+						putString(KONSTANT.username, usname);
 						putString(KONSTANT.useruid, fbuser?.uid);
 						putString(KONSTANT.usergid, usinfo?.uid);
 						putString(KONSTANT.usergmail, usinfo?.email);

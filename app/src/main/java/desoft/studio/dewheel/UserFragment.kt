@@ -119,6 +119,22 @@ class UserFragment : Fragment()
 			Log.d(TAG, "FilloutUSERinfo: == NAME FROM CACHE ${disname}");
 			disnameTitle.setText(DefaultUSERname(disname!!));
 		}
+		//_ fill out gender, other info from cache
+		val genderpref = appcache.getString(KONSTANT.gender, "");
+		if(genderpref?.isNotBlank() == true)
+		{
+			genderDropLine.text = SpannableStringBuilder( genderpref);
+		}
+		val sorientpref = appcache.getString(KONSTANT.sexori, "");
+		if(sorientpref?.isNotBlank() == true)
+		{
+			sorientDropLine.text = SpannableStringBuilder(sorientpref);
+		}
+		val favorpref = appcache.getString(KONSTANT.favor, "");
+		if(favorpref?.isNotBlank() == true)
+		{
+			favor.text = SpannableStringBuilder(favorpref);
+		}
 	}
 	private fun SetupVIEWfunc()
 	{
@@ -168,6 +184,12 @@ class UserFragment : Fragment()
 		var genderlist : ArrayList<String> = arrayListOf(*resources.getStringArray(R.array.gender_list));
 		var genderAdapter = ArrayAdapter<String>(requireContext(), R.layout.support_simple_spinner_dropdown_item, genderlist);
 		genderDropLine.setAdapter(genderAdapter);
+		genderDropLine.setOnItemClickListener { adapview, view, pos, l ->
+			val selecitem = adapview?.getItemAtPosition(pos);
+			Log.d(TAG, "onItemSelected: == User picked this item $selecitem");
+			appcache.edit().putString(KONSTANT.gender, selecitem.toString()).apply();
+		}
+		
 		//_ gender button
 		genderbtn.setOnClickListener {
 		
@@ -176,6 +198,11 @@ class UserFragment : Fragment()
 		var sexlist : ArrayList<String> = arrayListOf(*resources.getStringArray(R.array.sex_list));
 		var sexdapter = ArrayAdapter<String>(requireContext(), R.layout.support_simple_spinner_dropdown_item, sexlist);
 		sorientDropLine.setAdapter(sexdapter);
+		sorientDropLine.setOnItemClickListener { adapterView, view, pos, l ->
+			val seitem = adapterView.getItemAtPosition(pos);
+			Log.d(TAG, "onItemSelected: == User picked this item $seitem");
+			appcache.edit().putString(KONSTANT.sexori, seitem.toString()).apply();
+		}
 		//_ sex orientation
 		sorientbtn.setOnClickListener {
 		
