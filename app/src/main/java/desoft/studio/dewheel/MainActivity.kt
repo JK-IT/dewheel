@@ -14,6 +14,7 @@ import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import desoft.studio.dewheel.Kontrol.DataControl
 import desoft.studio.dewheel.katic.KONSTANT
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -26,7 +27,8 @@ class MainActivity : AppCompatActivity()
 	private lateinit var fbauth : FirebaseAuth;
 	private var fbuser : FirebaseUser? = null;
 	private lateinit var appCache: SharedPreferences;
-	
+	private lateinit var dataFutory : DataControl.DataFactory;
+	private lateinit var dataKontrol : DataControl;
 	private lateinit var navHost : NavHostFragment;
 	private lateinit var navContro : NavController;
 	
@@ -34,6 +36,8 @@ class MainActivity : AppCompatActivity()
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		dataFutory = DataControl.DataFactory(application);
+		dataKontrol = ViewModelProvider(this, dataFutory).get(DataControl::class.java);
 		
 		fbauth = FirebaseAuth.getInstance();
 		appCache = getSharedPreferences(getString(R.string.app_pref), Context.MODE_PRIVATE);
@@ -100,7 +104,8 @@ class MainActivity : AppCompatActivity()
 		}
 	}
 	
-	fun GoBACKtoGATE(){
+	fun GoBACKtoGATE()
+	{
 		var inte = Intent(this, GateActivity::class.java);
 		inte.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK;
 		startActivity(inte);
@@ -131,5 +136,9 @@ class MainActivity : AppCompatActivity()
 			Log.e(TAG, "SavingTOcache: == SOMETHING WRONG WITH CACHE", RuntimeException("FAILED TO WRITE TO CACHE"));
 		}
 	}
+	
+	/**
+	 * VIEW MODEL - DATA CONTROL RELATED
+	 */
 
 }

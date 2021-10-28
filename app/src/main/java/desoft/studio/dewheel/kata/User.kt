@@ -25,10 +25,11 @@ package desoft.studio.dewheel.kata
  * favorite
  */
 data class User(
-	var id : String,
-	var fbid: String,
-	var app_user_name: String,
-	var gender: String,
-	var sorient: String,
-	var favorite: String
+	var id : String?,
+	var fbid: String?,
+	var email : String?,
+	var app_user_name: String? = null,
+	var gender: String?=null,
+	var sorient: String?=null,
+	var favorite: String?=null
                )

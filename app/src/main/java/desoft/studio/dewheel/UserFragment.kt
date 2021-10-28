@@ -20,6 +20,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.SignInButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseAuth
@@ -44,14 +45,13 @@ class UserFragment : Fragment()
 	
 	private lateinit var disnameLayout : TextInputLayout;
 	private lateinit var disnameTitle :TextInputEditText;
+	private lateinit var goobtn : SignInButton;
 	private lateinit var verifiedBtn : Button;
 	private lateinit var verifiedImg: ImageView;
 	private lateinit var genderDropLayout: TextInputLayout;
 	private lateinit var genderDropLine: AutoCompleteTextView;
-	private lateinit var genderbtn : Button;
 	private lateinit var sorientDropLayout: TextInputLayout;
 	private lateinit var sorientDropLine: AutoCompleteTextView;
-	private lateinit var sorientbtn : Button;
 	private lateinit var favor: TextInputEditText;
 	private lateinit var favorbtn: Button;
 	private lateinit var logoutbtn: Button;
@@ -80,14 +80,15 @@ class UserFragment : Fragment()
 		var v = inflater.inflate(R.layout.frag_user, container, false);
 		disnameTitle = v.findViewById(R.id.user_disname_edt);
 		disnameLayout = v.findViewById(R.id.user_disname_layout);
+		goobtn = v.findViewById(R.id.user_goobtn);
 		verifiedBtn = v.findViewById(R.id.user_verified_btn);
 		verifiedImg = v.findViewById(R.id.user_verified_img);
 		genderDropLayout = v.findViewById(R.id.user_gender_drop_layout);
 		genderDropLine = v.findViewById(R.id.user_gender_drop_line);
-		genderbtn = v.findViewById(R.id.user_gender_upbtn);
+		
 		sorientDropLayout = v.findViewById(R.id.user_sexori_drop_layout);
 		sorientDropLine = v.findViewById(R.id.user_sexori_drop_line);
-		sorientbtn = v.findViewById(R.id.user_sex_orient_upbtn);
+		
 		favor = v.findViewById(R.id.user_favor_edt);
 		favorbtn = v.findViewById(R.id.user_favor_upbtn);
 		logoutbtn = v.findViewById(R.id.user_logout_btn);
@@ -106,11 +107,12 @@ class UserFragment : Fragment()
 	{
 		if(fbuser.isAnonymous) {
 			verifiedImg.setColorFilter(ContextCompat.getColor(requireContext(),R.color.grey));
+			goobtn.isEnabled = true;
 			verifiedBtn.isEnabled = true;
 		} else
 		{
-			verifiedBtn.isEnabled = false;
-			verifiedImg.setColorFilter(ContextCompat.getColor(requireContext(), R.color.confirm));
+			goobtn.isEnabled = false;
+			FieldChecked(); //-> this will enable verified icon for you
 			val disname = appcache.getString(KONSTANT.username, "");
 			if(disname.isNullOrBlank()) // from appcache
 			{
@@ -119,6 +121,7 @@ class UserFragment : Fragment()
 			Log.d(TAG, "FilloutUSERinfo: == NAME FROM CACHE ${disname}");
 			disnameTitle.setText(DefaultUSERname(disname!!));
 		}
+
 		//_ fill out gender, other info from cache
 		val genderpref = appcache.getString(KONSTANT.gender, "");
 		if(genderpref?.isNotBlank() == true)
@@ -175,10 +178,14 @@ class UserFragment : Fragment()
 			}
 			false;
 		}
-		// _verified button
-		verifiedBtn.setOnClickListener {
+		//_goobtn
+		goobtn.setOnClickListener{
 			var goointe = gooCLIENT.signInIntent;
 			gooLauncher.launch(goointe);
+		}
+		// _verified button
+		verifiedBtn.setOnClickListener {
+			FieldChecked(true);
 		}
 		//_set up gender list and gender spinner
 		var genderlist : ArrayList<String> = arrayListOf(*resources.getStringArray(R.array.gender_list));
@@ -190,10 +197,6 @@ class UserFragment : Fragment()
 			appcache.edit().putString(KONSTANT.gender, selecitem.toString()).apply();
 		}
 		
-		//_ gender button
-		genderbtn.setOnClickListener {
-		
-		}
 		//_ set up sex list and sex spinner
 		var sexlist : ArrayList<String> = arrayListOf(*resources.getStringArray(R.array.sex_list));
 		var sexdapter = ArrayAdapter<String>(requireContext(), R.layout.support_simple_spinner_dropdown_item, sexlist);
@@ -203,16 +206,22 @@ class UserFragment : Fragment()
 			Log.d(TAG, "onItemSelected: == User picked this item $seitem");
 			appcache.edit().putString(KONSTANT.sexori, seitem.toString()).apply();
 		}
-		//_ sex orientation
-		sorientbtn.setOnClickListener {
-		
-		}
+
 		//_ favor things
+		favor.setOnEditorActionListener { textView, i, keyEvent ->
+			if(i== EditorInfo.IME_ACTION_DONE)
+			{
+				favor.clearFocus();
+			}
+			false;
+		}
 		favorbtn.setOnClickListener {
 			var valu = favor.text.toString();
 			if( ! valu.isBlank())
 			{
+				favor.clearFocus();
 				appcache.edit().putString(KONSTANT.favor, valu).apply();
+				Toast.makeText(requireContext(), "Successful Updating Your Favorites",Toast.LENGTH_SHORT).show();
 			}
 		}
 		//_logout button
@@ -275,8 +284,7 @@ class UserFragment : Fragment()
 							fbuser = fbauth.currentUser!!;
 							UpdateUIwithGOO(gooACC!!);
 							SavingTOcache(fbuser);
-							verifiedBtn.isEnabled = false;
-							verifiedImg.setColorFilter(ContextCompat.getColor(requireContext(),R.color.confirm));
+							FieldChecked();
 							Toast.makeText(requireContext(), "You are now signed in with google", Toast.LENGTH_SHORT).show();
 						} else {
 							Toast.makeText(requireContext(), "Server Error, please try again later", Toast.LENGTH_LONG).show();
@@ -284,6 +292,42 @@ class UserFragment : Fragment()
 						}
 					}
 			}
+		}
+	}
+	
+	/**
+	 * after sign in , do fields check to let user know they need to fill out form so they can become verifed user.
+	 */
+	private fun FieldChecked(show: Boolean = false) : Boolean
+	{
+		var gender = appcache.getString(KONSTANT.gender, "");
+		var sorient = appcache.getString(KONSTANT.sexori, "");
+		var favor = appcache.getString(KONSTANT.favor, "");
+		if(gender?.isBlank() == true || sorient?.isBlank() == true || favor?.isBlank() == true || fbuser.isAnonymous == true)
+		{
+			verifiedBtn.isEnabled = true;
+			verifiedImg.setColorFilter(ContextCompat.getColor(requireContext(),R.color.grey));
+			if(show == true)
+			{
+				if(gender?.isBlank() == true)
+					Toast.makeText(requireContext(), "Please Pick Your Gender", Toast.LENGTH_SHORT).show();
+				if(sorient?.isBlank() == true)
+					Toast.makeText(requireContext(), "Please Pick Your Interest", Toast.LENGTH_SHORT).show();
+				if(favor?.isBlank() == true)
+					Toast.makeText(requireContext(), "Please Confirm Your Favorites", Toast.LENGTH_SHORT).show();
+				if(fbuser.isAnonymous)
+					Toast.makeText(requireContext(), "Please Sign In/Up With Google Account", Toast.LENGTH_SHORT).show();
+			}
+			appcache.edit().putBoolean(KONSTANT.verified, false).apply();
+			return false;
+		} else
+		{
+			verifiedBtn.isEnabled = false;
+			verifiedImg.setColorFilter(ContextCompat.getColor(requireContext(),R.color.confirm));
+			genderDropLayout.isEnabled = false;
+			sorientDropLayout.isEnabled = false;
+			appcache.edit().putBoolean(KONSTANT.verified, true).apply();
+			return true;
 		}
 	}
 	

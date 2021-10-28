@@ -11,6 +11,9 @@ object KONSTANT
 	val sexori: String = "USER SEXUAL ORIENTATION";
 	val favor: String = "USER FAVORITE THINGS";
 	val cache_timestamp : String = "CACHE SAVING TIME";
-	
-	//TODO: PROBLEM: USER DELETE DATA, THEN SIGN IN ANONYMOUS, AND SIGN UP WITH GOOGLE, WHAT TO DO WITH HIS ACCOUNT ON DATABASE BEFORE HE WIPE OUT DATA
+	/**
+	 * verified user -> create a user account from data control, upload it to firestore, or should i wait till user fill out all information
+	 * or u cannot become verified user, if u don't fill out other required fields
+ 	 */
+	val verified : String = "VERIFED USER";
 }
