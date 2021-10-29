@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.net.ConnectivityManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -25,6 +26,8 @@ import com.google.firebase.auth.GoogleAuthProvider
 class GateActivity : AppCompatActivity()
 {
 	private val TAG = "-des- <<++ GATE ACTIVITY ++>>";
+	
+	private lateinit var connmana : ConnectivityManager;
 	private lateinit var fbauth : FirebaseAuth;
 	private var fbuser : FirebaseUser? = null;
 	private lateinit var gooInOptions : GoogleSignInOptions;
@@ -39,6 +42,9 @@ class GateActivity : AppCompatActivity()
 	{
 		super.onCreate(savedInstanceState)
 		setContentView(R.layout.activity_gate);
+		
+		connmana = getSystemService(ConnectivityManager::class.java);
+		CheckConnection();
 		
 		shrepref = getSharedPreferences(getString(R.string.app_pref), Context.MODE_PRIVATE);
 		
@@ -62,6 +68,19 @@ class GateActivity : AppCompatActivity()
 	}
 	
 	/* *---------------------------------------*/
+	/**
+	 * Check for connection
+	 * FAIL => SHOWING DIALOG FRAGMENT
+	 * SUCCESS => RETURN;
+	 */
+	private fun CheckConnection()
+	{
+		if(connmana.isDefaultNetworkActive == false || connmana.activeNetwork == null)
+		{
+		
+		}
+	}
+	
 	/**
 	 * fbuser == null --> user not login or data is deleted
 	 * -> then just let them login either with google or get new anonymous id if they wiped their data

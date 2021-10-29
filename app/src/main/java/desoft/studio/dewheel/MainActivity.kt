@@ -3,6 +3,7 @@ package desoft.studio.dewheel
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.net.*
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -24,6 +25,8 @@ class MainActivity : AppCompatActivity()
 {
 	private val TAG = "-des- <<++ MAIN ACTIVITY ++>>";
 	private var iodis = Dispatchers.IO;
+	private lateinit var conmana : ConnectivityManager;
+	private lateinit var defaultConnCb: ConnectivityManager.NetworkCallback;
 	private lateinit var fbauth : FirebaseAuth;
 	private var fbuser : FirebaseUser? = null;
 	private lateinit var appCache: SharedPreferences;
@@ -36,6 +39,10 @@ class MainActivity : AppCompatActivity()
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		
+		conmana = getSystemService(ConnectivityManager::class.java);
+		SetupDEFAULTconnectionCB();
+		
 		dataFutory = DataControl.DataFactory(application);
 		dataKontrol = ViewModelProvider(this, dataFutory).get(DataControl::class.java);
 		
@@ -44,8 +51,19 @@ class MainActivity : AppCompatActivity()
 		CheckUSERauthen();
 		
 		SetupNavHost();
+		
 	}
 	
+	override fun onStart()
+	{
+		super.onStart();
+		CheckNETWORKconnection();
+	}
+	
+	override fun onStop()
+	{
+		super.onStop();
+	}
 	/**
 	 * Setup the navigation host
 	 */
@@ -137,6 +155,90 @@ class MainActivity : AppCompatActivity()
 		}
 	}
 	
+	/**
+	 * Register Callback on connectivity manager
+	 * should not call other methods, if it is available as callback, cuz of race condition
+	 */
+	private fun SetupDEFAULTconnectionCB()
+	{
+		/*
+		var netcap: NetworkCapabilities? = conmana.getNetworkCapabilities(currnet);
+		Log.d(TAG, "CheckNETWORKconnection: == network capa ${netcap}");
+		var linkpro : LinkProperties? = conmana.getLinkProperties(currnet);
+		Log.i(TAG, "CheckNETWORKconnection: == network link prop $linkpro");*/
+		defaultConnCb = object:ConnectivityManager.NetworkCallback(){
+			//Called when the framework connects and has declared a new network ready for use.
+			// if register as default network callback, then only best network instance will invoke this callback
+			// do not call getCapabilities or getLinkProperties, cuz of race condition, wait for the callback on those info u need
+			override fun onAvailable(network: Network)
+			{
+				Log.d(TAG, "onAvailable: _____||||||____ Network available");
+			}
+			
+			override fun onCapabilitiesChanged(network: Network, networkCapabilities: NetworkCapabilities)
+			{
+				Log.i(TAG, "onCapabilitiesChanged: _____||||||_____ NEW CAPABILITIES $networkCapabilities")
+			}
+			
+			override fun onLinkPropertiesChanged(network: Network, linkProperties: LinkProperties)
+			{
+				Log.d(TAG, "onLinkPropertiesChanged: _____||||||_____ NEW LINK PROPERTIES $linkProperties")
+			}
+			
+			override fun onLosing(network: Network, maxMsToLive: Int)
+			{
+				Log.d(TAG, "onLost: Loosing network connection, wait if on available is called for new candidate");
+			}
+			//Called when a network disconnects or otherwise no longer satisfies this request or callback.
+			//only be called when the last network, return from onAvailable, is lost and no other network is available that can satisfy the request
+			//If the callback was registered with registerNetworkCallback() it will be called for each network which no longer satisfies the criteria of the callback.
+			override fun onLost(network: Network)
+			{
+				Log.d(TAG, "onLost: NO MORE NETWORK THAT CAN SATISFY THE REQUEST");
+			}
+			// call when networkrequest is removed or released or when network request cannot be fulfilled.
+			override fun onUnavailable()
+			{
+				Log.w(TAG, "onUnavailable: There no network availiable that can satisfy the network request");
+			}
+		}
+
+		conmana.registerDefaultNetworkCallback(defaultConnCb);
+		// this callback keep being called -> waste of resource if u don't do anything
+		var activNetCallback = object : ConnectivityManager.OnNetworkActiveListener{
+			override fun onNetworkActive()
+			{
+				Log.i(TAG, "onNetworkActive: == DEFAULT SYSTEM NETWORK HAS GONE TO ACTIVE OR HIGH STATE");
+			}
+		}
+		//conmana.addDefaultNetworkActiveListener(activNetCallback);
+	}
+	/**
+	 * Check for network connectivity
+	 * boolean = isdefaultnetworkactive = isactivenetworkmetered
+	 * getcurrent_active_network -> null if there are no active network
+	 * network capability and link property provides info about network
+	 * if NOT NULLL, check for basic capabilities of network, so u can access internet
+	 */
+	private fun CheckNETWORKconnection()
+	{
+		var currnet :Network? = conmana.activeNetwork;
+		if(currnet == null || conmana.isDefaultNetworkActive == false)
+		{
+		
+		} else
+		{
+			var capa = conmana.getNetworkCapabilities(currnet);
+			//Log.d(TAG, "CheckNETWORKconnection: ${capa?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)} - ${capa?.hasCapability(NetworkCapabilities.NET_CAPABILITY_FOREGROUND)}");
+			if( capa?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)==true)
+			{
+				Log.i(TAG, "CheckNETWORKconnection: == This network has required ability");
+			} else
+			{
+				//Log.e(TAG, "CheckNETWORKconnection: == Does not have required ability", RuntimeException("CANNOT FIND AN ACTIVE NETWORK"));
+			}
+		}
+	}
 	/**
 	 * VIEW MODEL - DATA CONTROL RELATED
 	 */

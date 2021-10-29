@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <LinearLayout
+        android:id="@+id/dialog_net_symbol_head"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/dialog_net_info_head"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="100dp">
+        <FrameLayout
+            android:layout_marginHorizontal="5dp"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:src="@drawable/ic_baseline_signal_wifi_off_24"
+                android:scaleType="fitCenter"
+                android:layout_gravity="end"
+                android:layout_width="60dp"
+                android:layout_height="60dp"/>
+        </FrameLayout>
+        <FrameLayout
+            android:layout_marginHorizontal="5dp"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:src="@drawable/ic_baseline_mobiledata_off_24"
+                android:scaleType="fitCenter"
+                android:layout_gravity="start"
+                android:layout_width="60dp"
+                android:layout_height="60dp"/>
+        </FrameLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/dialog_net_info_head"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/dialog_net_symbol_head"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+        <TextView
+            android:text="Something goes wrong!!! Please check your internet connections"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:padding="10dp"
+            android:layout_margin="5dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
