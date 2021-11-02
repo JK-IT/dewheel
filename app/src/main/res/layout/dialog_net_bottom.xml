@@ -47,15 +47,34 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@id/dialog_net_symbol_head"
+        app:layout_constraintBottom_toTopOf="@id/dialog_net_butt_head"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
         <TextView
-            android:text="Something goes wrong!!! Please check your internet connections"
+            android:text="@string/no_internet_prompt"
             android:textStyle="bold"
             android:gravity="center"
             android:padding="10dp"
             android:layout_margin="5dp"
             android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/dialog_net_butt_head"
+        android:orientation="horizontal"
+        android:gravity="end"
+        app:layout_constraintTop_toBottomOf="@id/dialog_net_info_head"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <Button
+            android:id="@+id/dialog_net_ok_btn"
+            android:text="Ok"
+            android:layout_marginHorizontal="20dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
     </LinearLayout>
 

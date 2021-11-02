@@ -6,6 +6,8 @@ import android.content.SharedPreferences
 import android.net.*
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -13,6 +15,8 @@ import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import desoft.studio.dewheel.Kontrol.DataControl
@@ -25,6 +29,8 @@ class MainActivity : AppCompatActivity()
 {
 	private val TAG = "-des- <<++ MAIN ACTIVITY ++>>";
 	private var iodis = Dispatchers.IO;
+	private lateinit var kHandler : Handler;
+	private var currDEFAULTnet: Network? = null;
 	private lateinit var conmana : ConnectivityManager;
 	private lateinit var defaultConnCb: ConnectivityManager.NetworkCallback;
 	private lateinit var fbauth : FirebaseAuth;
@@ -34,30 +40,34 @@ class MainActivity : AppCompatActivity()
 	private lateinit var dataKontrol : DataControl;
 	private lateinit var navHost : NavHostFragment;
 	private lateinit var navContro : NavController;
+	private var loosingBottomDialog : BottomSheetDialog? = null;
 	
 	override fun onCreate(savedInstanceState: Bundle?)
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		SetupBOTTOMSheet();
 		
+		kHandler = Handler(Looper.getMainLooper());
 		conmana = getSystemService(ConnectivityManager::class.java);
-		SetupDEFAULTconnectionCB();
-		
-		dataFutory = DataControl.DataFactory(application);
-		dataKontrol = ViewModelProvider(this, dataFutory).get(DataControl::class.java);
-		
-		fbauth = FirebaseAuth.getInstance();
-		appCache = getSharedPreferences(getString(R.string.app_pref), Context.MODE_PRIVATE);
-		CheckUSERauthen();
-		
-		SetupNavHost();
-		
+		if(CheckNETWORKconnection())
+		{
+			dataFutory = DataControl.DataFactory(application);
+			dataKontrol = ViewModelProvider(this, dataFutory).get(DataControl::class.java);
+			
+			fbauth = FirebaseAuth.getInstance();
+			appCache = getSharedPreferences(getString(R.string.app_pref), Context.MODE_PRIVATE);
+			CheckUSERauthen();
+			
+			SetupNavHost();
+		}
 	}
+	
 	
 	override fun onStart()
 	{
 		super.onStart();
-		CheckNETWORKconnection();
+		SetupDEFAULTconnectionCB();
 	}
 	
 	override fun onStop()
@@ -172,22 +182,24 @@ class MainActivity : AppCompatActivity()
 			// do not call getCapabilities or getLinkProperties, cuz of race condition, wait for the callback on those info u need
 			override fun onAvailable(network: Network)
 			{
-				Log.d(TAG, "onAvailable: _____||||||____ Network available");
+				Log.d(TAG, "onAvailable: _____||||||____DEFAULT Network available");
+				currDEFAULTnet = network;
+				HandlingDEFnetFOUND();
 			}
 			
 			override fun onCapabilitiesChanged(network: Network, networkCapabilities: NetworkCapabilities)
 			{
-				Log.i(TAG, "onCapabilitiesChanged: _____||||||_____ NEW CAPABILITIES $networkCapabilities")
+				//Log.i(TAG, "onCapabilitiesChanged: _____||||||_____ NEW CAPABILITIES $networkCapabilities")
 			}
 			
 			override fun onLinkPropertiesChanged(network: Network, linkProperties: LinkProperties)
 			{
-				Log.d(TAG, "onLinkPropertiesChanged: _____||||||_____ NEW LINK PROPERTIES $linkProperties")
+				//Log.d(TAG, "onLinkPropertiesChanged: _____||||||_____ NEW LINK PROPERTIES $linkProperties")
 			}
-			
 			override fun onLosing(network: Network, maxMsToLive: Int)
 			{
-				Log.d(TAG, "onLost: Loosing network connection, wait if on available is called for new candidate");
+				Log.d(TAG, "onLosing: Loosing network connection, wait if on available is called for new candidate");
+				
 			}
 			//Called when a network disconnects or otherwise no longer satisfies this request or callback.
 			//only be called when the last network, return from onAvailable, is lost and no other network is available that can satisfy the request
@@ -195,6 +207,7 @@ class MainActivity : AppCompatActivity()
 			override fun onLost(network: Network)
 			{
 				Log.d(TAG, "onLost: NO MORE NETWORK THAT CAN SATISFY THE REQUEST");
+				HandlingCONNECTIONlost();
 			}
 			// call when networkrequest is removed or released or when network request cannot be fulfilled.
 			override fun onUnavailable()
@@ -204,14 +217,7 @@ class MainActivity : AppCompatActivity()
 		}
 
 		conmana.registerDefaultNetworkCallback(defaultConnCb);
-		// this callback keep being called -> waste of resource if u don't do anything
-		var activNetCallback = object : ConnectivityManager.OnNetworkActiveListener{
-			override fun onNetworkActive()
-			{
-				Log.i(TAG, "onNetworkActive: == DEFAULT SYSTEM NETWORK HAS GONE TO ACTIVE OR HIGH STATE");
-			}
-		}
-		//conmana.addDefaultNetworkActiveListener(activNetCallback);
+
 	}
 	/**
 	 * Check for network connectivity
@@ -220,27 +226,80 @@ class MainActivity : AppCompatActivity()
 	 * network capability and link property provides info about network
 	 * if NOT NULLL, check for basic capabilities of network, so u can access internet
 	 */
-	private fun CheckNETWORKconnection()
+	private fun CheckNETWORKconnection(): Boolean
 	{
-		var currnet :Network? = conmana.activeNetwork;
-		if(currnet == null || conmana.isDefaultNetworkActive == false)
-		{
-		
+		currDEFAULTnet = conmana.activeNetwork;
+		if(currDEFAULTnet == null || conmana.isDefaultNetworkActive == false)
+		{// showing no connection dialog
+			GateActivity.ShowingNOCONNECTIONdialog(this);
+			return false;
 		} else
 		{
-			var capa = conmana.getNetworkCapabilities(currnet);
-			//Log.d(TAG, "CheckNETWORKconnection: ${capa?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)} - ${capa?.hasCapability(NetworkCapabilities.NET_CAPABILITY_FOREGROUND)}");
-			if( capa?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)==true)
+			return true;
+		}
+	}
+	/**
+	 * Handling network connection. should be async or sthing that will not block the flow
+	 * pop up a dialog, with attempt to reconnect to internet ???
+	 * after a timeout --> resume or forcing user to restart the app
+	 * finish activity???
+	 */
+	private fun HandlingCONNECTIONlost()
+	{
+		kHandler.post {
+			if(loosingBottomDialog != null && loosingBottomDialog?.isShowing == false)
 			{
-				Log.i(TAG, "CheckNETWORKconnection: == This network has required ability");
-			} else
+				loosingBottomDialog?.show();
+			}else
 			{
-				//Log.e(TAG, "CheckNETWORKconnection: == Does not have required ability", RuntimeException("CANNOT FIND AN ACTIVE NETWORK"));
+				SetupBOTTOMSheet();
+				loosingBottomDialog?.show();
 			}
 		}
 	}
 	/**
+	 * Connection is back, so we pop back the dialog
+	 */
+	private fun HandlingDEFnetFOUND()
+	{
+		kHandler.post {
+			if(loosingBottomDialog != null && loosingBottomDialog?.isShowing == true)
+			{
+				loosingBottomDialog?.dismiss();
+			}
+		}
+	}
+	/**
+	 * Generate and set up bottomsheet dialog
+	 */
+	private fun SetupBOTTOMSheet()
+	{
+		//setting loosing connection bottom sheet dialog
+		loosingBottomDialog = BottomSheetDialog(this);
+		loosingBottomDialog?.apply {
+			setContentView(R.layout.dialog_loosing_net_bottom);
+			setCancelable(false);
+			setCanceledOnTouchOutside(false);
+		}
+		val loosingbeha = loosingBottomDialog?.behavior;
+		loosingbeha?.apply {
+			state= BottomSheetBehavior.STATE_EXPANDED;
+			isFitToContents = true;
+			isHideable = false;
+		}
+		
+		//set up
+	}
+	/**
 	 * VIEW MODEL - DATA CONTROL RELATED
 	 */
-
 }
+
+/*		// this callback keep being called -> waste of resource if u don't do anything
+		var activNetCallback = object : ConnectivityManager.OnNetworkActiveListener{
+			override fun onNetworkActive()
+			{
+				Log.i(TAG, "onNetworkActive: == DEFAULT SYSTEM NETWORK HAS GONE TO ACTIVE OR HIGH STATE");
+			}
+		}
+		//conmana.addDefaultNetworkActiveListener(activNetCallback);*/

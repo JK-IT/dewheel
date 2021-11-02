@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="no_internet_prompt">Something goes wrong!!! Please check your internet connections and restart the application</string>
+</resources>

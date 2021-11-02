@@ -18,6 +18,9 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.SignInButton
 import com.google.android.gms.common.api.ApiException
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -37,6 +40,7 @@ class GateActivity : AppCompatActivity()
 	private lateinit var shrepref : SharedPreferences;
 	private lateinit var goobtn : SignInButton;
 	private lateinit var guestbtn : Button;
+	private var noCONNECTION : Boolean = false;
 	
 	override fun onCreate(savedInstanceState: Bundle?)
 	{
@@ -44,22 +48,23 @@ class GateActivity : AppCompatActivity()
 		setContentView(R.layout.activity_gate);
 		
 		connmana = getSystemService(ConnectivityManager::class.java);
-		CheckConnection();
-		
-		shrepref = getSharedPreferences(getString(R.string.app_pref), Context.MODE_PRIVATE);
-		
-		gooInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-			.requestIdToken(getString(R.string.default_web_client_id))
-			.requestId().requestEmail().build();
-		gooInClient = GoogleSignIn.getClient(this, gooInOptions);
-		
-		fbauth = FirebaseAuth.getInstance();
-		
-		goobtn = findViewById(R.id.gate_google_btn);
-		guestbtn = findViewById(R.id.gate_guest_btn);
-		
-		StartAuthen();
-		SetupVIEWfunc();
+		if(CheckConnection())
+		{
+			shrepref = getSharedPreferences(getString(R.string.app_pref), Context.MODE_PRIVATE);
+			
+			gooInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+				.requestIdToken(getString(R.string.default_web_client_id))
+				.requestId().requestEmail().build();
+			gooInClient = GoogleSignIn.getClient(this, gooInOptions);
+			
+			fbauth = FirebaseAuth.getInstance();
+			
+			goobtn = findViewById(R.id.gate_google_btn);
+			guestbtn = findViewById(R.id.gate_guest_btn);
+			
+			StartAuthen();
+			SetupVIEWfunc();
+		}
 	}
 	
 	override fun onDestroy()
@@ -73,11 +78,16 @@ class GateActivity : AppCompatActivity()
 	 * FAIL => SHOWING DIALOG FRAGMENT
 	 * SUCCESS => RETURN;
 	 */
-	private fun CheckConnection()
+	private fun CheckConnection() : Boolean
 	{
 		if(connmana.isDefaultNetworkActive == false || connmana.activeNetwork == null)
 		{
-		
+			noCONNECTION = true;
+			ShowingNOCONNECTIONdialog(this);
+			return false;
+		} else
+		{
+			return true;
 		}
 	}
 	
@@ -236,6 +246,9 @@ class GateActivity : AppCompatActivity()
 		}
 	}
 	
+	/**
+	 * Going Forward to next
+	 */
 	private fun StartMain()
 	{
 		var inte = Intent(this, MainActivity::class.java);
@@ -243,4 +256,34 @@ class GateActivity : AppCompatActivity()
 		startActivity(inte);
 		finish();
 	}
+	
+	
+	companion object{
+		/**
+		 * NO INTERNET CONNECTION BOTTOM SHEET DIALOG
+		 */
+		fun ShowingNOCONNECTIONdialog(acti: Activity)
+		{
+			var botshee = BottomSheetDialog(acti);
+			botshee.apply {
+				setContentView(R.layout.dialog_net_bottom);
+				setCancelable(false);
+				setCanceledOnTouchOutside(false);
+			}
+			var okbtn = botshee.findViewById<Button>(R.id.dialog_net_ok_btn);
+			okbtn?.setOnClickListener {
+				botshee.dismiss();
+				acti.finish();
+			}
+			var beha = botshee.behavior;
+			beha.apply {
+				isHideable = false;
+				isFitToContents = true;
+				state = BottomSheetBehavior.STATE_EXPANDED;
+			}
+			botshee.show();
+		}
+	}
+	
+	
 }
