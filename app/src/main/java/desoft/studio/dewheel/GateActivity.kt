@@ -36,7 +36,7 @@ class GateActivity : AppCompatActivity()
 	private lateinit var gooInOptions : GoogleSignInOptions;
 	private lateinit var gooInClient : GoogleSignInClient;
 	private var gooInAccount : GoogleSignInAccount? = null;
-	private var gooInLauncher = GooinACTIVITYresultLAUNCHER();
+	private var gooLauncher : ActivityResultLauncher<Intent> = KF_GOOlauncherCB();
 	private lateinit var shrepref : SharedPreferences;
 	private lateinit var goobtn : SignInButton;
 	private lateinit var guestbtn : Button;
@@ -147,21 +147,16 @@ class GateActivity : AppCompatActivity()
 	/**
 	 * GOOGLE SIGN IN LAUNCHER
 	 */
-	private fun GooinACTIVITYresultLAUNCHER() : ActivityResultLauncher<Intent>
+	private fun KF_GOOlauncherCB() : ActivityResultLauncher<Intent>
 	{
 		return registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
-			if(it.resultCode == Activity.RESULT_OK)
-			{
-				var tak = GoogleSignIn.getSignedInAccountFromIntent(it.data);
-				try
-				{
-					gooInAccount = tak.getResult(ApiException::class.java)!!
-					Log.d(TAG, "GooinLAUNCHER:Callback == success google sigin ${gooInAccount?.id}");
-					LinkORsign(gooInAccount!!);
-				}catch (e: ApiException)
-				{
-					Log.e(TAG, "GooinLAUNCHER:Callback == google sign in failed", e);
-				}
+			var tsk = GoogleSignIn.getSignedInAccountFromIntent(it.data);
+			try {
+				gooInAccount = tsk.getResult(ApiException::class.java)!!;
+				Log.d(TAG, "KF_GOOlauncherCB: == Successfully getting google sign in account");
+				LinkORsign(gooInAccount!!);
+			}catch (e: ApiException	){
+				Log.e(TAG, "KF_GOOlauncherCB: == FAILED TO LOGIN AS GOOGLE", RuntimeException(e.message));
 			}
 		}
 	}
@@ -195,8 +190,6 @@ class GateActivity : AppCompatActivity()
 				if(it.isSuccessful){
 					fbuser = it.result.user;
 					Log.d(TAG, "SigninWITHgoogle: == success signin , size of fbuser ${fbuser?.providerData?.size}");
-					// set up cache
-					
 					StartMain();
 				} else
 				{
@@ -242,7 +235,7 @@ class GateActivity : AppCompatActivity()
 	{
 		goobtn.setOnClickListener {
 			var inte = gooInClient.signInIntent;
-			gooInLauncher.launch(inte);
+			gooLauncher.launch(inte);
 		}
 	}
 	

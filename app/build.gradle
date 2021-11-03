@@ -86,8 +86,8 @@ dependencies {
     implementation("androidx.room:room-ktx:$roomver")
 
     // firebase
-    implementation 'com.google.android.gms:play-services-auth:19.2.0' // for google signin
     implementation platform('com.google.firebase:firebase-bom:28.4.2')
+    implementation 'com.google.android.gms:play-services-auth:19.2.0' // for google signin
     implementation 'com.google.firebase:firebase-analytics-ktx'
     implementation 'com.google.firebase:firebase-auth-ktx'
 

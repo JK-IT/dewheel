@@ -250,6 +250,7 @@ class UserFragment : Fragment()
 		return registerForActivityResult(ActivityResultContracts.StartActivityForResult())
 		{
 			if(it.resultCode == Activity.RESULT_OK){
+				Log.d(TAG, "GooSIGNINresultLAUNCHER: == Google sign in return ok");
 				GoogleSignIn.getSignedInAccountFromIntent(it.data)
 					.addOnSuccessListener {goores ->
 						gooACC = goores;
