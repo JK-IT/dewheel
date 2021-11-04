@@ -15,6 +15,7 @@ package desoft.studio.dewheel.kata
  * see user-info: {gender, sexual orientation, favorite things} |
  * Chat -> will open chat activity
  */
+
 /**
  * fone number, email , address will be secret, only u give it to the other
  * id: gmail_gid
@@ -24,8 +25,8 @@ package desoft.studio.dewheel.kata
  * sexual orientation
  * favorite
  */
-data class User(
-	var id : String?,
+data class K_User(
+	var kid : String?,
 	var fbid: String?,
 	var email : String?,
 	var app_user_name: String? = null,

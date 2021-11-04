@@ -2,19 +2,28 @@ package desoft.studio.dewheel.Kontrol
 
 import android.app.Application
 import android.util.Log
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import com.google.firebase.auth.FirebaseAuth
-import desoft.studio.dewheel.kata.User
-import java.lang.IllegalArgumentException
+import androidx.lifecycle.*
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
+import desoft.studio.dewheel.kata.K_User
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 private const val TAG : String = "-des- k-- DATA CONTROL ( VIEW MODEL) -->l";
 
 class DataControl(ctx : Application) : AndroidViewModel(ctx)
 {
-	private var fbauth : FirebaseAuth? = null;
-	private lateinit var user : User;
+	private var defdis = Dispatchers.Default;
+	private var iodis = Dispatchers.IO;
+	
+	private lateinit var user : K_User;
+	
+	private var storedb = Firebase.firestore;
+	private var userstore = storedb.collection("users");
+	
+	val sucuload :MutableLiveData<Boolean> by lazy {
+		MutableLiveData<Boolean>();
+	}
 	
 	/***
 	 * Creating  A User class on init, fill out from cache
@@ -22,13 +31,29 @@ class DataControl(ctx : Application) : AndroidViewModel(ctx)
 	//_ init
 	init
 	{
-		fbauth = FirebaseAuth.getInstance();
-		Log.d(TAG, "VIEW MODEL ININT: Data Control is created ${fbauth!!.uid}");
+		Log.d(TAG, "VIEW MODEL ININT: Data Control is created");
 	}
 	//_ clean up function
 	override fun onCleared()
 	{
-		super.onCleared()
+		super.onCleared();
+	}
+	
+	/**
+	 * UPload user to firestore
+	 */
+	fun KF_VMuploadUSER(usr: K_User){
+		viewModelScope.launch (iodis) {
+			usr.kid?.let {
+				userstore.document(it).set(usr).addOnSuccessListener {
+					sucuload.value = true;
+				}.addOnFailureListener {
+					sucuload.value = false;
+					Log.e(TAG, "KF_VMuploadUSER: = FAILED TO UPLOAD USER ", it);
+				}
+			}
+		}
+		
 	}
 	
 	class DataFactory(private var appli: Application): ViewModelProvider.AndroidViewModelFactory(appli)

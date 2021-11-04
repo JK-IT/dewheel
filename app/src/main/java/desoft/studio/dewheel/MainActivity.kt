@@ -3,12 +3,17 @@ package desoft.studio.dewheel
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.net.*
-import androidx.appcompat.app.AppCompatActivity
+import android.net.ConnectivityManager
+import android.net.LinkProperties
+import android.net.Network
+import android.net.NetworkCapabilities
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
@@ -20,10 +25,10 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import desoft.studio.dewheel.Kontrol.DataControl
+import desoft.studio.dewheel.kata.K_User
 import desoft.studio.dewheel.katic.KONSTANT
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.lang.RuntimeException
 
 class MainActivity : AppCompatActivity()
 {
@@ -38,6 +43,7 @@ class MainActivity : AppCompatActivity()
 	private lateinit var appCache: SharedPreferences;
 	private lateinit var dataFutory : DataControl.DataFactory;
 	private lateinit var dataKontrol : DataControl;
+	private lateinit var sucudateFlag : LiveData<Boolean>;
 	private lateinit var navHost : NavHostFragment;
 	private lateinit var navContro : NavController;
 	private var loosingBottomDialog : BottomSheetDialog? = null;
@@ -54,6 +60,7 @@ class MainActivity : AppCompatActivity()
 		{
 			dataFutory = DataControl.DataFactory(application);
 			dataKontrol = ViewModelProvider(this, dataFutory).get(DataControl::class.java);
+			dataKontrol.sucuload.observe(this, uploadFlagWatcher);
 			
 			fbauth = FirebaseAuth.getInstance();
 			appCache = getSharedPreferences(getString(R.string.app_pref), Context.MODE_PRIVATE);
@@ -62,7 +69,6 @@ class MainActivity : AppCompatActivity()
 			SetupNavHost();
 		}
 	}
-	
 	
 	override fun onStart()
 	{
@@ -164,8 +170,9 @@ class MainActivity : AppCompatActivity()
 			Log.e(TAG, "SavingTOcache: == SOMETHING WRONG WITH CACHE", RuntimeException("FAILED TO WRITE TO CACHE"));
 		}
 	}
-	
+	//#region NETWORK AREA
 	/**
+	 * ?NETWORK RELATED FUNCTIONS
 	 * Register Callback on connectivity manager
 	 * should not call other methods, if it is available as callback, cuz of race condition
 	 */
@@ -215,7 +222,6 @@ class MainActivity : AppCompatActivity()
 				Log.w(TAG, "onUnavailable: There no network availiable that can satisfy the network request");
 			}
 		}
-
 		conmana.registerDefaultNetworkCallback(defaultConnCb);
 
 	}
@@ -229,7 +235,7 @@ class MainActivity : AppCompatActivity()
 	private fun CheckNETWORKconnection(): Boolean
 	{
 		currDEFAULTnet = conmana.activeNetwork;
-		if(currDEFAULTnet == null || conmana.isDefaultNetworkActive == false)
+		if(currDEFAULTnet == null)
 		{// showing no connection dialog
 			GateActivity.ShowingNOCONNECTIONdialog(this);
 			return false;
@@ -269,6 +275,7 @@ class MainActivity : AppCompatActivity()
 			}
 		}
 	}
+	//#endregion
 	/**
 	 * Generate and set up bottomsheet dialog
 	 */
@@ -290,9 +297,37 @@ class MainActivity : AppCompatActivity()
 		
 		//set up
 	}
+	
 	/**
-	 * VIEW MODEL - DATA CONTROL RELATED
+	 * ?VIEW MODEL - DATA CONTROL RELATED
+	 * * this will exposed all functions related to data control, instead of instantiate those on fragment
 	 */
+	fun KF_UPuserTOstore(usr : K_User)
+	{
+		Log.d(TAG, "KF_UPuserTOstore: == Get user to upload $usr");
+		dataKontrol.KF_VMuploadUSER(usr);
+	}
+	
+	/**
+	 * // ! upload flag observer
+	 * write to cache to have appropriate action later
+	 */
+	private val uploadFlagWatcher = Observer<Boolean>{
+		if(it) {
+			Log.i(TAG, "successfully updated user to store: ");
+			appCache.edit().apply{
+				putBoolean(KONSTANT.upload_flag, true);
+				putLong(KONSTANT.cache_timestamp, System.currentTimeMillis());
+				apply();
+			}
+		} else {
+			appCache.edit().apply {
+				putBoolean(KONSTANT.upload_flag, false);
+				putLong(KONSTANT.cache_timestamp, System.currentTimeMillis());
+				apply();
+			}
+		}
+	}
 }
 
 /*		// this callback keep being called -> waste of resource if u don't do anything

@@ -16,4 +16,6 @@ object KONSTANT
 	 * or u cannot become verified user, if u don't fill out other required fields
  	 */
 	val verified : String = "VERIFED USER";
+	
+	val upload_flag: String = "USER UPLOADING FLAG";
 }
