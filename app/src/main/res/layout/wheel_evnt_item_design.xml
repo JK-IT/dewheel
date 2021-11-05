@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:cardElevation="10dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+   <androidx.constraintlayout.widget.ConstraintLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+      <FrameLayout
+          android:id="@+id/wheel_user_avata"
+          app:layout_constraintStart_toStartOf="parent"
+          app:layout_constraintEnd_toEndOf="parent"
+          app:layout_constraintTop_toTopOf="parent"
+          android:layout_marginVertical="10dp"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content">
+         <androidx.appcompat.widget.AppCompatImageView
+             app:srcCompat="@drawable/ic_baseline_emoji_face_24"
+             android:scaleType="fitCenter"
+             android:adjustViewBounds="true"
+             android:layout_gravity="center"
+             android:layout_width="50dp"
+             android:layout_height="50dp"/>
+      </FrameLayout>
+      <LinearLayout
+          android:id="@+id/wheel_info_grp"
+          android:orientation="vertical"
+          android:layout_margin="10dp"
+          app:layout_constraintTop_toBottomOf="@id/wheel_user_avata"
+          app:layout_constraintStart_toStartOf="parent"
+          app:layout_constraintEnd_toEndOf="parent"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content">
+         <FrameLayout
+             android:layout_gravity="center"
+            android:layout_marginVertical="10dp"
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content">
+            <ImageView
+                android:src="@drawable/ic__city_line"
+                android:scaleType="centerCrop"
+                android:adjustViewBounds="true"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxHeight="100dp"/>
+         </FrameLayout>
+      </LinearLayout>
+   </androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.material.card.MaterialCardView>
+
