@@ -41,6 +41,7 @@ class WheelFragment : Fragment()
 	private var locConfLauncher = KF_LOC_CONFIG_LAUNCHER();
 	private lateinit var locationEdit : TextInputEditText;
 	private var currLocation : Location? = null;
+	private lateinit var locationPickFrag : LocationPickFragment;
 	
 	private val cancelTokSrc : CancellationTokenSource = CancellationTokenSource();
 	
@@ -66,6 +67,7 @@ class WheelFragment : Fragment()
 			interval = 15000;
 			fastestInterval = 7000;
 		}!!
+		locationPickFrag = LocationPickFragment(requireActivity());
 	}
 	
 	override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -82,7 +84,8 @@ class WheelFragment : Fragment()
 		locationEdit.inputType = InputType.TYPE_NULL;
 		locationEdit.setOnClickListener {
 			Log.i(TAG, "KF_SETUP_VIEWS: = location edit is clicked");
-			KF_FRESHlocation();
+			locationPickFrag.show(childFragmentManager, LocationPickFragment.fragtag);
+			//KF_FRESHlocation();
 		}
 	}
 	
