@@ -21,9 +21,12 @@ class DataControl(ctx : Application) : AndroidViewModel(ctx)
 	private var storedb = Firebase.firestore;
 	private var userstore = storedb.collection("users");
 	
+	// * uploading status
 	val sucuload :MutableLiveData<Boolean> by lazy {
 		MutableLiveData<Boolean>();
 	}
+	// * assigned location
+	
 	
 	/***
 	 * Creating  A User class on init, fill out from cache

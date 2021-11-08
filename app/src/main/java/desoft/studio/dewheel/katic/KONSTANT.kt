@@ -18,6 +18,9 @@ object KONSTANT
 	val verified : String = "VERIFED USER";
 	
 	val upload_flag: String = "USER UPLOADING FLAG";
+	
+	val lati_flag : String = "USER LATITUDE LOCATION";
+	val logi_flag : String = "USER LONGITUDE LOCATION"
 }
 
 /**

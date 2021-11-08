@@ -2,6 +2,8 @@ package desoft.studio.dewheel
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.Context
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.location.Location
@@ -12,23 +14,29 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.android.gms.tasks.CancellationTokenSource
 import com.google.android.material.snackbar.Snackbar
-import com.google.android.material.textfield.TextInputEditText
+import desoft.studio.dewheel.katic.KONSTANT
 import java.util.*
 
 private const val TAG :  String = "-des- [[== WHEEL FRAGMENT ==]]";
 
 class WheelFragment : Fragment()
 {
+	private lateinit var appcache : SharedPreferences;
+	
 	private val locationPermLauncher: ActivityResultLauncher<Array<String>> = GetLOCATIONpermissionCB();
 	private val coar_perm = android.Manifest.permission.ACCESS_COARSE_LOCATION;
 	private val fine_perm = android.Manifest.permission.ACCESS_FINE_LOCATION;
@@ -38,10 +46,15 @@ class WheelFragment : Fragment()
 	private lateinit var slowLocReq: LocationRequest;
 	private lateinit var cliSettings : SettingsClient;
 	private lateinit var geocoder : Geocoder;
-	private var locConfLauncher = KF_LOC_CONFIG_LAUNCHER();
-	private lateinit var locationEdit : TextInputEditText;
 	private var currLocation : Location? = null;
+	private var locConfLauncher = KF_LOC_CONFIG_LAUNCHER();
+	private lateinit var locationHead : LinearLayout;
+	private lateinit var locationText : TextView;
+	private lateinit var getCurrLocationBtn : TextView;
 	private lateinit var locationPickFrag : LocationPickFragment;
+	
+	private lateinit var hideViewBtn : ImageView;
+	private lateinit var locationCopy : TextView;
 	
 	private val cancelTokSrc : CancellationTokenSource = CancellationTokenSource();
 	
@@ -49,6 +62,7 @@ class WheelFragment : Fragment()
 	override fun onCreate(savedInstanceState: Bundle?)
 	{
 		super.onCreate(savedInstanceState);
+		appcache = requireActivity().getSharedPreferences(getString(R.string.app_pref), Context.MODE_PRIVATE);
 		fulocation = LocationServices.getFusedLocationProviderClient(requireContext());
 		cliSettings = LocationServices.getSettingsClient(requireContext());
 		geocoder = Geocoder(requireContext(), Locale.getDefault());
@@ -75,17 +89,38 @@ class WheelFragment : Fragment()
 	{
 		// Inflate the layout for this fragment
 		var v = inflater.inflate(R.layout.frag_wheel, container, false);
-		locationEdit = v.findViewById(R.id.wheel_location_tedit);
+		locationHead = v.findViewById(R.id.wheel_location_head);
+		locationText = v.findViewById(R.id.wheel_location_tedit);
+		getCurrLocationBtn = v.findViewById(R.id.wheel_get_current_location);
+		hideViewBtn = v.findViewById(R.id.wheel_hide_view_btn);
+		locationCopy = v.findViewById(R.id.wheel_location_copy);
 		KF_SETUP_VIEWS();
 		return v;
 	}
 	
 	private fun KF_SETUP_VIEWS() {
-		locationEdit.inputType = InputType.TYPE_NULL;
-		locationEdit.setOnClickListener {
+		//_ location display name
+		locationText.inputType = InputType.TYPE_NULL;
+		locationText.setOnClickListener {
 			Log.i(TAG, "KF_SETUP_VIEWS: = location edit is clicked");
 			locationPickFrag.show(childFragmentManager, LocationPickFragment.fragtag);
-			//KF_FRESHlocation();
+		}
+		//_ get current location btn
+		getCurrLocationBtn.setOnClickListener{
+			KF_FRESHlocation();
+		}
+		// _ hiding view button
+		hideViewBtn.setOnClickListener {
+			if(locationHead.isVisible)
+			{
+				it.rotation = 180F;
+				locationHead.visibility = View.GONE;
+				locationCopy.visibility = View.VISIBLE;
+			} else {
+				it.rotation = 360f;
+				locationHead.visibility = View.VISIBLE;
+				locationCopy.visibility = View.INVISIBLE;
+			}
 		}
 	}
 	
@@ -200,10 +235,16 @@ class WheelFragment : Fragment()
 				{
 					Log.d(TAG, "kf_FRESHlocation: == current location ${loc.accuracy} - ${loc.latitude} - ${loc.longitude}");
 					currLocation = loc;
+					appcache.edit().apply {
+						putString(KONSTANT.lati_flag, loc.latitude.toString());
+						putString(KONSTANT.logi_flag, loc.longitude.toString());
+						putLong(KONSTANT.cache_timestamp, System.currentTimeMillis());
+						apply();
+					}
 					if(Geocoder.isPresent()) {
 						var laddr = geocoder.getFromLocation(loc.latitude, loc.longitude, 1);
 						if (laddr.isNotEmpty())
-							locationEdit.text = SpannableStringBuilder(laddr[0].locality);
+							locationText.text = SpannableStringBuilder(laddr[0].locality);
 					}
 				} else {
 					Log.w(TAG, "KF_FRESHlocation: = fresh location null so u may out of reach area" );
@@ -226,10 +267,30 @@ class WheelFragment : Fragment()
 				if(Geocoder.isPresent()) {
 					var laddr = geocoder.getFromLocation(it.latitude, it.longitude, 1);
 					if (laddr.isNotEmpty())
-						locationEdit.text = SpannableStringBuilder(laddr[0].locality);
+						locationText.text = SpannableStringBuilder(laddr[0].locality);
+					appcache.edit().apply {
+						putString(KONSTANT.lati_flag, laddr[0].latitude.toString());
+						putString(KONSTANT.logi_flag, laddr[0].longitude.toString());
+						putLong(KONSTANT.cache_timestamp, System.currentTimeMillis());
+						apply();
+					}
 				}
 			} else
+			{
 				Log.i(TAG, "KF_ESTIMATE_LOCATION: = LAST LOCATION NULL");
+				var latcache = appcache.getString(KONSTANT.lati_flag, "");
+				if( !latcache.isNullOrBlank()){
+					var lngcache = appcache.getString(KONSTANT.logi_flag, "");
+					if( !lngcache.isNullOrBlank())
+					{
+						var addrlst = geocoder.getFromLocation(latcache.toDouble(), lngcache.toDouble(), 1);
+						addrlst[0]?.let {
+							locationText.text = SpannableStringBuilder(it.locality);
+						}
+					}
+				}
+				
+			}
 		}
 	}
 
