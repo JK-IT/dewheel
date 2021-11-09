@@ -6,6 +6,7 @@ import androidx.lifecycle.*
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import desoft.studio.dewheel.kata.K_User
+import desoft.studio.dewheel.kata.Kadress
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -26,7 +27,9 @@ class DataControl(ctx : Application) : AndroidViewModel(ctx)
 		MutableLiveData<Boolean>();
 	}
 	// * assigned location
-	
+	val pickedLocation : MutableLiveData<Kadress> by lazy {
+		MutableLiveData<Kadress>();
+	}
 	
 	/***
 	 * Creating  A User class on init, fill out from cache

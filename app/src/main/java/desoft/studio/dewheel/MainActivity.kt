@@ -12,7 +12,6 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -43,7 +42,6 @@ class MainActivity : AppCompatActivity()
 	private lateinit var appCache: SharedPreferences;
 	private lateinit var dataFutory : DataControl.DataFactory;
 	private lateinit var dataKontrol : DataControl;
-	private lateinit var sucudateFlag : LiveData<Boolean>;
 	private lateinit var navHost : NavHostFragment;
 	private lateinit var navContro : NavController;
 	private var loosingBottomDialog : BottomSheetDialog? = null;
@@ -300,8 +298,11 @@ class MainActivity : AppCompatActivity()
 	
 	/**
 	 * ?VIEW MODEL - DATA CONTROL RELATED
-	 * * this will exposed all functions related to data control, instead of instantiate those on fragment
+	 * *
 	 */
+	/**
+	* ! uploading user to firestore using viewmodel
+	*/
 	fun KF_UPuserTOstore(usr : K_User)
 	{
 		Log.d(TAG, "KF_UPuserTOstore: == Get user to upload $usr");
@@ -328,6 +329,7 @@ class MainActivity : AppCompatActivity()
 			}
 		}
 	}
+
 }
 
 /*		// this callback keep being called -> waste of resource if u don't do anything

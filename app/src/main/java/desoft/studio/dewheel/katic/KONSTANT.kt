@@ -19,6 +19,7 @@ object KONSTANT
 	
 	val upload_flag: String = "USER UPLOADING FLAG";
 	
+	val region_flag: String = "USER LOCATION REGION";
 	val lati_flag : String = "USER LATITUDE LOCATION";
 	val logi_flag : String = "USER LONGITUDE LOCATION"
 }

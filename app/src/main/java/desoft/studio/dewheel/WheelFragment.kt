@@ -9,7 +9,6 @@ import android.location.Geocoder
 import android.location.Location
 import android.os.Bundle
 import android.text.InputType
-import android.text.SpannableStringBuilder
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -24,10 +23,18 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentResultListener
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.tasks.CancellationTokenSource
+import com.google.android.libraries.places.api.model.AddressComponents
 import com.google.android.material.snackbar.Snackbar
+import desoft.studio.dewheel.Kontrol.DataControl
+import desoft.studio.dewheel.kata.Kadress
 import desoft.studio.dewheel.katic.KONSTANT
 import java.util.*
 
@@ -35,6 +42,9 @@ private const val TAG :  String = "-des- [[== WHEEL FRAGMENT ==]]";
 
 class WheelFragment : Fragment()
 {
+	private lateinit var dataFutory : DataControl.DataFactory;
+	private lateinit var dataKontrol : DataControl;
+	private lateinit var locationLiveDat: MutableLiveData<Kadress>;
 	private lateinit var appcache : SharedPreferences;
 	
 	private val locationPermLauncher: ActivityResultLauncher<Array<String>> = GetLOCATIONpermissionCB();
@@ -62,7 +72,11 @@ class WheelFragment : Fragment()
 	override fun onCreate(savedInstanceState: Bundle?)
 	{
 		super.onCreate(savedInstanceState);
+		dataFutory = DataControl.DataFactory(requireActivity().application);
+		dataKontrol = ViewModelProvider(requireActivity(), dataFutory).get(DataControl::class.java);
+		locationLiveDat = dataKontrol.pickedLocation;
 		appcache = requireActivity().getSharedPreferences(getString(R.string.app_pref), Context.MODE_PRIVATE);
+		
 		fulocation = LocationServices.getFusedLocationProviderClient(requireContext());
 		cliSettings = LocationServices.getSettingsClient(requireContext());
 		geocoder = Geocoder(requireContext(), Locale.getDefault());
@@ -124,15 +138,39 @@ class WheelFragment : Fragment()
 		}
 	}
 	
+	/**
+	 * Register FRAGMENT MANAGER FOR RECEIVING PICKED LOCATION
+	 */
 	override fun onViewCreated(view: View, savedInstanceState: Bundle?)
 	{
+		childFragmentManager.setFragmentResultListener(locationQuestKey, this, object : FragmentResultListener{
+			override fun onFragmentResult(requestKey : String, result : Bundle) {
+				if(requestKey.contentEquals(locationQuestKey)){
+					var addrlst = geocoder.getFromLocation(result.getDouble(placesLati)!!, result.getDouble(placesLongi)!!,1 );
+					if(addrlst.isNotEmpty()) {
+						Log.d(TAG, "onFragmentResult: = this location $addrlst[0]");
+					}
+				}
+			}
+		})
 		CheckLOCATIONperm();
+	}
+	/**
+	* * Good places to adding observer or listener callback
+	 * adding observer on location text
+	*/
+	override fun onStart() {
+		super.onStart();
+		locationLiveDat.observe(requireActivity(), locationWatcher);
 	}
 	
 	override fun onStop() {
 		cancelTokSrc.cancel();
+		childFragmentManager.clearFragmentResult(locationQuestKey);
 		super.onStop();
 	}
+	
+	//#region LOCATION REGION
 	/**
 	 * location permission requesting
 	 * Failed == start permission launcher
@@ -226,25 +264,18 @@ class WheelFragment : Fragment()
 	 *@param the priority of request
 	*/
 	@SuppressLint("MissingPermission")
-	private fun KF_GET_LOCATION_WITH_LEVEL(prior : Int)
-	{
+	private fun KF_GET_LOCATION_WITH_LEVEL(prior : Int) {
 		Log.d(TAG, "KF_GET_LOCATION_WITH_LEVEL: = Getting location with accuracy");
 		fulocation.getCurrentLocation(prior, cancelTokSrc.token)
 			.addOnSuccessListener { loc ->
 				if(loc != null)
 				{
-					Log.d(TAG, "kf_FRESHlocation: == current location ${loc.accuracy} - ${loc.latitude} - ${loc.longitude}");
 					currLocation = loc;
-					appcache.edit().apply {
-						putString(KONSTANT.lati_flag, loc.latitude.toString());
-						putString(KONSTANT.logi_flag, loc.longitude.toString());
-						putLong(KONSTANT.cache_timestamp, System.currentTimeMillis());
-						apply();
-					}
-					if(Geocoder.isPresent()) {
-						var laddr = geocoder.getFromLocation(loc.latitude, loc.longitude, 1);
-						if (laddr.isNotEmpty())
-							locationText.text = SpannableStringBuilder(laddr[0].locality);
+					Log.d(TAG, "kf_FRESHlocation: == current location ${loc.accuracy} - ${loc.latitude} - ${loc.longitude}");
+					var addrlst = geocoder.getFromLocation(loc.latitude, loc.longitude, 1);
+					addrlst[0]?.let {
+						var kadd = Kadress(null, null, it.subLocality, it.locality, it.subAdminArea, it.adminArea, it.postalCode.toInt(),it.countryName, it.latitude, it.longitude );
+						locationLiveDat.value = kadd;
 					}
 				} else {
 					Log.w(TAG, "KF_FRESHlocation: = fresh location null so u may out of reach area" );
@@ -264,20 +295,15 @@ class WheelFragment : Fragment()
 	private fun KF_ESTIMATE_LOCATION(){
 		fulocation.lastLocation.addOnSuccessListener {
 			if(it != null){
-				if(Geocoder.isPresent()) {
-					var laddr = geocoder.getFromLocation(it.latitude, it.longitude, 1);
-					if (laddr.isNotEmpty())
-						locationText.text = SpannableStringBuilder(laddr[0].locality);
-					appcache.edit().apply {
-						putString(KONSTANT.lati_flag, laddr[0].latitude.toString());
-						putString(KONSTANT.logi_flag, laddr[0].longitude.toString());
-						putLong(KONSTANT.cache_timestamp, System.currentTimeMillis());
-						apply();
-					}
+				currLocation = it;
+				var addrlst = geocoder.getFromLocation(it.latitude, it.longitude, 1);
+				addrlst[0]?.let {
+					var kadd = Kadress(null,null, it.subLocality, it.locality, it.subAdminArea, it.adminArea, it.postalCode.toInt(),it.countryName, it.latitude, it.longitude );
+					locationLiveDat.value = kadd;
 				}
 			} else
 			{
-				Log.i(TAG, "KF_ESTIMATE_LOCATION: = LAST LOCATION NULL");
+				Log.i(TAG, "KF_ESTIMATE_LOCATION: = LAST LOCATION NULL , TRY TO GET FROM CACHE");
 				var latcache = appcache.getString(KONSTANT.lati_flag, "");
 				if( !latcache.isNullOrBlank()){
 					var lngcache = appcache.getString(KONSTANT.logi_flag, "");
@@ -285,13 +311,84 @@ class WheelFragment : Fragment()
 					{
 						var addrlst = geocoder.getFromLocation(latcache.toDouble(), lngcache.toDouble(), 1);
 						addrlst[0]?.let {
-							locationText.text = SpannableStringBuilder(it.locality);
+							var kadd = Kadress(null, null, it.subLocality, it.locality, it.subAdminArea, it.adminArea, it.postalCode.toInt(),it.countryName, it.latitude, it.longitude );
+							locationLiveDat.value = kadd;
 						}
 					}
 				}
-				
 			}
 		}
 	}
-
+	
+	/**
+	* ?REGISTER OBSERVER FOR LOCATION CHANGING
+	 * set up location text display N copy text view
+	 * refrest from database event at that location
+	*/
+	private val locationWatcher = Observer<Kadress>(){
+		if(it.neighbor != null )
+		{
+			if(it.locality != null){
+				locationText.text = "${it.neighbor}, ${it.locality}";
+				locationCopy.text = locationText.text;
+			} else {
+				locationText.text = "${it.neighbor}";
+				locationCopy.text = locationText.text;
+			}
+		} else {
+			locationText.text = it.locality;
+			locationCopy.text = locationText.text;
+		}
+		appcache.edit().apply {
+			putString(KONSTANT.region_flag, locationText.text.toString());
+			putString(KONSTANT.lati_flag, it.lati.toString());
+			putString(KONSTANT.logi_flag, it.longi.toString());
+			putLong(KONSTANT.cache_timestamp, System.currentTimeMillis());
+			apply();
+		}
+	}
+	//#endregion
+	
+	//#region RETURNING RESULT FROM LOCATION PICKUP FRAGEMENT
+	fun KF_PICKED_PLACES_RETURN(resu : LocationResultContainer)
+	{
+		when(resu){
+			is LocationResultContainer.Success ->{
+				var addlatlon = resu.latlng;
+				var kadd = Kadress();
+				for(comp in resu.addcompo.asList()){
+					var type = comp.types.get(0);
+					if(type.contains("neighborhood"))	kadd.neighbor = comp.name;
+					if(type.contains("locality"))	kadd.locality = comp.name;
+					if(type.contains("administrative_area_level_2"))	kadd.admin2 = comp.name;
+					if(type.contains("administrative_area_level_1"))	kadd.admin1 = comp.name;
+					if(type.contains("postal_code"))	kadd.zip = comp.name.toInt();
+					if(type.contains("country"))	kadd.country = comp.name;
+				}
+				kadd.lati = addlatlon.latitude;
+				kadd.longi = addlatlon.longitude;
+				locationLiveDat.value = kadd;
+			}
+			is LocationResultContainer.Error -> {
+				Log.e(TAG,"KF_PICKED_PLACES_RETURN: = Error on Picking up the places ${resu.code} - ${resu.msg}");
+			}
+		}
+	}
+	//#endregion
+	/**
+	* * A CONTAINER FOR THE RETURNING RESULT FROM AUTOCOMPLETE FRAGMENT
+	*/
+	sealed class LocationResultContainer{
+		data class Success(var addcompo : AddressComponents, var latlng : LatLng): LocationResultContainer()
+		data class Error(var msg:String?, var code:String?, var extra: Any?): LocationResultContainer()
+	}
+	
+	
+	companion object {
+		const val locationQuestKey : String = "LOCATION REQUEST KEY";
+		
+		const val placesName : String = "LOCATION NAME";
+		const val placesLati : String = "LOCATION LATITUDE";
+		const val placesLongi : String = "LOCATION LONGITUDE";
+	}
 }
