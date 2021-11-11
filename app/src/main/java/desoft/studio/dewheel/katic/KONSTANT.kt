@@ -22,6 +22,8 @@ object KONSTANT
 	val region_flag: String = "USER LOCATION REGION";
 	val lati_flag : String = "USER LATITUDE LOCATION";
 	val logi_flag : String = "USER LONGITUDE LOCATION"
+	
+	val goo_package_name = "com.google.android.apps.maps";
 }
 
 /**
