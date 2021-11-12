@@ -28,6 +28,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.findNavController
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.model.LatLng
@@ -49,6 +50,7 @@ class WheelFragment : Fragment()
 	private lateinit var locationLiveDat: MutableLiveData<Kadress>;
 	private lateinit var appcache : SharedPreferences;
 	
+	
 	private val locationPermLauncher: ActivityResultLauncher<Array<String>> = GetLOCATIONpermissionCB();
 	private val coar_perm = android.Manifest.permission.ACCESS_COARSE_LOCATION;
 	private val fine_perm = android.Manifest.permission.ACCESS_FINE_LOCATION;
@@ -69,7 +71,6 @@ class WheelFragment : Fragment()
 	private lateinit var locationCopy : TextView;
 	
 	private lateinit var addBtn : ImageView;
-	private lateinit var evntAddFragment: EvntCreateFragment;
 	
 	
 	private val cancelTokSrc : CancellationTokenSource = CancellationTokenSource();
@@ -78,6 +79,7 @@ class WheelFragment : Fragment()
 	override fun onCreate(savedInstanceState: Bundle?)
 	{
 		super.onCreate(savedInstanceState);
+		
 		dataFutory = DataControl.DataFactory(requireActivity().application);
 		dataKontrol = ViewModelProvider(requireActivity(), dataFutory).get(DataControl::class.java);
 		locationLiveDat = dataKontrol.pickedLocation;
@@ -102,7 +104,6 @@ class WheelFragment : Fragment()
 			fastestInterval = 7000;
 		}!!
 		locationPickFrag = LocationPickFragment(requireActivity());
-		evntAddFragment = EvntCreateFragment(requireActivity());
 	}
 	
 	override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -164,10 +165,21 @@ class WheelFragment : Fragment()
 				locationCopy.visibility = View.INVISIBLE;
 			}
 		}
-		// adding occurrence btn
+		// adding occurrence btn, the view must be in a navhost to get nav controller
 		addBtn.setOnClickListener {
-			evntAddFragment.show(childFragmentManager, EvntCreateFragment.fragTag);
-			
+			if( ! appcache.getString(KONSTANT.lati_flag, "").isNullOrBlank()){
+				var bund: Bundle = Bundle();
+				var lati = appcache.getString(KONSTANT.lati_flag,"");
+				bund.apply {
+					putDouble(KONSTANT.lati_flag, lati!!.toDouble());
+					putDouble(KONSTANT.logi_flag, appcache.getString(KONSTANT.logi_flag, "")!!.toDouble());
+				}
+				it.findNavController().navigate(R.id.action_wheelFragment_to_jollyCreationFragment, bund);
+			}
+			else {
+				var actn = WheelFragmentDirections.actionWheelFragmentToJollyCreationFragment();
+				it.findNavController().navigate(actn);
+			}
 		}
 	}
 	
@@ -324,29 +336,17 @@ class WheelFragment : Fragment()
 						}
 					}
 				}
-				
 			}
 		}
 	}
 	
-	/**
-	 * EXPOSED CURRENT USER LATI, LONGI
-	 */
-	fun KF_GET_CURRENT_LATLNG(): List<String>?
-	{
-		if(appcache.getString(KONSTANT.lati_flag, "").isNullOrBlank())
-			return null;
-		else {
-			return listOf(appcache.getString(KONSTANT.lati_flag, "")!!, appcache.getString(KONSTANT.logi_flag,"")!!);
-		}
-	}
 	/**
 	* * HELPER FUNCTIONS THAT IS CALLED TO GET ADDRESSES FROM LATI AND LONGI
 	*/
 	private fun KF_GET_ADDR_FROM_LATLNG(lati: Double, lngi:Double, maxres: Int)
 	{
 		viewLifecycleOwner.lifecycleScope.launch {
-			var addrlst = geocoder.getFromLocation(lati.toDouble(), lngi.toDouble(), maxres);
+			var addrlst = geocoder.getFromLocation(lati, lngi, maxres);
 			Log.d(TAG, "KF_ESTIMATE_LOCATION: $addrlst[0]");
 			addrlst[0]?.let {
 				var kadd = Kadress(null, null, it.subLocality, it.locality, it.subAdminArea, it.adminArea,

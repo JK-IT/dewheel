@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_marginVertical="10dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+   <androidx.constraintlayout.widget.ConstraintLayout
+       android:layout_marginVertical="20dp"
+       android:layout_gravity="center"
+       android:layout_width="match_parent"
+       android:layout_height="match_parent">
+      <LinearLayout
+          android:id="@+id/evnt_filling_grp"
+          android:orientation="vertical"
+          app:layout_constraintTop_toTopOf="parent"
+          app:layout_constraintEnd_toEndOf="parent"
+          app:layout_constraintStart_toStartOf="parent"
+          app:layout_constraintBottom_toTopOf="@id/evnt_btn_grp"
+          android:layout_width="match_parent"
+          android:layout_height="match_parent">
+         <TextView
+             android:text="Looking For A Parner?"
+             android:padding="10dp"
+             style="@style/TextAppearance.MaterialComponents.Headline5"
+             android:gravity="center"
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content"/>
+
+         <com.google.android.material.textfield.TextInputLayout
+             style="@style/Widget.Design.TextInputLayout"
+             app:hintEnabled="true"
+             android:hint="what's the occurrence?"
+             android:labelFor="@id/evnt_edit_field"
+             android:layout_margin="15dp"
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/evnt_edit_field"
+                android:lines="2"
+                android:maxLines="3"
+                android:imeOptions="actionNext|actionDone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+         </com.google.android.material.textfield.TextInputLayout>
+
+         <TextView
+             android:id="@+id/evnt_addrpick_btn"
+             android:text="Pick A Place"
+             android:gravity="start"
+             android:maxLines="4"
+             android:textSize="@dimen/medText"
+             android:layout_margin="15dp"
+             android:padding="5dp"
+             android:drawableStart="@drawable/ic_baseline_add_location_24"
+             android:drawablePadding="10dp"
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content"/>
+         <TextView
+             android:id="@+id/evnt_lookup_googlemaps"
+             android:text="Look up places with Google Maps"
+             android:gravity="center"
+             android:paddingVertical="5dp"
+             android:layout_marginVertical="10dp"
+             android:textStyle="bold"
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content"/>
+         <View
+             android:background="@color/grey"
+             android:layout_marginHorizontal="20dp"
+             android:layout_width="200dp"
+             android:layout_height="1dp"/>
+
+         <TextView
+             android:id="@+id/evnt_picktime_btn"
+             android:text="Pick A Time"
+             android:textSize="@dimen/medText"
+             android:layout_margin="15dp"
+             android:padding="5dp"
+             android:drawableStart="@drawable/ic_baseline_time_24"
+             android:drawablePadding="10dp"
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content"/>
+         <View
+             android:background="@color/grey"
+             android:layout_marginHorizontal="20dp"
+             android:layout_width="200dp"
+             android:layout_height="1dp"/>
+
+         <TextView
+             android:id="@+id/evnt_date_display"
+             android:padding="15dp"
+             android:layout_margin="5dp"
+             android:textSize="@dimen/medText"
+             android:drawableStart="@drawable/ic_baseline_calendar_today_24"
+             android:drawablePadding="10dp"
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content"/>
+         <View
+             android:background="@color/grey"
+             android:layout_marginHorizontal="20dp"
+             android:layout_width="200dp"
+             android:layout_height="1dp"/>
+      </LinearLayout>
+
+      <RelativeLayout
+          android:id="@+id/evnt_btn_grp"
+          app:layout_constraintTop_toBottomOf="@id/evnt_filling_grp"
+          app:layout_constraintStart_toStartOf="parent"
+          app:layout_constraintEnd_toEndOf="parent"
+          app:layout_constraintBottom_toBottomOf="parent"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content">
+
+         <Button
+             android:id="@+id/evnt_cancel_btn"
+             style="@style/Widget.AppCompat.Button.Borderless"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:layout_margin="20dp"
+             android:layout_marginStart="20dp"
+             android:layout_marginTop="20dp"
+             android:layout_marginEnd="20dp"
+             android:layout_marginBottom="20dp"
+             android:layout_toStartOf="@id/evnt_done_btn"
+             android:text="Cancel"
+             android:textColor="@color/quantum_pink500" />
+         <Button
+             android:id="@+id/evnt_done_btn"
+             android:text="Done"
+             style="@style/Widget.AppCompat.Button.Borderless"
+             android:textColor="@color/purple_700"
+             android:layout_gravity="end"
+             android:layout_margin="20dp"
+             android:layout_alignParentEnd="true"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"/>
+      </RelativeLayout>
+
+   </androidx.constraintlayout.widget.ConstraintLayout>
+
+</ScrollView>
