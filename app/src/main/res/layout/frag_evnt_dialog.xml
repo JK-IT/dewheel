@@ -31,12 +31,12 @@
              style="@style/Widget.Design.TextInputLayout"
              app:hintEnabled="true"
              android:hint="what's the occurrence?"
-             android:labelFor="@id/evnt_edit_field"
+             android:labelFor="@id/evnt_name_field"
              android:layout_margin="15dp"
              android:layout_width="match_parent"
              android:layout_height="wrap_content">
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/evnt_edit_field"
+                android:id="@+id/evnt_name_field"
                 android:lines="2"
                 android:maxLines="3"
                 android:imeOptions="actionNext|actionDone"

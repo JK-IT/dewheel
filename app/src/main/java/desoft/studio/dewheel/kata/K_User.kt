@@ -17,6 +17,8 @@ package desoft.studio.dewheel.kata
  */
 
 /**
+ * FIRESTORE DATABASE : USERS
+ * 	-kid	-fbid	-email	-username	-gender 	-sorient	-favorite
  * fone number, email , address will be secret, only u give it to the other
  * id: gmail_gid
  * fbid: uid

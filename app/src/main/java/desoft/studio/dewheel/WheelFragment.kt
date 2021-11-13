@@ -173,6 +173,8 @@ class WheelFragment : Fragment()
 				bund.apply {
 					putDouble(KONSTANT.lati_flag, lati!!.toDouble());
 					putDouble(KONSTANT.logi_flag, appcache.getString(KONSTANT.logi_flag, "")!!.toDouble());
+					putString(KONSTANT.username, appcache.getString(KONSTANT.username, ""));
+					putString(KONSTANT.usergid, appcache.getString(KONSTANT.usergid, ""));
 				}
 				it.findNavController().navigate(R.id.action_wheelFragment_to_jollyCreationFragment, bund);
 			}
