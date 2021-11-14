@@ -25,7 +25,6 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
-import desoft.studio.dewheel.kata.WheelJolly
 import desoft.studio.dewheel.katic.KONSTANT
 import java.text.SimpleDateFormat
 import java.util.*
@@ -150,15 +149,11 @@ class JollyFragment : Fragment() {
 			} else {
 				placeError.visibility = View.INVISIBLE;
 			}
-			var jid: String = System.currentTimeMillis().toString();
-			var creator: String = username!!;
-			var kid:String = usergid!!;
 			var name: String = jollyNameField.text.toString()!!;
 			var addr: String = placePickDisplay.text.toString()!!;
 			var time: Long = calen.timeInMillis;
-			var joll = WheelJolly(jid, creator, kid, name, addr, time);
-			Log.d(TAG, "KF_SETUP_VIEWS: == >>> this is the new event $joll");
-			
+			(requireContext() as MainActivity).KF_UPLOAD_JOLLY(name, addr, time);
+			//it.findNavController().navigate(R.id.action_jollyCreationFragment_to_wheelFragment);
 		}
 		canbtn.setOnClickListener {
 			it.findNavController().navigate(R.id.action_jollyCreationFragment_to_wheelFragment);

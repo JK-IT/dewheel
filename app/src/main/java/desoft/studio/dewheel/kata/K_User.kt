@@ -28,9 +28,9 @@ package desoft.studio.dewheel.kata
  * favorite
  */
 data class K_User(
-	var kid : String?,
-	var fbid: String?,
-	var email : String?,
+	var kid : String? = null,
+	var fbid: String? = null,
+	var email : String? = null,
 	var app_user_name: String? = null,
 	var gender: String?=null,
 	var sorient: String?=null,

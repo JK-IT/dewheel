@@ -14,6 +14,7 @@ object KONSTANT
 	/**
 	 * verified user -> create a user account from data control, upload it to firestore, or should i wait till user fill out all information
 	 * or u cannot become verified user, if u don't fill out other required fields
+	 * ? VALUE TYPE == BOOLEAN
  	 */
 	val verified : String = "VERIFED USER";
 	

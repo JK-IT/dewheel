@@ -11,10 +11,10 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
@@ -27,7 +27,6 @@ import desoft.studio.dewheel.Kontrol.DataControl
 import desoft.studio.dewheel.kata.K_User
 import desoft.studio.dewheel.katic.KONSTANT
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity()
 {
@@ -56,22 +55,38 @@ class MainActivity : AppCompatActivity()
 		conmana = getSystemService(ConnectivityManager::class.java);
 		if(CheckNETWORKconnection())
 		{
-			dataFutory = DataControl.DataFactory(application);
-			dataKontrol = ViewModelProvider(this, dataFutory).get(DataControl::class.java);
-			dataKontrol.sucuload.observe(this, uploadFlagWatcher);
+			appCache = getSharedPreferences(getString(R.string.app_pref), Context.MODE_PRIVATE);
 			
 			fbauth = FirebaseAuth.getInstance();
-			appCache = getSharedPreferences(getString(R.string.app_pref), Context.MODE_PRIVATE);
-			CheckUSERauthen();
+			CheckUSERauthen(); //-> going back if user is null
+			
+			dataFutory = DataControl.DataFactory(application, fbauth.currentUser!!);
+			dataKontrol = ViewModelProvider(this, dataFutory).get(DataControl::class.java);
+			dataKontrol.sucuload.observe(this, uploadFlagWatcher);
+			dataKontrol.jollyupload.observe(this, jollyWatcher);
 			
 			SetupNavHost();
 		}
 	}
 	
+	/**
+	* Register connection callback
+	 * Register username from cache
+	*/
 	override fun onStart()
 	{
 		super.onStart();
 		SetupDEFAULTconnectionCB();
+		if(appCache.getBoolean(KONSTANT.verified, false) == true)
+		{
+			dataKontrol.KF_VM_SETUP_USER(appCache.getString(KONSTANT.username, "")!!,
+													appCache.getString(KONSTANT.gender, ""),
+													appCache.getString(KONSTANT.sexori, ""),
+													appCache.getString(KONSTANT.favor, ""));
+		} else
+		{
+			dataKontrol.KF_VM_SETUP_USER(appCache.getString(KONSTANT.username, "")!!);
+		}
 	}
 	
 	override fun onStop()
@@ -101,37 +116,35 @@ class MainActivity : AppCompatActivity()
 			GoBACKtoGATE();
 		} else
 		{
-			lifecycleScope.launch(iodis) {
-				var editor = appCache.edit();
-				if(fbuser?.isAnonymous == true)
+			var editor = appCache.edit();
+			if(fbuser?.isAnonymous == true)
+			{
+				//saving userid = username
+				editor.apply {
+					putString(KONSTANT.username, fbuser?.uid);
+					putString(KONSTANT.useruid, fbuser?.uid);
+				}
+			} else
+			{
+				// at this step , mostly getting data from cache, not from provider
+				var usinfo = fbuser?.providerData?.get(1);
+				Log.d(TAG, "CheckUSERauthen: == Name from google provider ${usinfo?.displayName}");
+				var usname = appCache.getString(KONSTANT.username, "");
+				if(usname?.isBlank() == true)
 				{
-					//saving userid = username
-					editor.apply {
-						putString(KONSTANT.username, fbuser?.uid);
-						putString(KONSTANT.useruid, fbuser?.uid);
-					}
-				} else
-				{
-					// at this step , mostly getting data from cache, not from provider
-					var usinfo = fbuser?.providerData?.get(1);
-					Log.d(TAG, "CheckUSERauthen: == Name from google provider ${usinfo?.displayName}");
-					var usname = appCache.getString(KONSTANT.username, "");
-					if(usname?.isBlank() == true)
-					{
-						usname = usinfo?.displayName;
-					}
-					editor.apply {
-						putString(KONSTANT.username, usname);
-						putString(KONSTANT.useruid, fbuser?.uid);
-						putString(KONSTANT.usergid, usinfo?.uid);
-						putString(KONSTANT.usergmail, usinfo?.email);
-						putString(KONSTANT.fone, usinfo?.phoneNumber);
-					}
+					usname = usinfo?.displayName;
 				}
 				editor.apply {
-					putLong(KONSTANT.cache_timestamp, System.currentTimeMillis());
-					apply();
+					putString(KONSTANT.username, usname);
+					putString(KONSTANT.useruid, fbuser?.uid);
+					putString(KONSTANT.usergid, usinfo?.uid);
+					putString(KONSTANT.usergmail, usinfo?.email);
+					putString(KONSTANT.fone, usinfo?.phoneNumber);
 				}
+			}
+			editor.apply {
+				putLong(KONSTANT.cache_timestamp, System.currentTimeMillis());
+				commit();
 			}
 		}
 	}
@@ -306,7 +319,7 @@ class MainActivity : AppCompatActivity()
 	fun KF_UPuserTOstore(usr : K_User)
 	{
 		Log.d(TAG, "KF_UPuserTOstore: == Get user to upload $usr");
-		dataKontrol.KF_VMuploadUSER(usr);
+		dataKontrol.KF_VM_UP_USER(usr);
 	}
 	
 	/**
@@ -328,6 +341,25 @@ class MainActivity : AppCompatActivity()
 				apply();
 			}
 		}
+	}
+	/**
+	* ** Jolly UPLOADING WATCHER
+	*/
+	private val jollyWatcher = Observer<Boolean> {
+		if(it)
+		{
+			Toast.makeText(this, "Successful uploading the event", Toast.LENGTH_SHORT).show();
+			navContro.navigate(R.id.action_jollyCreationFragment_to_wheelFragment);
+		} else {
+			Toast.makeText(this, "Failed uploading the occurrence. Please try again later!!", Toast.LENGTH_SHORT).show();
+		}
+	}
+	/**
+	* * UPLOADING JOLLY EVENT TO DATABASE
+	*/
+	fun KF_UPLOAD_JOLLY(iname: String, iaddr:String, itime:Long)
+	{
+		dataKontrol.KF_VM_UP_JOLLY(iname, iaddr, itime);
 	}
 
 }

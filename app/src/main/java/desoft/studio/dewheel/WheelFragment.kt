@@ -35,6 +35,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.tasks.CancellationTokenSource
 import com.google.android.libraries.places.api.model.AddressComponents
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.auth.FirebaseAuth
 import desoft.studio.dewheel.Kontrol.DataControl
 import desoft.studio.dewheel.kata.Kadress
 import desoft.studio.dewheel.katic.KONSTANT
@@ -80,7 +81,7 @@ class WheelFragment : Fragment()
 	{
 		super.onCreate(savedInstanceState);
 		
-		dataFutory = DataControl.DataFactory(requireActivity().application);
+		dataFutory = DataControl.DataFactory(requireActivity().application, FirebaseAuth.getInstance().currentUser!!);
 		dataKontrol = ViewModelProvider(requireActivity(), dataFutory).get(DataControl::class.java);
 		locationLiveDat = dataKontrol.pickedLocation;
 		appcache = requireActivity().getSharedPreferences(getString(R.string.app_pref), Context.MODE_PRIVATE);
