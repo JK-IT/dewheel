@@ -53,20 +53,9 @@ class MainActivity : AppCompatActivity()
 		
 		kHandler = Handler(Looper.getMainLooper());
 		conmana = getSystemService(ConnectivityManager::class.java);
-		if(CheckNETWORKconnection())
-		{
-			appCache = getSharedPreferences(getString(R.string.app_pref), Context.MODE_PRIVATE);
-			
-			fbauth = FirebaseAuth.getInstance();
-			CheckUSERauthen(); //-> going back if user is null
-			
-			dataFutory = DataControl.DataFactory(application, fbauth.currentUser!!);
-			dataKontrol = ViewModelProvider(this, dataFutory).get(DataControl::class.java);
-			dataKontrol.sucuload.observe(this, uploadFlagWatcher);
-			dataKontrol.jollyupload.observe(this, jollyWatcher);
-			
-			SetupNavHost();
-		}
+		appCache = getSharedPreferences(getString(R.string.app_pref), Context.MODE_PRIVATE);
+		fbauth = FirebaseAuth.getInstance();
+		SetupNavHost();
 	}
 	
 	/**
@@ -76,8 +65,20 @@ class MainActivity : AppCompatActivity()
 	override fun onStart()
 	{
 		super.onStart();
+		if(CheckNETWORKconnection())
+		{
+			CheckUSERauthen(); //-> going back if user is null
+			dataFutory = DataControl.DataFactory(application, fbauth.currentUser!!);
+			dataKontrol = ViewModelProvider(this, dataFutory).get(DataControl::class.java);
+			dataKontrol.sucuload.observe(this, uploadFlagWatcher);
+			dataKontrol.jollyupload.observe(this, jollyWatcher);
+		}
 		SetupDEFAULTconnectionCB();
-		if(appCache.getBoolean(KONSTANT.verified, false) == true)
+/*		Log.d(TAG, "onStart:  == User verified ${appCache.getBoolean(KONSTANT.verified, false)}");
+		Log.d(TAG, "onStart:  == User Uploaded ${appCache.getBoolean(KONSTANT.upload_flag, false)}");
+		Log.d(TAG, "onStart:  == User Gender ${appCache.getString(KONSTANT.gender, "")}");*/
+		if(appCache.getBoolean(KONSTANT.verified, false) == true &&
+				appCache.getBoolean(KONSTANT.upload_flag, false) == true)
 		{
 			dataKontrol.KF_VM_SETUP_USER(appCache.getString(KONSTANT.username, "")!!,
 													appCache.getString(KONSTANT.gender, ""),
@@ -330,6 +331,7 @@ class MainActivity : AppCompatActivity()
 		if(it) {
 			Log.i(TAG, "successfully updated user to store: ");
 			appCache.edit().apply{
+				putBoolean(KONSTANT.verified, true);
 				putBoolean(KONSTANT.upload_flag, true);
 				putLong(KONSTANT.cache_timestamp, System.currentTimeMillis());
 				apply();
@@ -337,6 +339,7 @@ class MainActivity : AppCompatActivity()
 		} else {
 			appCache.edit().apply {
 				putBoolean(KONSTANT.upload_flag, false);
+				putBoolean(KONSTANT.verified, false);
 				putLong(KONSTANT.cache_timestamp, System.currentTimeMillis());
 				apply();
 			}
@@ -351,6 +354,7 @@ class MainActivity : AppCompatActivity()
 			Toast.makeText(this, "Successful uploading the event", Toast.LENGTH_SHORT).show();
 			navContro.navigate(R.id.action_jollyCreationFragment_to_wheelFragment);
 		} else {
+			Log.e(TAG, "Jolly uploading flag: User is null or Failed to contact server", throw java.lang.RuntimeException("Check your View model if User is NUll"));
 			Toast.makeText(this, "Failed uploading the occurrence. Please try again later!!", Toast.LENGTH_SHORT).show();
 		}
 	}

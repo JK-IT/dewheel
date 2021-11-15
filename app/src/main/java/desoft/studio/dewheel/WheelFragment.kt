@@ -3,27 +3,27 @@ package desoft.studio.dewheel
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.location.Location
+import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import android.text.InputType
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentResultListener
+import androidx.fragment.app.FragmentContainerView
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -36,6 +36,7 @@ import com.google.android.gms.tasks.CancellationTokenSource
 import com.google.android.libraries.places.api.model.AddressComponents
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import desoft.studio.dewheel.Kontrol.DataControl
 import desoft.studio.dewheel.kata.Kadress
 import desoft.studio.dewheel.katic.KONSTANT
@@ -51,10 +52,12 @@ class WheelFragment : Fragment()
 	private lateinit var locationLiveDat: MutableLiveData<Kadress>;
 	private lateinit var appcache : SharedPreferences;
 	
-	
 	private val locationPermLauncher: ActivityResultLauncher<Array<String>> = GetLOCATIONpermissionCB();
 	private val coar_perm = android.Manifest.permission.ACCESS_COARSE_LOCATION;
 	private val fine_perm = android.Manifest.permission.ACCESS_FINE_LOCATION;
+	private var locationPermCheckFlag : Boolean = false;
+	private lateinit var locationPromptView : LinearLayout;
+	private lateinit var locationEnableSettings : Button;
 	private lateinit var fulocation : FusedLocationProviderClient;
 	private lateinit var lowPowerQuest : LocationRequest;
 	private lateinit var accuQuest : LocationRequest;
@@ -70,9 +73,11 @@ class WheelFragment : Fragment()
 	
 	private lateinit var hideViewBtn : ImageView;
 	private lateinit var locationCopy : TextView;
-	
 	private lateinit var addBtn : ImageView;
 	
+	private lateinit var wheelFragBox : FragmentContainerView;
+	
+	private var fbuser : FirebaseUser? = null;
 	
 	private val cancelTokSrc : CancellationTokenSource = CancellationTokenSource();
 	
@@ -105,6 +110,8 @@ class WheelFragment : Fragment()
 			fastestInterval = 7000;
 		}!!
 		locationPickFrag = LocationPickFragment(requireActivity());
+		
+		fbuser = FirebaseAuth.getInstance().currentUser;
 	}
 	
 	override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -112,17 +119,17 @@ class WheelFragment : Fragment()
 	{
 		// Inflate the layout for this fragment
 		var v = inflater.inflate(R.layout.frag_wheel, container, false);
+		locationEnableSettings = v.findViewById(R.id.wheel_location_setting_btn);
 		locationHead = v.findViewById(R.id.wheel_location_head);
 		locationText = v.findViewById(R.id.wheel_location_tedit);
 		getCurrLocationBtn = v.findViewById(R.id.wheel_get_current_location);
 		hideViewBtn = v.findViewById(R.id.wheel_hide_view_btn);
 		locationCopy = v.findViewById(R.id.wheel_location_copy);
 		addBtn = v.findViewById(R.id.wheel_add_btn);
-		
+		locationPromptView = v.findViewById(R.id.wheel_location_prompt_view);
+		wheelFragBox = v.findViewById(R.id.wheel_frag_box);
 		return v;
 	}
-	
-	
 	
 	/**
 	 * Register FRAGMENT MANAGER FOR RECEIVING PICKED LOCATION
@@ -130,17 +137,7 @@ class WheelFragment : Fragment()
 	override fun onViewCreated(view: View, savedInstanceState: Bundle?)
 	{
 		KF_SETUP_VIEWS();
-		childFragmentManager.setFragmentResultListener(locationQuestKey, this, object : FragmentResultListener{
-			override fun onFragmentResult(requestKey : String, result : Bundle) {
-				if(requestKey.contentEquals(locationQuestKey)){
-					var addrlst = geocoder.getFromLocation(result.getDouble(placesLati)!!, result.getDouble(placesLongi)!!,1 );
-					if(addrlst.isNotEmpty()) {
-						Log.d(TAG, "onFragmentResult: = this location $addrlst[0]");
-					}
-				}
-			}
-		})
-		CheckLOCATIONperm();
+		
 	}
 	private fun KF_SETUP_VIEWS() {
 		//_ location display name
@@ -151,7 +148,12 @@ class WheelFragment : Fragment()
 		}
 		//_ get current location btn
 		getCurrLocationBtn.setOnClickListener{
-			KF_FRESHlocation();
+			if(locationPermCheckFlag)
+			{
+				KF_FRESHlocation();
+			} else {
+				locationPermLauncher.launch(arrayOf(coar_perm, fine_perm));
+			}
 		}
 		// _ hiding view button
 		hideViewBtn.setOnClickListener {
@@ -167,22 +169,33 @@ class WheelFragment : Fragment()
 			}
 		}
 		// adding occurrence btn, the view must be in a navhost to get nav controller
-		addBtn.setOnClickListener {
-			if( ! appcache.getString(KONSTANT.lati_flag, "").isNullOrBlank()){
-				var bund: Bundle = Bundle();
-				var lati = appcache.getString(KONSTANT.lati_flag,"");
-				bund.apply {
-					putDouble(KONSTANT.lati_flag, lati!!.toDouble());
-					putDouble(KONSTANT.logi_flag, appcache.getString(KONSTANT.logi_flag, "")!!.toDouble());
-					putString(KONSTANT.username, appcache.getString(KONSTANT.username, ""));
-					putString(KONSTANT.usergid, appcache.getString(KONSTANT.usergid, ""));
+		if(fbuser?.isAnonymous == true || appcache.getBoolean(KONSTANT.upload_flag, false) == false)
+		{
+			addBtn.isEnabled = false;
+		} else
+		{
+			addBtn.setOnClickListener {
+				if( ! appcache.getString(KONSTANT.lati_flag, "").isNullOrBlank()){
+					var bund: Bundle = Bundle();
+					var lati = appcache.getString(KONSTANT.lati_flag,"");
+					bund.apply {
+						putDouble(KONSTANT.lati_flag, lati!!.toDouble());
+						putDouble(KONSTANT.logi_flag, appcache.getString(KONSTANT.logi_flag, "")!!.toDouble());
+						putString(KONSTANT.username, appcache.getString(KONSTANT.username, ""));
+						putString(KONSTANT.usergid, appcache.getString(KONSTANT.usergid, ""));
+					}
+					it.findNavController().navigate(R.id.action_wheelFragment_to_jollyCreationFragment, bund);
 				}
-				it.findNavController().navigate(R.id.action_wheelFragment_to_jollyCreationFragment, bund);
+				else {
+					var actn = WheelFragmentDirections.actionWheelFragmentToJollyCreationFragment();
+					it.findNavController().navigate(actn);
+				}
 			}
-			else {
-				var actn = WheelFragmentDirections.actionWheelFragmentToJollyCreationFragment();
-				it.findNavController().navigate(actn);
-			}
+		}
+		//_ location settings button -> go to per settings
+		locationEnableSettings.setOnClickListener {
+			var seti = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", requireActivity().packageName, null));
+			startActivity(seti);
 		}
 	}
 	
@@ -192,6 +205,11 @@ class WheelFragment : Fragment()
 	*/
 	override fun onStart() {
 		super.onStart();
+		CheckLOCATIONperm();
+		if(locationPermCheckFlag && currLocation == null)
+		{
+			KF_ESTIMATE_LOCATION();
+		}
 		locationLiveDat.observe(requireActivity(), locationWatcher);
 	}
 	
@@ -204,18 +222,19 @@ class WheelFragment : Fragment()
 	//#region LOCATION REGION
 	/**
 	 * location permission requesting
-	 * Failed == start permission launcher
+	 * Failed == show the location prompt view that tell users to pick a location
 	 */
 	private fun CheckLOCATIONperm()
 	{
 		if(ContextCompat.checkSelfPermission(requireContext(), coar_perm) == PackageManager.PERMISSION_GRANTED
 			&& ContextCompat.checkSelfPermission(requireContext(), fine_perm) == PackageManager.PERMISSION_GRANTED)
 		{
-			// start things
-			KF_LOCATIONgranted();
+			locationPermCheckFlag = true;
 		} else
 		{
-			locationPermLauncher.launch(arrayOf(coar_perm, fine_perm));
+			locationPermCheckFlag = false;
+			locationPromptView.visibility = View.VISIBLE;
+			wheelFragBox.visibility = View.GONE;
 		}
 	}
 	/**
@@ -231,18 +250,14 @@ class WheelFragment : Fragment()
 			}
 			if(resu == true){
 				// getting location request
-				KF_LOCATIONgranted();
+				locationPermCheckFlag = true;
+				KF_FRESHlocation();
 			} else{
-				// show up fragment, that require permission
+				locationPermCheckFlag = false;
+				locationPromptView.visibility = View.VISIBLE;
+				wheelFragBox.visibility = View.GONE;
 			}
 		})
-	}
-	/**
-	 * common things to do when location permission granted
-	 */
-	private fun KF_LOCATIONgranted()
-	{
-		KF_ESTIMATE_LOCATION();
 	}
 	
 	@SuppressLint("MissingPermission")
@@ -362,7 +377,8 @@ class WheelFragment : Fragment()
 	/**
 	* ?REGISTER OBSERVER FOR LOCATION CHANGING
 	 * set up location text display N copy text view
-	 * refrest from database event at that location
+	 * saving region to appcache
+	 * get jollies from database at that location
 	*/
 	private val locationWatcher = Observer<Kadress>(){
 		if(it.neighbor != null )
@@ -383,8 +399,9 @@ class WheelFragment : Fragment()
 			putString(KONSTANT.lati_flag, it.lati.toString());
 			putString(KONSTANT.logi_flag, it.longi.toString());
 			putLong(KONSTANT.cache_timestamp, System.currentTimeMillis());
-			apply();
+			commit();
 		}
+		KF_GET_JOLLIES_ON_AREA();
 	}
 	//#endregion
 	
@@ -394,7 +411,6 @@ class WheelFragment : Fragment()
 		lifecycleScope.launch {
 			when(resu){
 				is LocationResultContainer.Success ->{
-					
 					var addlatlon = resu.latlng;
 					var kadd = Kadress();
 					for(comp in resu.addcompo.asList()){
@@ -409,7 +425,6 @@ class WheelFragment : Fragment()
 					kadd.lati = addlatlon.latitude;
 					kadd.longi = addlatlon.longitude;
 					locationLiveDat.value = kadd;
-					// TODO: refreshing event from server after location update
 				}
 				is LocationResultContainer.Error -> {
 					Log.e(TAG,"KF_PICKED_PLACES_RETURN: = Error on Picking up the places ${resu.code} - ${resu.msg}");
@@ -427,6 +442,15 @@ class WheelFragment : Fragment()
 		data class Error(var msg:String?, var code:String?, var extra: Any?): LocationResultContainer()
 	}
 	
+	/**
+	* ! --- CALLING VIEW MODEL TO GET DATA WHEN LOCATION IS AVAILABLE
+	 * showing error view if there is error
+	 * showing result as list
+	*/
+	private fun KF_GET_JOLLIES_ON_AREA()
+	{
+		Log.d(TAG, "KF_GET_JOLLIES_ON_AREA: >>>=== GETTING JOLLIES REFRESH AT ${appcache.getString(KONSTANT.region_flag, "")}");
+	}
 	
 	companion object {
 		const val locationQuestKey : String = "LOCATION REQUEST KEY";

@@ -116,7 +116,6 @@ class UserFragment : Fragment()
 		} else
 		{
 			goobtn.isEnabled = false;
-			FieldChecked(false, false); //-> this will enable verified icon for you
 			val disname = appcache.getString(KONSTANT.username, "");
 			if(disname.isNullOrBlank()) // from appcache
 			{
@@ -258,6 +257,17 @@ class UserFragment : Fragment()
 		}
 	}
 	
+	override fun onStart() {
+		super.onStart();
+		if(appcache.getBoolean(KONSTANT.verified, false) == true)
+		{
+			FieldChecked(false, false);
+		} else
+		{
+			FieldChecked(false, true);
+		}
+	}
+	
 	//#region GOOGLE SIGN IN LAUNCHER RESULT CALLBACK
 	private fun GooSIGNINresultLAUNCHER() : ActivityResultLauncher<Intent>
 	{
@@ -338,32 +348,15 @@ class UserFragment : Fragment()
 				if(fbuser.isAnonymous)
 					Toast.makeText(requireContext(), "Please Sign In/Up With Google Account", Toast.LENGTH_SHORT).show();
 			}
-			appcache.edit().apply {
-				putBoolean(KONSTANT.verified, false);
-				putLong(KONSTANT.cache_timestamp, System.currentTimeMillis());
-				apply();
-			}
 			return false;
 		} else
 		{
-			appcache.edit().apply {
-				putBoolean(KONSTANT.verified, true);
-				putLong(KONSTANT.cache_timestamp, System.currentTimeMillis());
-			}
-			if(appcache.edit().commit())
-			{
-				verifiedBtn.isEnabled = false;
-				verifiedImg.setColorFilter(ContextCompat.getColor(requireContext(),R.color.confirm));
-				genderDropLayout.isEnabled = false;
-				sorientDropLayout.isEnabled = false;
-				if(upload)
-					KF_UPLOADuserDATA();
-				//todo :poping rule and related regular
-			} else {
-				Toast.makeText(requireContext(), "Failed to sync with server. Please try again later", Toast.LENGTH_SHORT).show();
-				verifiedBtn.isEnabled = true;
-				verifiedImg.setColorFilter(ContextCompat.getColor(requireContext(),R.color.grey));
-			}
+			verifiedBtn.isEnabled = false;
+			verifiedImg.setColorFilter(ContextCompat.getColor(requireContext(),R.color.confirm));
+			genderDropLayout.isEnabled = false;
+			sorientDropLayout.isEnabled = false;
+			if(upload)
+				KF_UPLOADuserDATA();
 			return true;
 		}
 	}

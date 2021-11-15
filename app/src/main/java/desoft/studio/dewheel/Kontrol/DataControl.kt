@@ -84,18 +84,15 @@ class DataControl(@NonNull ctx : Application,@NonNull var fbuser : FirebaseUser)
 	 * make sure to check that fb user is not anonymous, aka not failed to sign up with fb server
 	 */
 	fun KF_VM_UP_USER(inusr: K_User){
-		if(fbuser.isAnonymous == false)
-		{
-			viewModelScope.launch (iodis) {
-				inusr.kid?.let {
-					userstore.document(it).set(inusr).addOnSuccessListener {
-						sucuload.value = true;
-						user = inusr;
-						Log.i(TAG, "KF_VM_UP_USER: == User just sign up and got uploaded");
-					}.addOnFailureListener {
-						sucuload.value = false;
-						Log.e(TAG, "KF_VMuploadUSER: = FAILED TO UPLOAD USER ", it);
-					}
+		viewModelScope.launch (iodis) {
+			inusr.kid?.let {
+				userstore.document(it).set(inusr).addOnSuccessListener {
+					sucuload.value = true;
+					user = inusr;
+					Log.i(TAG, "KF_VM_UP_USER: == User just sign up and got uploaded");
+				}.addOnFailureListener {
+					sucuload.value = false;
+					Log.e(TAG, "KF_VMuploadUSER: = FAILED TO UPLOAD USER ", it);
 				}
 			}
 		}
@@ -106,7 +103,7 @@ class DataControl(@NonNull ctx : Application,@NonNull var fbuser : FirebaseUser)
 	*/
 	fun KF_VM_UP_JOLLY(injoname: String, injoaddr:String, injotime:Long)
 	{
-		if(fbuser.isAnonymous == false && user != null)
+		if(user != null)
 		{
 			viewModelScope.launch() {
 				Log.i(TAG, "KF_VM_UP_JOLLY: == Uploading jolly");
@@ -124,6 +121,7 @@ class DataControl(@NonNull ctx : Application,@NonNull var fbuser : FirebaseUser)
 			}
 		} else {
 			Log.e(TAG, "KF_VM_UP_JOLLY: == fbuser is anonymous ${fbuser.isAnonymous} or user is null ${user == null}");
+			jollyupload.value = false;
 		}
 	}
 	
