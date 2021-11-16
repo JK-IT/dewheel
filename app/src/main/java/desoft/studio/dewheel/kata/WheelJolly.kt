@@ -11,5 +11,6 @@ data class WheelJolly(
 	var kid:String,
 	var name: String,
 	var addr: String,
+	var area: String,
 	var time: Long,
 )

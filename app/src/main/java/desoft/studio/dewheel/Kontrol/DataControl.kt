@@ -101,13 +101,13 @@ class DataControl(@NonNull ctx : Application,@NonNull var fbuser : FirebaseUser)
 	/**
 	* * Upload Jolly Occurrence to Database
 	*/
-	fun KF_VM_UP_JOLLY(injoname: String, injoaddr:String, injotime:Long)
+	fun KF_VM_UP_JOLLY(injoname: String, injoaddr:String, inarea: String, injotime:Long)
 	{
 		if(user != null)
 		{
 			viewModelScope.launch() {
 				Log.i(TAG, "KF_VM_UP_JOLLY: == Uploading jolly");
-				var wjo = WheelJolly(System.currentTimeMillis().toString(), user.app_user_name!!, user.kid!!, injoname, injoaddr, injotime);
+				var wjo = WheelJolly(System.currentTimeMillis().toString(), user.app_user_name!!, user.kid!!, injoname, injoaddr, inarea, injotime);
 				jollydb.child(wjo.jid).setValue(wjo)
 					.addOnCompleteListener {
 						if( ! it.isSuccessful)
@@ -115,6 +115,7 @@ class DataControl(@NonNull ctx : Application,@NonNull var fbuser : FirebaseUser)
 							Log.e(TAG, "KF_VM_UP_JOLLY: Failed to upload jolly why????", it.exception);
 							jollyupload.value = false;
 						} else {
+							Log.d(TAG, "KF_VM_UP_JOLLY: == SUCCESSFULL UPLOADING JOLLY");
 							jollyupload.value = true;
 						}
 					}

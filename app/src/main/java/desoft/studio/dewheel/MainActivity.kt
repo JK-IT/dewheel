@@ -361,9 +361,9 @@ class MainActivity : AppCompatActivity()
 	/**
 	* * UPLOADING JOLLY EVENT TO DATABASE
 	*/
-	fun KF_UPLOAD_JOLLY(iname: String, iaddr:String, itime:Long)
+	fun KF_UPLOAD_JOLLY(iname: String, iaddr:String, inarea:String, itime:Long)
 	{
-		dataKontrol.KF_VM_UP_JOLLY(iname, iaddr, itime);
+		dataKontrol.KF_VM_UP_JOLLY(iname, iaddr, inarea, itime);
 	}
 
 }

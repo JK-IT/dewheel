@@ -77,6 +77,8 @@ class WheelFragment : Fragment()
 	
 	private lateinit var wheelFragBox : FragmentContainerView;
 	
+	private lateinit var refreshBtn : Button;
+	
 	private var fbuser : FirebaseUser? = null;
 	
 	private val cancelTokSrc : CancellationTokenSource = CancellationTokenSource();
@@ -126,7 +128,8 @@ class WheelFragment : Fragment()
 		hideViewBtn = v.findViewById(R.id.wheel_hide_view_btn);
 		locationCopy = v.findViewById(R.id.wheel_location_copy);
 		addBtn = v.findViewById(R.id.wheel_add_btn);
-		locationPromptView = v.findViewById(R.id.wheel_location_prompt_view);
+		locationPromptView = v.findViewById(R.id.wheel_location_prompt_grp);
+		refreshBtn = v.findViewById(R.id.wheel_refresh_on_location_btn);
 		wheelFragBox = v.findViewById(R.id.wheel_frag_box);
 		return v;
 	}
@@ -137,7 +140,6 @@ class WheelFragment : Fragment()
 	override fun onViewCreated(view: View, savedInstanceState: Bundle?)
 	{
 		KF_SETUP_VIEWS();
-		
 	}
 	private fun KF_SETUP_VIEWS() {
 		//_ location display name
@@ -197,6 +199,10 @@ class WheelFragment : Fragment()
 			var seti = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", requireActivity().packageName, null));
 			startActivity(seti);
 		}
+		//_ setup refresh button
+		refreshBtn.setOnClickListener {
+			KF_GET_JOLLIES_ON_AREA();
+		}
 	}
 	
 	/**
@@ -206,11 +212,12 @@ class WheelFragment : Fragment()
 	override fun onStart() {
 		super.onStart();
 		CheckLOCATIONperm();
+		locationLiveDat.observe(requireActivity(), locationWatcher);
 		if(locationPermCheckFlag && currLocation == null)
 		{
+			Log.i(TAG, "onStart: Location is null so calling estimation, you need to set saved bundle or fix with view model");
 			KF_ESTIMATE_LOCATION();
 		}
-		locationLiveDat.observe(requireActivity(), locationWatcher);
 	}
 	
 	override fun onStop() {
@@ -368,7 +375,7 @@ class WheelFragment : Fragment()
 			Log.d(TAG, "KF_ESTIMATE_LOCATION: $addrlst[0]");
 			addrlst[0]?.let {
 				var kadd = Kadress(null, null, it.subLocality, it.locality, it.subAdminArea, it.adminArea,
-					it.postalCode?.toInt(),it.countryName, it.latitude, it.longitude );
+					it.postalCode?.toInt(),it.countryName, lati, lngi );
 				locationLiveDat.value = kadd;
 			}
 		}
@@ -395,7 +402,8 @@ class WheelFragment : Fragment()
 			locationCopy.text = locationText.text;
 		}
 		appcache.edit().apply {
-			putString(KONSTANT.region_flag, locationText.text.toString());
+			putString(KONSTANT.locality_flag, it.locality);
+			putString(KONSTANT.subarea_flag, it.neighbor ?: "");
 			putString(KONSTANT.lati_flag, it.lati.toString());
 			putString(KONSTANT.logi_flag, it.longi.toString());
 			putLong(KONSTANT.cache_timestamp, System.currentTimeMillis());
@@ -411,7 +419,6 @@ class WheelFragment : Fragment()
 		lifecycleScope.launch {
 			when(resu){
 				is LocationResultContainer.Success ->{
-					var addlatlon = resu.latlng;
 					var kadd = Kadress();
 					for(comp in resu.addcompo.asList()){
 						var type = comp.types.get(0);
@@ -422,8 +429,16 @@ class WheelFragment : Fragment()
 						if(type.contains("postal_code"))	kadd.zip = comp.name.toInt();
 						if(type.contains("country"))	kadd.country = comp.name;
 					}
-					kadd.lati = addlatlon.latitude;
-					kadd.longi = addlatlon.longitude;
+					//_handle cases like SAN PEDRO
+					if(kadd.locality.isNullOrBlank())
+					{
+						var addrlst = geocoder.getFromLocation(resu.latlng.latitude, resu.latlng.longitude, 1);
+						addrlst[0]?.let {
+							kadd.locality = it.locality;
+						}
+					}
+					kadd.lati = resu.latlng.latitude;
+					kadd.longi = resu.latlng.longitude;
 					locationLiveDat.value = kadd;
 				}
 				is LocationResultContainer.Error -> {
@@ -449,7 +464,7 @@ class WheelFragment : Fragment()
 	*/
 	private fun KF_GET_JOLLIES_ON_AREA()
 	{
-		Log.d(TAG, "KF_GET_JOLLIES_ON_AREA: >>>=== GETTING JOLLIES REFRESH AT ${appcache.getString(KONSTANT.region_flag, "")}");
+		Log.d(TAG, "KF_GET_JOLLIES_ON_AREA: >>>=== GETTING JOLLIES REFRESH AT ${appcache.getString(KONSTANT.locality_flag, "")}");
 	}
 	
 	companion object {

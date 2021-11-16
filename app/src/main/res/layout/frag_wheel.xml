@@ -166,7 +166,7 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/wheel_location_prompt_view"
+            android:id="@+id/wheel_location_prompt_grp"
             android:orientation="vertical"
             app:layout_constraintTop_toBottomOf="@id/wheel_header_ctrl"
             app:layout_constraintStart_toStartOf="parent"
@@ -202,6 +202,37 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
         </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/wheel_no_events_grp"
+            android:visibility="gone"
+            android:orientation="vertical"
+            app:layout_constraintTop_toBottomOf="@id/wheel_header_ctrl"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:text="There are no activities/events going on now.\n Be the first one to start the jolly!!!"
+                android:textSize="@dimen/medText"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:padding="10dp"
+                android:layout_marginVertical="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <Button
+                android:id="@+id/wheel_no_activities_create_btn"
+                android:text="Create"
+                android:layout_marginVertical="10dp"
+                android:layout_gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/wheel_frag_box"
             android:visibility="gone"
