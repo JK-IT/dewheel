@@ -17,11 +17,9 @@ object KONSTANT
 	 * ? VALUE TYPE == BOOLEAN
  	 */
 	val verified : String = "VERIFED USER";
-	
-	val upload_flag: String = "USER UPLOADING FLAG";
-	
-	val locality_flag: String = "USER LOCATION LOCALITY";
-	val subarea_flag: String = "USER SUB AREA";
+	// * BOOLEAN
+	val user_upload_flag: String = "USER UPLOADING FLAG";
+	// * STRING
 	val lati_flag : String = "USER LATITUDE LOCATION";
 	val logi_flag : String = "USER LONGITUDE LOCATION"
 	

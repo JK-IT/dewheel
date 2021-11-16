@@ -7,7 +7,6 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.location.Geocoder
-import android.location.Location
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
@@ -24,9 +23,8 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentContainerView
-import androidx.lifecycle.MutableLiveData
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import com.google.android.gms.common.api.ResolvableApiException
@@ -47,9 +45,7 @@ private const val TAG :  String = "-des- [[== WHEEL FRAGMENT ==]]";
 
 class WheelFragment : Fragment()
 {
-	private lateinit var dataFutory : DataControl.DataFactory;
-	private lateinit var dataKontrol : DataControl;
-	private lateinit var locationLiveDat: MutableLiveData<Kadress>;
+	private val dataKontrol : DataControl by activityViewModels();
 	private lateinit var appcache : SharedPreferences;
 	
 	private val locationPermLauncher: ActivityResultLauncher<Array<String>> = GetLOCATIONpermissionCB();
@@ -64,7 +60,7 @@ class WheelFragment : Fragment()
 	private lateinit var slowLocReq: LocationRequest;
 	private lateinit var cliSettings : SettingsClient;
 	private lateinit var geocoder : Geocoder;
-	private var currLocation : Location? = null;
+	private var currLocation : Kadress? = null;
 	private var locConfLauncher = KF_LOC_CONFIG_LAUNCHER();
 	private lateinit var locationHead : LinearLayout;
 	private lateinit var locationText : TextView;
@@ -86,11 +82,8 @@ class WheelFragment : Fragment()
 	
 	override fun onCreate(savedInstanceState: Bundle?)
 	{
+		Log.i(TAG, "onCreate: IS BEING CALLED");
 		super.onCreate(savedInstanceState);
-		
-		dataFutory = DataControl.DataFactory(requireActivity().application, FirebaseAuth.getInstance().currentUser!!);
-		dataKontrol = ViewModelProvider(requireActivity(), dataFutory).get(DataControl::class.java);
-		locationLiveDat = dataKontrol.pickedLocation;
 		appcache = requireActivity().getSharedPreferences(getString(R.string.app_pref), Context.MODE_PRIVATE);
 		
 		fulocation = LocationServices.getFusedLocationProviderClient(requireContext());
@@ -135,11 +128,12 @@ class WheelFragment : Fragment()
 	}
 	
 	/**
-	 * Register FRAGMENT MANAGER FOR RECEIVING PICKED LOCATION
+	 * *set up related view functions
 	 */
 	override fun onViewCreated(view: View, savedInstanceState: Bundle?)
 	{
 		KF_SETUP_VIEWS();
+		dataKontrol.pickedLocation.observe(requireActivity(), locationWatcher);
 	}
 	private fun KF_SETUP_VIEWS() {
 		//_ location display name
@@ -171,7 +165,7 @@ class WheelFragment : Fragment()
 			}
 		}
 		// adding occurrence btn, the view must be in a navhost to get nav controller
-		if(fbuser?.isAnonymous == true || appcache.getBoolean(KONSTANT.upload_flag, false) == false)
+		if(fbuser?.isAnonymous == true || appcache.getBoolean(KONSTANT.user_upload_flag, false) == false)
 		{
 			addBtn.isEnabled = false;
 		} else
@@ -209,14 +203,18 @@ class WheelFragment : Fragment()
 	* * Good places to adding observer or listener callback
 	 * adding observer on location text
 	*/
-	override fun onStart() {
+	override fun onStart()
+	{
+		Log.i(TAG, "onStart: IS BEING CALLED");
 		super.onStart();
 		CheckLOCATIONperm();
-		locationLiveDat.observe(requireActivity(), locationWatcher);
-		if(locationPermCheckFlag && currLocation == null)
+		if(dataKontrol.pickedLocation.value == null)
 		{
-			Log.i(TAG, "onStart: Location is null so calling estimation, you need to set saved bundle or fix with view model");
+			Log.i(TAG, "onStart: >>>> value of location on view model is null, call estimation");
 			KF_ESTIMATE_LOCATION();
+		} else {
+			currLocation = dataKontrol.pickedLocation.value;
+			Log.d(TAG, "onStart: >>>> value of location on view model $currLocation");
 		}
 	}
 	
@@ -323,8 +321,6 @@ class WheelFragment : Fragment()
 			.addOnSuccessListener { loc ->
 				if(loc != null)
 				{
-					currLocation = loc;
-					//Log.d(TAG, "kf_FRESHlocation: == current location ${loc.accuracy} - ${loc.latitude} - ${loc.longitude}");
 					KF_GET_ADDR_FROM_LATLNG(loc.latitude, loc.longitude, 1);
 				} else {
 					Log.w(TAG, "KF_FRESHlocation: = fresh location null so u may out of reach area" );
@@ -333,6 +329,7 @@ class WheelFragment : Fragment()
 			} .addOnFailureListener {
 				cancelTokSrc.cancel();
 				Log.e(TAG, "KF_GET_LOCATION: = Failed to get current location", it);
+					Toast.makeText(requireContext(), "Cannot get your current location. Please check location settings, internet connection and try again", Toast.LENGTH_LONG).show();
 			}
 	}
 	/**
@@ -344,7 +341,6 @@ class WheelFragment : Fragment()
 	private fun KF_ESTIMATE_LOCATION(){
 		fulocation.lastLocation.addOnSuccessListener {
 			if(it != null){
-				currLocation = it;
 				viewLifecycleOwner.lifecycleScope.launch{
 					KF_GET_ADDR_FROM_LATLNG(it.latitude, it.longitude, 1);
 				}
@@ -368,15 +364,21 @@ class WheelFragment : Fragment()
 	/**
 	* * HELPER FUNCTIONS THAT IS CALLED TO GET ADDRESSES FROM LATI AND LONGI
 	*/
-	private fun KF_GET_ADDR_FROM_LATLNG(lati: Double, lngi:Double, maxres: Int)
+	private fun KF_GET_ADDR_FROM_LATLNG(inlati: Double, inlngi:Double, maxres: Int)
 	{
 		viewLifecycleOwner.lifecycleScope.launch {
-			var addrlst = geocoder.getFromLocation(lati, lngi, maxres);
+			var addrlst = geocoder.getFromLocation(inlati, inlngi, maxres);
 			Log.d(TAG, "KF_ESTIMATE_LOCATION: $addrlst[0]");
-			addrlst[0]?.let {
-				var kadd = Kadress(null, null, it.subLocality, it.locality, it.subAdminArea, it.adminArea,
-					it.postalCode?.toInt(),it.countryName, lati, lngi );
-				locationLiveDat.value = kadd;
+			if(addrlst.size != 0) {
+				addrlst[0]?.let {
+					currLocation = Kadress(null, null, it.subLocality, it.locality, it.subAdminArea, it.adminArea, it.postalCode?.toInt(),it.countryName, inlati, inlngi );
+					dataKontrol.pickedLocation.value = currLocation!!;
+				}
+			} else {
+				currLocation = Kadress().also {
+					it.lati = inlati; it.longi = inlngi;
+				}
+				dataKontrol.pickedLocation.value = currLocation!!;
 			}
 		}
 	}
@@ -388,28 +390,30 @@ class WheelFragment : Fragment()
 	 * get jollies from database at that location
 	*/
 	private val locationWatcher = Observer<Kadress>(){
-		if(it.neighbor != null )
+		Log.d(TAG, "LOCATION OBSERVER: Location watcher is being called $it");
+		if(it != null)
 		{
-			if(it.locality != null){
-				locationText.text = "${it.neighbor}, ${it.locality}";
-				locationCopy.text = locationText.text;
+			if(it.neighbor != null )
+			{
+				if(it.locality != null){
+					locationText.text = "${it.neighbor}, ${it.locality}";
+					locationCopy.text = locationText.text;
+				} else {
+					locationText.text = "${it.neighbor}";
+					locationCopy.text = locationText.text;
+				}
 			} else {
-				locationText.text = "${it.neighbor}";
+				locationText.text = it.locality;
 				locationCopy.text = locationText.text;
 			}
-		} else {
-			locationText.text = it.locality;
-			locationCopy.text = locationText.text;
+			appcache.edit().apply {
+				putString(KONSTANT.lati_flag, it.lati.toString());
+				putString(KONSTANT.logi_flag, it.longi.toString());
+				putLong(KONSTANT.cache_timestamp, System.currentTimeMillis());
+				commit();
+			}
+			KF_GET_JOLLIES_ON_AREA();
 		}
-		appcache.edit().apply {
-			putString(KONSTANT.locality_flag, it.locality);
-			putString(KONSTANT.subarea_flag, it.neighbor ?: "");
-			putString(KONSTANT.lati_flag, it.lati.toString());
-			putString(KONSTANT.logi_flag, it.longi.toString());
-			putLong(KONSTANT.cache_timestamp, System.currentTimeMillis());
-			commit();
-		}
-		KF_GET_JOLLIES_ON_AREA();
 	}
 	//#endregion
 	
@@ -439,7 +443,9 @@ class WheelFragment : Fragment()
 					}
 					kadd.lati = resu.latlng.latitude;
 					kadd.longi = resu.latlng.longitude;
-					locationLiveDat.value = kadd;
+					currLocation = kadd;
+					Log.d(TAG, "KF_PICKED_PLACES_RETURN: SETTING VALUE OF CURRENT LOCATION");
+					dataKontrol.pickedLocation.value = currLocation!!;
 				}
 				is LocationResultContainer.Error -> {
 					Log.e(TAG,"KF_PICKED_PLACES_RETURN: = Error on Picking up the places ${resu.code} - ${resu.msg}");
@@ -464,7 +470,7 @@ class WheelFragment : Fragment()
 	*/
 	private fun KF_GET_JOLLIES_ON_AREA()
 	{
-		Log.d(TAG, "KF_GET_JOLLIES_ON_AREA: >>>=== GETTING JOLLIES REFRESH AT ${appcache.getString(KONSTANT.locality_flag, "")}");
+		Log.d(TAG, "KF_GET_JOLLIES_ON_AREA: >>>=== GETTING JOLLIES REFRESH AT ${currLocation}");
 	}
 	
 	companion object {

@@ -12,9 +12,9 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
@@ -39,14 +39,16 @@ class MainActivity : AppCompatActivity()
 	private lateinit var fbauth : FirebaseAuth;
 	private var fbuser : FirebaseUser? = null;
 	private lateinit var appCache: SharedPreferences;
-	private lateinit var dataFutory : DataControl.DataFactory;
-	private lateinit var dataKontrol : DataControl;
+	//private lateinit var dataFutory : DataControl.DataFactory;
+	//private lateinit var dataKontrol : DataControl;
+	private val dataKontrol : DataControl by viewModels { DataControl.DataFactory(application) }
 	private lateinit var navHost : NavHostFragment;
 	private lateinit var navContro : NavController;
 	private var loosingBottomDialog : BottomSheetDialog? = null;
 	
 	override fun onCreate(savedInstanceState: Bundle?)
 	{
+		Log.d(TAG, "onCreate: MAIN ACTIVITY");
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		SetupBOTTOMSheet();
@@ -55,6 +57,17 @@ class MainActivity : AppCompatActivity()
 		conmana = getSystemService(ConnectivityManager::class.java);
 		appCache = getSharedPreferences(getString(R.string.app_pref), Context.MODE_PRIVATE);
 		fbauth = FirebaseAuth.getInstance();
+
+		if(CheckNETWORKconnection())
+		{
+			CheckUSERauthen(); //-> going back if user is null
+			dataKontrol.KF_VM_SETUP_FIREBASE(fbauth.currentUser!!);
+			//dataFutory = DataControl.DataFactory(application, fbauth.currentUser!!);
+			//dataKontrol = ViewModelProvider(this, dataFutory).get(DataControl::class.java);
+			dataKontrol.sucuload.observe(this, uploadFlagWatcher);
+			dataKontrol.jollyupload.observe(this, jollyWatcher);
+		}
+
 		SetupNavHost();
 	}
 	
@@ -64,21 +77,15 @@ class MainActivity : AppCompatActivity()
 	*/
 	override fun onStart()
 	{
+		Log.d(TAG, "onStart: MAIN ACTIVITY");
 		super.onStart();
-		if(CheckNETWORKconnection())
-		{
-			CheckUSERauthen(); //-> going back if user is null
-			dataFutory = DataControl.DataFactory(application, fbauth.currentUser!!);
-			dataKontrol = ViewModelProvider(this, dataFutory).get(DataControl::class.java);
-			dataKontrol.sucuload.observe(this, uploadFlagWatcher);
-			dataKontrol.jollyupload.observe(this, jollyWatcher);
-		}
+
 		SetupDEFAULTconnectionCB();
 /*		Log.d(TAG, "onStart:  == User verified ${appCache.getBoolean(KONSTANT.verified, false)}");
 		Log.d(TAG, "onStart:  == User Uploaded ${appCache.getBoolean(KONSTANT.upload_flag, false)}");
 		Log.d(TAG, "onStart:  == User Gender ${appCache.getString(KONSTANT.gender, "")}");*/
 		if(appCache.getBoolean(KONSTANT.verified, false) == true &&
-				appCache.getBoolean(KONSTANT.upload_flag, false) == true)
+				appCache.getBoolean(KONSTANT.user_upload_flag, false) == true)
 		{
 			dataKontrol.KF_VM_SETUP_USER(appCache.getString(KONSTANT.username, "")!!,
 													appCache.getString(KONSTANT.gender, ""),
@@ -332,13 +339,13 @@ class MainActivity : AppCompatActivity()
 			Log.i(TAG, "successfully updated user to store: ");
 			appCache.edit().apply{
 				putBoolean(KONSTANT.verified, true);
-				putBoolean(KONSTANT.upload_flag, true);
+				putBoolean(KONSTANT.user_upload_flag, true);
 				putLong(KONSTANT.cache_timestamp, System.currentTimeMillis());
 				apply();
 			}
 		} else {
 			appCache.edit().apply {
-				putBoolean(KONSTANT.upload_flag, false);
+				putBoolean(KONSTANT.user_upload_flag, false);
 				putBoolean(KONSTANT.verified, false);
 				putLong(KONSTANT.cache_timestamp, System.currentTimeMillis());
 				apply();
@@ -365,7 +372,6 @@ class MainActivity : AppCompatActivity()
 	{
 		dataKontrol.KF_VM_UP_JOLLY(iname, iaddr, inarea, itime);
 	}
-
 }
 
 /*		// this callback keep being called -> waste of resource if u don't do anything

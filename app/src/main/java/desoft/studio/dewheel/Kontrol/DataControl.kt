@@ -1,7 +1,6 @@
 package desoft.studio.dewheel.Kontrol
 
 import android.app.Application
-import android.content.SharedPreferences
 import android.util.Log
 import androidx.annotation.NonNull
 import androidx.lifecycle.*
@@ -17,12 +16,12 @@ import kotlinx.coroutines.launch
 
 private const val TAG : String = "-des- k-- DATA CONTROL ( VIEW MODEL) -->l";
 
-class DataControl(@NonNull ctx : Application,@NonNull var fbuser : FirebaseUser) : AndroidViewModel(ctx)
+class DataControl(@NonNull ctx : Application) : AndroidViewModel(ctx)
 {
 	private var defdis = Dispatchers.Default;
 	private var iodis = Dispatchers.IO;
-	
-	private lateinit var appcache : SharedPreferences;
+
+	private var fbuser : FirebaseUser? = null;
 	private var user : K_User = K_User();
 	
 	private var userstore = Firebase.firestore.collection("users");
@@ -34,15 +33,13 @@ class DataControl(@NonNull ctx : Application,@NonNull var fbuser : FirebaseUser)
 		MutableLiveData<Boolean>();
 	}
 	// * assigned location
-	val pickedLocation : MutableLiveData<Kadress> by lazy {
-		MutableLiveData<Kadress>();
-	}
+	val pickedLocation : MutableLiveData<Kadress> = MutableLiveData<Kadress>();
 	
 	// * jolly update flag
 	val jollyupload: MutableLiveData<Boolean> by lazy {
 		MutableLiveData<Boolean>();
 	}
-	
+
 	/***
 	 * Creating  A User class on init, fill out from cache or from FirebaseUser parameter
 	 * only creating Kuser if user is not anonymous
@@ -51,21 +48,28 @@ class DataControl(@NonNull ctx : Application,@NonNull var fbuser : FirebaseUser)
 	init
 	{
 		Log.w(TAG, "VIEW MODEL ININT: Data Control is created");
-		if(fbuser.isAnonymous == false)
-		{
-			var gid = fbuser.providerData.get(1).uid;
-			var fbid = fbuser.providerData.get(0).uid;
-			var email = fbuser.email;
-			user = K_User(gid, fbid, email);
-			Log.w(TAG, "Init: Hey , This is the user calling View Model Init $user");
-		}
 	}
 	//_ clean up function
 	override fun onCleared()
 	{
+		Log.i(TAG, "onCleared: == VIEW MODEL CLEAN UP IS CALLED");
 		super.onCleared();
 	}
-	
+
+	/**
+	* SETUP VIEW MODEL WITH ASSIGNED FIREBASE USER
+	*/
+	fun KF_VM_SETUP_FIREBASE (inuser : FirebaseUser){
+		fbuser = inuser;
+		if(fbuser!!.isAnonymous == false)
+		{
+			var gid = fbuser!!.providerData.get(1).uid;
+			var fbid = fbuser!!.providerData.get(0).uid;
+			var email = fbuser!!.email;
+			user = K_User(gid, fbid, email);
+			Log.w(TAG, "Init: Hey , This is the user calling View Model Init $user");
+		}
+	}
 	/**
 	*	SETUP USER NAME FROM CACHE
 	*/
@@ -121,18 +125,18 @@ class DataControl(@NonNull ctx : Application,@NonNull var fbuser : FirebaseUser)
 					}
 			}
 		} else {
-			Log.e(TAG, "KF_VM_UP_JOLLY: == fbuser is anonymous ${fbuser.isAnonymous} or user is null ${user == null}");
+			Log.e(TAG, "KF_VM_UP_JOLLY: == fbuser is anonymous ${fbuser?.isAnonymous} or user is null ${user == null}");
 			jollyupload.value = false;
 		}
 	}
 	
-	class DataFactory(private var appli: Application, var fbuser : FirebaseUser): ViewModelProvider.AndroidViewModelFactory(appli)
+	class DataFactory(private var appli: Application): ViewModelProvider.AndroidViewModelFactory(appli)
 	{
 		override fun <T : ViewModel> create(modelClass: Class<T>): T
 		{
 			if(modelClass.isAssignableFrom(DataControl::class.java))
 			{
-				return DataControl(appli, fbuser) as T;
+				return DataControl(appli) as T;
 			}
 			throw IllegalArgumentException("NOT A DATA CONTROL CLASS");
 		}
