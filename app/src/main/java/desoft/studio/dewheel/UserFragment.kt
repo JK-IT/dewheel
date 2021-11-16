@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.os.Handler
 import android.text.SpannableStringBuilder
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -25,8 +26,8 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.auth.GoogleAuthCredential
 import com.google.firebase.auth.GoogleAuthProvider
+import desoft.studio.dewheel.kata.K_User
 import desoft.studio.dewheel.katic.KONSTANT
 import java.lang.RuntimeException
 
@@ -34,6 +35,8 @@ import java.lang.RuntimeException
 class UserFragment : Fragment()
 {
 	private var TAG : String = "-des- [[== USER FRAGMENT ==]]";
+	
+	private lateinit var khandler : Handler;
 	
 	private lateinit var fbauth : FirebaseAuth;
 	private lateinit var fbuser: FirebaseUser;
@@ -62,6 +65,7 @@ class UserFragment : Fragment()
 	override fun onCreate(savedInstanceState: Bundle?)
 	{
 		super.onCreate(savedInstanceState);
+		khandler = Handler(requireActivity().mainLooper);
 		appcache = requireContext().getSharedPreferences(getString(R.string.app_pref), Context.MODE_PRIVATE);
 		fbauth = FirebaseAuth.getInstance();
 		fbuser = fbauth.currentUser!!;
@@ -112,7 +116,6 @@ class UserFragment : Fragment()
 		} else
 		{
 			goobtn.isEnabled = false;
-			FieldChecked(); //-> this will enable verified icon for you
 			val disname = appcache.getString(KONSTANT.username, "");
 			if(disname.isNullOrBlank()) // from appcache
 			{
@@ -122,7 +125,7 @@ class UserFragment : Fragment()
 			disnameTitle.setText(DefaultUSERname(disname!!));
 		}
 
-		//_ fill out gender, other info from cache
+		// fill out gender, other info from cache
 		val genderpref = appcache.getString(KONSTANT.gender, "");
 		if(genderpref?.isNotBlank() == true)
 		{
@@ -160,7 +163,6 @@ class UserFragment : Fragment()
 					appcache.edit().putString(KONSTANT.username, disnameTitle.text.toString()).apply();
 				}
 			}
-			
 		}
 		//_title input
 		disnameTitle.setOnEditorActionListener { textView, i, keyEvent ->
@@ -215,13 +217,24 @@ class UserFragment : Fragment()
 			}
 			false;
 		}
+		/*
+		* update cache with favorite
+		* do field checked to become verified member if satisfied
+		 */
 		favorbtn.setOnClickListener {
 			var valu = favor.text.toString();
 			if( ! valu.isBlank())
 			{
 				favor.clearFocus();
-				appcache.edit().putString(KONSTANT.favor, valu).apply();
-				Toast.makeText(requireContext(), "Successful Updating Your Favorites",Toast.LENGTH_SHORT).show();
+				var oldfavor = appcache.getString(KONSTANT.favor, "");
+				if(oldfavor.isNullOrBlank() || ! oldfavor.contentEquals(valu, true))
+				{
+					if(appcache.edit().putString(KONSTANT.favor, valu).commit())
+					{
+						Toast.makeText(requireContext(), "Successfully updating your information", Toast.LENGTH_SHORT).show();
+					}
+					FieldChecked(true);
+				}
 			}
 		}
 		//_logout button
@@ -244,6 +257,17 @@ class UserFragment : Fragment()
 		}
 	}
 	
+	override fun onStart() {
+		super.onStart();
+		if(appcache.getBoolean(KONSTANT.verified, false) == true)
+		{
+			FieldChecked(false, false);
+		} else
+		{
+			FieldChecked(false, true);
+		}
+	}
+	
 	//#region GOOGLE SIGN IN LAUNCHER RESULT CALLBACK
 	private fun GooSIGNINresultLAUNCHER() : ActivityResultLauncher<Intent>
 	{
@@ -263,10 +287,12 @@ class UserFragment : Fragment()
 		}
 	}
 	//#endregion
+	
 	private fun UpdateUIwithGOO(param: GoogleSignInAccount)
 	{
 		Log.d(TAG, "UpdateUIwithGOO: == gOOGLE account name ${param.displayName}");
 		disnameTitle.setText(DefaultUSERname(param.displayName));
+		goobtn.isEnabled = false;
 	}
 	
 	/**
@@ -298,8 +324,11 @@ class UserFragment : Fragment()
 	
 	/**
 	 * after sign in , do fields check to let user know they need to fill out form so they can become verifed user.
+	 * FIELD CHECKED  will enable the button by itself
+	 * IT WILL BE THE KNOT THAT UPDATE USER TO FIRESTORE
+	 * @param show : true to show toast what u missed
 	 */
-	private fun FieldChecked(show: Boolean = false) : Boolean
+	private fun FieldChecked(show: Boolean = false, upload: Boolean = true) : Boolean
 	{
 		var gender = appcache.getString(KONSTANT.gender, "");
 		var sorient = appcache.getString(KONSTANT.sexori, "");
@@ -319,7 +348,6 @@ class UserFragment : Fragment()
 				if(fbuser.isAnonymous)
 					Toast.makeText(requireContext(), "Please Sign In/Up With Google Account", Toast.LENGTH_SHORT).show();
 			}
-			appcache.edit().putBoolean(KONSTANT.verified, false).apply();
 			return false;
 		} else
 		{
@@ -327,11 +355,15 @@ class UserFragment : Fragment()
 			verifiedImg.setColorFilter(ContextCompat.getColor(requireContext(),R.color.confirm));
 			genderDropLayout.isEnabled = false;
 			sorientDropLayout.isEnabled = false;
-			appcache.edit().putBoolean(KONSTANT.verified, true).apply();
+			if(upload)
+				KF_UPLOADuserDATA();
 			return true;
 		}
 	}
 	
+	/**
+	 * THIS WILL BE CALLED AFTER SUCCESSFUL SIGIN AS GOOGLE USER
+	 */
 	private fun SavingTOcache(user : FirebaseUser)
 	{
 		var editor = appcache.edit();
@@ -354,6 +386,20 @@ class UserFragment : Fragment()
 		{
 			Log.e(TAG, "SavingTOcache: == SOMETHING WRONG WITH CACHE", RuntimeException("FAILED TO WRITE TO CACHE"));
 		}
+	}
+	
+	private fun KF_UPLOADuserDATA()
+	{
+		//viewmodel update user to firestore
+		var kid : String = appcache.getString(KONSTANT.usergid, "")!!;
+		var fbid: String = appcache.getString(KONSTANT.useruid, "")!!;
+		var email : String = appcache.getString(KONSTANT.usergmail, "")!!;
+		var app_user_name: String = appcache.getString(KONSTANT.username, "")!!;
+		var gender: String = appcache.getString(KONSTANT.gender, "")!!;
+		var sorient: String = appcache.getString(KONSTANT.sexori, "")!!;
+		var favorite: String = appcache.getString(KONSTANT.favor, "")!!;
+		var usr = K_User(kid, fbid, email, app_user_name, gender, sorient, favorite);
+		(requireActivity() as MainActivity).KF_UPuserTOstore(usr);
 	}
 	
 	private fun DefaultUSERname(iname : String?): String{

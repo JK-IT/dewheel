@@ -14,6 +14,20 @@ object KONSTANT
 	/**
 	 * verified user -> create a user account from data control, upload it to firestore, or should i wait till user fill out all information
 	 * or u cannot become verified user, if u don't fill out other required fields
+	 * ? VALUE TYPE == BOOLEAN
  	 */
 	val verified : String = "VERIFED USER";
+	
+	val upload_flag: String = "USER UPLOADING FLAG";
+	
+	val region_flag: String = "USER LOCATION REGION";
+	val lati_flag : String = "USER LATITUDE LOCATION";
+	val logi_flag : String = "USER LONGITUDE LOCATION"
+	
+	val goo_package_name = "com.google.android.apps.maps";
 }
+
+/**
+ * TODO HOW TO TURN OFF/SAVE POWER WHEN APP GO TO BACKGROUND ON LOCATION REQUEST
+ * todo DO CHECK AUTHENTIC OF USER WHEN APP IS GOING TO BACKGROUND, CHECK IF USER IS STILL LOG IN OR NOT
+ */

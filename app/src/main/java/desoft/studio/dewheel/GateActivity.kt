@@ -40,7 +40,6 @@ class GateActivity : AppCompatActivity()
 	private lateinit var shrepref : SharedPreferences;
 	private lateinit var goobtn : SignInButton;
 	private lateinit var guestbtn : Button;
-	private var noCONNECTION : Boolean = false;
 	
 	override fun onCreate(savedInstanceState: Bundle?)
 	{
@@ -80,9 +79,9 @@ class GateActivity : AppCompatActivity()
 	 */
 	private fun CheckConnection() : Boolean
 	{
-		if(connmana.isDefaultNetworkActive == false || connmana.activeNetwork == null)
+		//Log.i(TAG, "CheckConnection: Active network null ?${connmana.activeNetwork == null} and curr net active ?${connmana.isDefaultNetworkActive}");
+		if(connmana.activeNetwork == null)
 		{
-			noCONNECTION = true;
 			ShowingNOCONNECTIONdialog(this);
 			return false;
 		} else

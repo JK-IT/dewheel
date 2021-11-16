@@ -15,7 +15,10 @@ package desoft.studio.dewheel.kata
  * see user-info: {gender, sexual orientation, favorite things} |
  * Chat -> will open chat activity
  */
+
 /**
+ * FIRESTORE DATABASE : USERS
+ * 	-kid	-fbid	-email	-username	-gender 	-sorient	-favorite
  * fone number, email , address will be secret, only u give it to the other
  * id: gmail_gid
  * fbid: uid
@@ -24,10 +27,10 @@ package desoft.studio.dewheel.kata
  * sexual orientation
  * favorite
  */
-data class User(
-	var id : String?,
-	var fbid: String?,
-	var email : String?,
+data class K_User(
+	var kid : String? = null,
+	var fbid: String? = null,
+	var email : String? = null,
 	var app_user_name: String? = null,
 	var gender: String?=null,
 	var sorient: String?=null,

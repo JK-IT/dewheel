@@ -3,30 +3,15 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main_naviga_diagram"
-    app:startDestination="@id/wheelFragment">
+    app:startDestination="@id/wheelRoot">
     <fragment
         android:id="@+id/windFragment"
         android:name="desoft.studio.dewheel.WindFragment"
         android:label="frag_wind"
         tools:layout="@layout/frag_wind" >
         <action
-            android:id="@+id/action_windFragment_to_userFragment"
-            app:destination="@id/userFragment" />
-        <action
-            android:id="@+id/action_windFragment_to_wheelFragment"
-            app:destination="@id/wheelFragment" />
-    </fragment>
-    <fragment
-        android:id="@+id/wheelFragment"
-        android:name="desoft.studio.dewheel.WheelFragment"
-        android:label="frag_wheel"
-        tools:layout="@layout/frag_wheel" >
-        <action
-            android:id="@+id/action_wheelFragment_to_userFragment"
-            app:destination="@id/userFragment" />
-        <action
-            android:id="@+id/action_wheelFragment_to_windFragment"
-            app:destination="@id/windFragment" />
+            android:id="@+id/action_windFragment_to_wheelRoot"
+            app:destination="@id/wheelRoot" />
     </fragment>
     <fragment
         android:id="@+id/userFragment"
@@ -34,10 +19,29 @@
         android:label="frag_user"
         tools:layout="@layout/frag_user" >
         <action
-            android:id="@+id/action_userFragment_to_windFragment"
-            app:destination="@id/windFragment" />
-        <action
-            android:id="@+id/action_userFragment_to_wheelFragment"
-            app:destination="@id/wheelFragment" />
+            android:id="@+id/action_userFragment_to_wheelRoot"
+            app:destination="@id/wheelRoot" />
     </fragment>
+
+    <navigation android:id="@+id/wheelRoot"
+        app:startDestination="@id/wheelFragment">
+        <fragment
+            android:id="@+id/wheelFragment"
+            android:name="desoft.studio.dewheel.WheelFragment"
+            android:label="frag_wheel"
+            tools:layout="@layout/frag_wheel">
+            <action
+                android:id="@+id/action_wheelFragment_to_jollyCreationFragment"
+                app:destination="@id/jollyCreationFragment" />
+        </fragment>
+        <fragment
+            android:id="@+id/jollyCreationFragment"
+            android:name="desoft.studio.dewheel.JollyFragment"
+            android:label="frag_jolly_creating"
+            tools:layout="@layout/frag_jolly_creating" >
+            <action
+                android:id="@+id/action_jollyCreationFragment_to_wheelFragment"
+                app:destination="@id/wheelFragment" />
+        </fragment>
+    </navigation>
 </navigation>

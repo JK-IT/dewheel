@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/wheelFragment"
+        android:id="@+id/wheelRoot"
         android:icon="@drawable/ic_baseline_blur_wheel_24"
         android:visible="true"
         android:enabled="true"
@@ -21,5 +21,6 @@
         android:icon="@drawable/ic_baseline_user_24"
         android:visible="true"
         android:enabled="true"
-        app:showAsAction="always"/>
+        app:showAsAction="always"
+        android:title="User" />
 </menu>

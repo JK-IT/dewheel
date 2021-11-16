@@ -3,14 +3,18 @@ package desoft.studio.dewheel
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.net.*
-import androidx.appcompat.app.AppCompatActivity
+import android.net.ConnectivityManager
+import android.net.LinkProperties
+import android.net.Network
+import android.net.NetworkCapabilities
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
@@ -20,10 +24,9 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import desoft.studio.dewheel.Kontrol.DataControl
+import desoft.studio.dewheel.kata.K_User
 import desoft.studio.dewheel.katic.KONSTANT
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import java.lang.RuntimeException
 
 class MainActivity : AppCompatActivity()
 {
@@ -50,24 +53,41 @@ class MainActivity : AppCompatActivity()
 		
 		kHandler = Handler(Looper.getMainLooper());
 		conmana = getSystemService(ConnectivityManager::class.java);
-		if(CheckNETWORKconnection())
-		{
-			dataFutory = DataControl.DataFactory(application);
-			dataKontrol = ViewModelProvider(this, dataFutory).get(DataControl::class.java);
-			
-			fbauth = FirebaseAuth.getInstance();
-			appCache = getSharedPreferences(getString(R.string.app_pref), Context.MODE_PRIVATE);
-			CheckUSERauthen();
-			
-			SetupNavHost();
-		}
+		appCache = getSharedPreferences(getString(R.string.app_pref), Context.MODE_PRIVATE);
+		fbauth = FirebaseAuth.getInstance();
+		SetupNavHost();
 	}
 	
-	
+	/**
+	* Register connection callback
+	 * Register username from cache
+	*/
 	override fun onStart()
 	{
 		super.onStart();
+		if(CheckNETWORKconnection())
+		{
+			CheckUSERauthen(); //-> going back if user is null
+			dataFutory = DataControl.DataFactory(application, fbauth.currentUser!!);
+			dataKontrol = ViewModelProvider(this, dataFutory).get(DataControl::class.java);
+			dataKontrol.sucuload.observe(this, uploadFlagWatcher);
+			dataKontrol.jollyupload.observe(this, jollyWatcher);
+		}
 		SetupDEFAULTconnectionCB();
+/*		Log.d(TAG, "onStart:  == User verified ${appCache.getBoolean(KONSTANT.verified, false)}");
+		Log.d(TAG, "onStart:  == User Uploaded ${appCache.getBoolean(KONSTANT.upload_flag, false)}");
+		Log.d(TAG, "onStart:  == User Gender ${appCache.getString(KONSTANT.gender, "")}");*/
+		if(appCache.getBoolean(KONSTANT.verified, false) == true &&
+				appCache.getBoolean(KONSTANT.upload_flag, false) == true)
+		{
+			dataKontrol.KF_VM_SETUP_USER(appCache.getString(KONSTANT.username, "")!!,
+													appCache.getString(KONSTANT.gender, ""),
+													appCache.getString(KONSTANT.sexori, ""),
+													appCache.getString(KONSTANT.favor, ""));
+		} else
+		{
+			dataKontrol.KF_VM_SETUP_USER(appCache.getString(KONSTANT.username, "")!!);
+		}
 	}
 	
 	override fun onStop()
@@ -97,37 +117,35 @@ class MainActivity : AppCompatActivity()
 			GoBACKtoGATE();
 		} else
 		{
-			lifecycleScope.launch(iodis) {
-				var editor = appCache.edit();
-				if(fbuser?.isAnonymous == true)
+			var editor = appCache.edit();
+			if(fbuser?.isAnonymous == true)
+			{
+				//saving userid = username
+				editor.apply {
+					putString(KONSTANT.username, fbuser?.uid);
+					putString(KONSTANT.useruid, fbuser?.uid);
+				}
+			} else
+			{
+				// at this step , mostly getting data from cache, not from provider
+				var usinfo = fbuser?.providerData?.get(1);
+				Log.d(TAG, "CheckUSERauthen: == Name from google provider ${usinfo?.displayName}");
+				var usname = appCache.getString(KONSTANT.username, "");
+				if(usname?.isBlank() == true)
 				{
-					//saving userid = username
-					editor.apply {
-						putString(KONSTANT.username, fbuser?.uid);
-						putString(KONSTANT.useruid, fbuser?.uid);
-					}
-				} else
-				{
-					// at this step , mostly getting data from cache, not from provider
-					var usinfo = fbuser?.providerData?.get(1);
-					Log.d(TAG, "CheckUSERauthen: == Name from google provider ${usinfo?.displayName}");
-					var usname = appCache.getString(KONSTANT.username, "");
-					if(usname?.isBlank() == true)
-					{
-						usname = usinfo?.displayName;
-					}
-					editor.apply {
-						putString(KONSTANT.username, usname);
-						putString(KONSTANT.useruid, fbuser?.uid);
-						putString(KONSTANT.usergid, usinfo?.uid);
-						putString(KONSTANT.usergmail, usinfo?.email);
-						putString(KONSTANT.fone, usinfo?.phoneNumber);
-					}
+					usname = usinfo?.displayName;
 				}
 				editor.apply {
-					putLong(KONSTANT.cache_timestamp, System.currentTimeMillis());
-					apply();
+					putString(KONSTANT.username, usname);
+					putString(KONSTANT.useruid, fbuser?.uid);
+					putString(KONSTANT.usergid, usinfo?.uid);
+					putString(KONSTANT.usergmail, usinfo?.email);
+					putString(KONSTANT.fone, usinfo?.phoneNumber);
 				}
+			}
+			editor.apply {
+				putLong(KONSTANT.cache_timestamp, System.currentTimeMillis());
+				commit();
 			}
 		}
 	}
@@ -164,8 +182,9 @@ class MainActivity : AppCompatActivity()
 			Log.e(TAG, "SavingTOcache: == SOMETHING WRONG WITH CACHE", RuntimeException("FAILED TO WRITE TO CACHE"));
 		}
 	}
-	
+	//#region NETWORK AREA
 	/**
+	 * ?NETWORK RELATED FUNCTIONS
 	 * Register Callback on connectivity manager
 	 * should not call other methods, if it is available as callback, cuz of race condition
 	 */
@@ -215,7 +234,6 @@ class MainActivity : AppCompatActivity()
 				Log.w(TAG, "onUnavailable: There no network availiable that can satisfy the network request");
 			}
 		}
-
 		conmana.registerDefaultNetworkCallback(defaultConnCb);
 
 	}
@@ -229,7 +247,7 @@ class MainActivity : AppCompatActivity()
 	private fun CheckNETWORKconnection(): Boolean
 	{
 		currDEFAULTnet = conmana.activeNetwork;
-		if(currDEFAULTnet == null || conmana.isDefaultNetworkActive == false)
+		if(currDEFAULTnet == null)
 		{// showing no connection dialog
 			GateActivity.ShowingNOCONNECTIONdialog(this);
 			return false;
@@ -269,6 +287,7 @@ class MainActivity : AppCompatActivity()
 			}
 		}
 	}
+	//#endregion
 	/**
 	 * Generate and set up bottomsheet dialog
 	 */
@@ -290,9 +309,63 @@ class MainActivity : AppCompatActivity()
 		
 		//set up
 	}
+	
 	/**
-	 * VIEW MODEL - DATA CONTROL RELATED
+	 * ?VIEW MODEL - DATA CONTROL RELATED
+	 * *
 	 */
+	/**
+	* ! uploading user to firestore using viewmodel
+	*/
+	fun KF_UPuserTOstore(usr : K_User)
+	{
+		Log.d(TAG, "KF_UPuserTOstore: == Get user to upload $usr");
+		dataKontrol.KF_VM_UP_USER(usr);
+	}
+	
+	/**
+	 * // ! upload flag observer
+	 * write to cache to have appropriate action later
+	 */
+	private val uploadFlagWatcher = Observer<Boolean>{
+		if(it) {
+			Log.i(TAG, "successfully updated user to store: ");
+			appCache.edit().apply{
+				putBoolean(KONSTANT.verified, true);
+				putBoolean(KONSTANT.upload_flag, true);
+				putLong(KONSTANT.cache_timestamp, System.currentTimeMillis());
+				apply();
+			}
+		} else {
+			appCache.edit().apply {
+				putBoolean(KONSTANT.upload_flag, false);
+				putBoolean(KONSTANT.verified, false);
+				putLong(KONSTANT.cache_timestamp, System.currentTimeMillis());
+				apply();
+			}
+		}
+	}
+	/**
+	* ** Jolly UPLOADING WATCHER
+	*/
+	private val jollyWatcher = Observer<Boolean> {
+		if(it)
+		{
+			Toast.makeText(this, "Successful uploading the event", Toast.LENGTH_SHORT).show();
+			navContro.navigate(R.id.action_jollyCreationFragment_to_wheelFragment);
+		} else {
+			Log.e(TAG, "Jolly uploading flag: User is null or Failed to contact server", throw java.lang.RuntimeException("Check your View model if User is NUll"));
+			Toast.makeText(this, "Failed uploading the occurrence. Please try again later!!", Toast.LENGTH_SHORT).show();
+		}
+	}
+	/**
+	* * UPLOADING JOLLY EVENT TO DATABASE
+	*/
+	fun KF_UPLOAD_JOLLY(iname: String, iaddr:String, itime:Long)
+	{
+		dataKontrol.KF_VM_UP_JOLLY(iname, iaddr, itime);
+	}
+
 }
 
 /*		// this callback keep being called -> waste of resource if u don't do anything

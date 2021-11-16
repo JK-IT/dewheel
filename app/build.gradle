@@ -3,6 +3,9 @@ plugins {
     id 'com.google.gms.google-services'
     id 'kotlin-android'
     id 'kotlin-kapt'
+    id 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin'
+    id 'androidx.navigation.safeargs.kotlin'
+
 }
 
 android {
@@ -90,7 +93,12 @@ dependencies {
     implementation 'com.google.android.gms:play-services-auth:19.2.0' // for google signin
     implementation 'com.google.firebase:firebase-analytics-ktx'
     implementation 'com.google.firebase:firebase-auth-ktx'
+    implementation 'com.google.firebase:firebase-firestore-ktx'
+    implementation 'com.google.firebase:firebase-database-ktx'
 
     // google play services - location
     implementation 'com.google.android.gms:play-services-location:18.0.0'
+
+    //google play services - places
+    implementation('com.google.android.libraries.places:places:2.5.0')
 }
