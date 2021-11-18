@@ -61,7 +61,8 @@ class MainActivity : AppCompatActivity()
 		if(CheckNETWORKconnection())
 		{
 			CheckUSERauthen(); //-> going back if user is null
-			dataKontrol.KF_VM_SETUP_FIREBASE(fbauth.currentUser!!);
+			Log.d(TAG, "onCreate: setup VIEW MODEL ON MAIN");
+			dataKontrol.KF_VM_SETUP_WITH_FIREBASE(fbauth.currentUser!!);
 			//dataFutory = DataControl.DataFactory(application, fbauth.currentUser!!);
 			//dataKontrol = ViewModelProvider(this, dataFutory).get(DataControl::class.java);
 			dataKontrol.sucuload.observe(this, uploadFlagWatcher);
@@ -368,9 +369,9 @@ class MainActivity : AppCompatActivity()
 	/**
 	* * UPLOADING JOLLY EVENT TO DATABASE
 	*/
-	fun KF_UPLOAD_JOLLY(iname: String, iaddr:String, inarea:String, itime:Long)
+	fun KF_UPLOAD_JOLLY(iname: String, iaddr:String, inarea:String, inadmin1: String, itime:Long)
 	{
-		dataKontrol.KF_VM_UP_JOLLY(iname, iaddr, inarea, itime);
+		dataKontrol.KF_VM_UP_JOLLY(iname, iaddr, inarea, inadmin1, itime);
 	}
 }
 

@@ -53,6 +53,7 @@ class JollyFragment : Fragment() {
 	private val fields = listOf<Place.Field>(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS_COMPONENTS, Place.Field.ADDRESS, Place.Field.LAT_LNG, Place.Field.PHOTO_METADATAS);
 	private var autocompleteLauncher : ActivityResultLauncher<Intent> = KF_AUTOCOMPLETE_RESULT_CB();
 	private var area : String = "";
+	private var admin1: String = "";
 	
 	private lateinit var donebtn: Button;
 	private lateinit var canbtn: Button;
@@ -153,7 +154,7 @@ class JollyFragment : Fragment() {
 			var name: String = jollyNameField.text.toString()!!;
 			var addr: String = placePickDisplay.text.toString()!!;
 			var time: Long = calen.timeInMillis;
-			(requireContext() as MainActivity).KF_UPLOAD_JOLLY(name, addr, area, time); //-> also navigate back to wheel fragment
+			(requireContext() as MainActivity).KF_UPLOAD_JOLLY(name, addr, area, admin1, time); //-> also navigate back to wheel fragment
 		}
 		canbtn.setOnClickListener {
 			it.findNavController().navigate(R.id.action_jollyCreationFragment_to_wheelFragment);
@@ -177,6 +178,9 @@ class JollyFragment : Fragment() {
 					{
 						if(typ.types.get(0).contentEquals("locality")) {
 								area = typ.name;
+						}
+						if(typ.types.get(0).contentEquals("administrative_area_level_1")){
+							admin1 = typ.name;
 						}
 					}
 					var finish = "${re.name}\n${re.address}";
