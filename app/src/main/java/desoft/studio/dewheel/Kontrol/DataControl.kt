@@ -48,7 +48,7 @@ class DataControl(@NonNull ctx : Application) : AndroidViewModel(ctx)
 	val jollies : MutableLiveData<ArrayList<WheelJolly>> = MutableLiveData<ArrayList<WheelJolly>>(arrayListOf());
 
 	// * single jolly
-	val jolly : MutableLiveData<WheelJolly> = MutableLiveData<WheelJolly>();
+	var jolly : MutableLiveData<WheelJolly?> = MutableLiveData<WheelJolly?>();
 	// * jolly update flag
 	val jollyupload: MutableLiveData<Boolean> by lazy {
 		MutableLiveData<Boolean>();
@@ -166,6 +166,7 @@ class DataControl(@NonNull ctx : Application) : AndroidViewModel(ctx)
 		jollyJob?.cancel(); // ==> this will cancel the flow that is currently on
 		if(jollyJob?.isCancelled == true || jollyJob == null)
 		{
+			jolly.value = null; // reset data on view model
 			jollyJob = viewModelScope.launch(){
 				realdbSource.KF_GET_JOLLIES_AT(inarea)
 					.flowOn(defdis)

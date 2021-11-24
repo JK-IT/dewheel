@@ -4,10 +4,15 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import desoft.studio.dewheel.R
 import desoft.studio.dewheel.kata.WheelJolly
+import java.text.SimpleDateFormat
+import java.util.*
 
-class RecyAdapter(val ctx : Context, var design: Int) : RecyclerView.Adapter<RecyAdapter.Kholder>() {
+class JollyRecyAdapter(val ctx : Context, var design: Int) : RecyclerView.Adapter<JollyRecyAdapter.Kholder>() {
 
     /**
     * VIEW HOLDER CLASS = inner -> access properties of outer class
@@ -15,37 +20,31 @@ class RecyAdapter(val ctx : Context, var design: Int) : RecyclerView.Adapter<Rec
     */
     inner class Kholder(iv: View) : RecyclerView.ViewHolder(iv)
     {
-        /*var prompt = iv.findViewById<TextView>(R.id.jolly_prompt);
+        var prompt = iv.findViewById<TextView>(R.id.jolly_prompt);
         var addr : TextView = iv.findViewById(R.id.jolly_address);
         var jollytime :TextView = iv.findViewById(R.id.jolly_time);
         var creator : TextView = iv.findViewById(R.id.jolly_creator_name);
-        var takbtn : Button = iv.findViewById(R.id.jolly_talk_btn);*/
-        init {
-            viewStupFunc?.InitView(iv);
-        }
+        var takbtn : Button = iv.findViewById(R.id.jolly_talk_btn);
+        var sfm = SimpleDateFormat("EEE, MMM dd 'at' hh:mm a", Locale.getDefault());
 
         fun FILLING_VIEW(data : WheelJolly){
-            viewStupFunc?.FillingData(data);
+            prompt.text = data.name;
+            addr.text = data.addr;
+            var calen = Calendar.getInstance();
+            calen.timeInMillis = data.time!!;
+            jollytime.text = sfm.format(data.time);
+            creator.text = data.creator;
         }
     }
 
-    /**
-    * ? --INTERFACE FOR GENERIC VIEW SETUP
-    */
-    public interface I_Adapter_View_Setup {
-        fun InitView(v: View);
-        fun FillingData(data: WheelJolly);
-    }
     /**
     * ? ------> RECYCLERVIEW ADAPTER IMPLEMENTATION
     */
     private val TAG = "-des- ;;;=== -RECYCLERVIEW ADAPTER- ===;;;";
 
-    var viewStupFunc : I_Adapter_View_Setup? = null;
-
     private var itemlst : ArrayList<WheelJolly> = arrayListOf();
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Kholder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): JollyRecyAdapter.Kholder {
         val v = LayoutInflater.from(parent.context).inflate(design, parent, false);
         return Kholder(v);
     }
@@ -59,16 +58,15 @@ class RecyAdapter(val ctx : Context, var design: Int) : RecyclerView.Adapter<Rec
         return itemlst.size ?: 0;
     }
 
-    // _ assign view setup interface
-    fun KF_ASSIGN_VIEW_SETUP_INTERFACE(param : I_Adapter_View_Setup)
-    {
-        viewStupFunc = param;
-    }
-
     fun KF_CONSUME_JOLLY(karam: WheelJolly)
     {
         itemlst.add(karam);
         notifyItemChanged(itemlst.indexOf(karam));
+    }
+    fun KF_CLEAR_DATA()
+    {
+        itemlst.clear();
+        notifyDataSetChanged();
     }
     companion object {
 

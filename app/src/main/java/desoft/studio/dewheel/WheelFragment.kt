@@ -37,7 +37,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import desoft.studio.dewheel.Kontrol.DataControl
-import desoft.studio.dewheel.SubKlass.RecyAdapter
+import desoft.studio.dewheel.SubKlass.JollyRecyAdapter
 import desoft.studio.dewheel.kata.Kadress
 import desoft.studio.dewheel.kata.WheelJolly
 import desoft.studio.dewheel.katic.KONSTANT
@@ -79,7 +79,7 @@ class WheelFragment : Fragment()
 	private lateinit var addBtn : ImageView;
 	
 	private lateinit var jolliesRecycler : RecyclerView;
-	private lateinit var jolliesAdapter : RecyAdapter;
+	private lateinit var jolliesAdapter : JollyRecyAdapter;
 
 	private lateinit var noLocationSetViewGroup : LinearLayout;
 	private lateinit var refreshBtn : Button;
@@ -204,17 +204,7 @@ class WheelFragment : Fragment()
 			KF_NAVIGATE_TO_JOLLY_CREATION();
 		}
 		// _ setup recyclerview
-		jolliesAdapter = RecyAdapter(requireContext(), R.layout.wheel_evnt_item_design);
-		jolliesAdapter.KF_ASSIGN_VIEW_SETUP_INTERFACE(object : RecyAdapter.I_Adapter_View_Setup{
-			override fun InitView(v: View) {
-				Log.i(TAG, "InitView: -> hey this is a stage of setting view at view holder");
-			}
-
-			override fun FillingData(data: WheelJolly) {
-				Log.i(TAG, "InitView: -> hey im filling in the wheel data");
-			}
-
-		})
+		jolliesAdapter = JollyRecyAdapter(requireContext(), R.layout.wheel_evnt_item_design);
 		jolliesRecycler.layoutManager = LinearLayoutManager(requireContext());
 		jolliesRecycler.adapter = jolliesAdapter;
 	}
@@ -502,6 +492,7 @@ class WheelFragment : Fragment()
 	private fun KF_GET_JOLLIES_ON_AREA()
 	{
 		Log.i(TAG, "KF_GET_JOLLIES_ON_AREA: >>>=== GETTING JOLLIES REFRESH AT ${currLocation?.locality}");
+		jolliesAdapter.KF_CLEAR_DATA();
 		lifecycleScope.launch {
 			dataKontrol.KF_VM_GET_JOLLIES_AT(currLocation!!);
 		}
@@ -511,7 +502,7 @@ class WheelFragment : Fragment()
 	* ? JOLLY OBSERVER
 	 *
 	*/
-	private val jollyWatcher = Observer<WheelJolly>(){
+	private val jollyWatcher = Observer<WheelJolly?>(){
 		//Log.i(TAG, "JOLLY WATCHER:  is being called");
 		if(it == null )
 		{
