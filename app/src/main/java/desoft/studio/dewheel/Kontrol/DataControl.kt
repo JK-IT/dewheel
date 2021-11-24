@@ -4,17 +4,17 @@ import android.app.Application
 import android.util.Log
 import androidx.annotation.NonNull
 import androidx.lifecycle.*
-import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.database.ChildEventListener
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.ktx.database
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import desoft.studio.dewheel.kata.K_User
 import desoft.studio.dewheel.kata.Kadress
 import desoft.studio.dewheel.kata.WheelJolly
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 
 private const val TAG : String = "-des- k-- DATA CONTROL ( VIEW MODEL) -->l";
@@ -24,12 +24,12 @@ class DataControl(@NonNull ctx : Application) : AndroidViewModel(ctx)
 	private var defdis = Dispatchers.Default;
 	private var iodis = Dispatchers.IO;
 
-	private var fbuser : FirebaseUser? = null;
+	private lateinit var realdbSource : RealtimeSource;
+
+	//private var fbuser : FirebaseUser? = null;
 	private var user : K_User = K_User();
-	
 	private var userstore = Firebase.firestore.collection("users");
-	private var jollydb = Firebase.database.getReference("jollies");
-	
+
 	// * WHEEL JOLLY LIVE DATA
 	val wjolly: MutableLiveData<WheelJolly> = MutableLiveData<WheelJolly>();
 	// * uploading status
@@ -38,7 +38,17 @@ class DataControl(@NonNull ctx : Application) : AndroidViewModel(ctx)
 	}
 	// * assigned location
 	val pickedLocation : MutableLiveData<Kadress> = MutableLiveData<Kadress>();
-	
+
+	// * jolly FLOW JOB
+	private var jollyJob : Job? = null;
+	// * a map that will hold old data and area
+	//_ 1st param = city, 2nd param = list of jollies
+	val oldJollies : Map<String, List<WheelJolly>> = mutableMapOf();
+	// * jolly live data
+	val jollies : MutableLiveData<ArrayList<WheelJolly>> = MutableLiveData<ArrayList<WheelJolly>>(arrayListOf());
+
+	// * single jolly
+	val jolly : MutableLiveData<WheelJolly> = MutableLiveData<WheelJolly>();
 	// * jolly update flag
 	val jollyupload: MutableLiveData<Boolean> by lazy {
 		MutableLiveData<Boolean>();
@@ -52,6 +62,7 @@ class DataControl(@NonNull ctx : Application) : AndroidViewModel(ctx)
 	init
 	{
 		Log.w(TAG, "VIEW MODEL ININT: Data Control is created");
+		realdbSource = RealtimeSource();
 	}
 	//_ clean up function
 	override fun onCleared()
@@ -60,12 +71,14 @@ class DataControl(@NonNull ctx : Application) : AndroidViewModel(ctx)
 		super.onCleared();
 	}
 
+	//#region SETUP K WHEEL USER SECTION
 	/**
 	* SETUP VIEW MODEL WITH ASSIGNED FIREBASE USER
 	*/
-	fun KF_VM_SETUP_WITH_FIREBASE (inuser : FirebaseUser){
+	fun KF_VM_SETUP_USER_FROM_FIREBASE (){ //(inuser : FirebaseUser){
 		viewModelScope.launch(defdis) {
-			fbuser = inuser;
+			//fbuser = inuser;
+			var fbuser = FirebaseAuth.getInstance().currentUser;
 			if(fbuser!!.isAnonymous == false)
 			{
 				var gid = fbuser!!.providerData.get(1).uid;
@@ -90,6 +103,9 @@ class DataControl(@NonNull ctx : Application) : AndroidViewModel(ctx)
 			Log.i(TAG, "KF_VM_SETUP_USER: == Setup user uptodate $user");
 		}
 	}
+	//#endregion
+
+	//#region USER AND FIRESTORE SECTION
 	/**
 	 * !UPload user to firestore
 	 * assing user to this uploaded user
@@ -109,18 +125,20 @@ class DataControl(@NonNull ctx : Application) : AndroidViewModel(ctx)
 			}
 		}
 	}
-	
+	//#endregion
+
+	//#region REALTIME DATABASE AND JOLLIES SECTION
 	/**
 	* * Upload Jolly Occurrence to Database
 	*/
-	fun KF_VM_UP_JOLLY(injoname: String, injoaddr:String, inarea: String, inadmin1: String, injotime:Long)
+	fun KF_VM_UP_JOLLY(injoname: String, injoaddr:String, injotime:Long, inVenue: Kadress)
 	{
 		if(user != null)
 		{
 			viewModelScope.launch() {
 				Log.i(TAG, "KF_VM_UP_JOLLY: == Uploading jolly");
-				var wjo = WheelJolly(System.currentTimeMillis().toString(), user.app_user_name!!, user.kid!!, injoname, injoaddr, inarea, injotime);
-				jollydb.child(inadmin1).child(wjo.area).child(wjo.jid).setValue(wjo)
+				var wjo = WheelJolly(System.currentTimeMillis().toString(), user.app_user_name!!, user.kid!!, injoname, injoaddr,inVenue.locality.toString(), injotime);
+				realdbSource.jollydb.child(inVenue.admin1!!).child(wjo.area!!).child(wjo.jid!!).setValue(wjo)
 					.addOnCompleteListener {
 						if( ! it.isSuccessful)
 						{
@@ -133,7 +151,7 @@ class DataControl(@NonNull ctx : Application) : AndroidViewModel(ctx)
 					}
 			}
 		} else {
-			Log.e(TAG, "KF_VM_UP_JOLLY: == fbuser is anonymous ${fbuser?.isAnonymous} or user is null ${user == null}");
+			Log.e(TAG, "KF_VM_UP_JOLLY: == fbuser is anonymous ${FirebaseAuth.getInstance().currentUser?.isAnonymous} or user is null ${user == null}");
 			jollyupload.value = false;
 		}
 	}
@@ -142,36 +160,24 @@ class DataControl(@NonNull ctx : Application) : AndroidViewModel(ctx)
 	* GET DATA FROM REALTIME BASE WITH AREA
 	 * * updating the events live data
 	*/
-	fun KF_VM_GET_JOLLIES_AT(inState: String, inarea: String) {
-		Log.w(TAG, "KF_VM_GET_JOLLIES_AT: jollies user $user");
-		Log.w(TAG, "KF_VM_GET_JOLLIES_AT: == Getting at State $inState, city $inarea");
-		viewModelScope.launch(iodis){
-			jollydb.child(inState).child(inarea).addChildEventListener(jolliesCallback);
+	@InternalCoroutinesApi
+	fun KF_VM_GET_JOLLIES_AT(inarea : Kadress) {
+		Log.w(TAG, "KF_VM_GET_JOLLIES_AT: == ${inarea.locality} AND remove the old one");
+		jollyJob?.cancel(); // ==> this will cancel the flow that is currently on
+		if(jollyJob?.isCancelled == true || jollyJob == null)
+		{
+			jollyJob = viewModelScope.launch(){
+				realdbSource.KF_GET_JOLLIES_AT(inarea)
+					.flowOn(defdis)
+					.collect {
+						Log.i(TAG, "KF_VM_GET_JOLLIES_AT: ===>>>=== i got the jolly ${it.jid}");
+						//jollies.value?.add(it);
+						jolly.value = it;
+				}
+			}
 		}
 	}
-	// ? CALLBACK GETTING JOLLIES FROM DATABASE
-	private val jolliesCallback = object : ChildEventListener{
-		override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
-			Log.w(TAG, "onChildAdded: NEW EVENT IS ADDED ----> ::::: ${snapshot.key} and previous name $previousChildName");
-		}
-
-		override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
-			TODO("Not yet implemented")
-		}
-
-		override fun onChildRemoved(snapshot: DataSnapshot) {
-			TODO("Not yet implemented")
-		}
-
-		override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {
-			TODO("Not yet implemented")
-		}
-
-		override fun onCancelled(error: DatabaseError) {
-			TODO("Not yet implemented")
-		}
-
-	}
+	//#endregion
 
 	/**
 	 * *----------------------------------------

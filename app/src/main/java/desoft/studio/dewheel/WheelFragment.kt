@@ -22,11 +22,12 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentContainerView
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.model.LatLng
@@ -36,9 +37,12 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import desoft.studio.dewheel.Kontrol.DataControl
+import desoft.studio.dewheel.SubKlass.RecyAdapter
 import desoft.studio.dewheel.kata.Kadress
+import desoft.studio.dewheel.kata.WheelJolly
 import desoft.studio.dewheel.katic.KONSTANT
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.launch
 import java.util.*
 
@@ -55,7 +59,7 @@ class WheelFragment : Fragment()
 	private val coar_perm = android.Manifest.permission.ACCESS_COARSE_LOCATION;
 	private val fine_perm = android.Manifest.permission.ACCESS_FINE_LOCATION;
 	private var locationPermCheckFlag : Boolean = false;
-	private lateinit var locationPromptView : LinearLayout;
+
 	private lateinit var locationEnableSettings : Button;
 	private lateinit var fulocation : FusedLocationProviderClient;
 	private lateinit var lowPowerQuest : LocationRequest;
@@ -74,9 +78,13 @@ class WheelFragment : Fragment()
 	private lateinit var locationCopy : TextView;
 	private lateinit var addBtn : ImageView;
 	
-	private lateinit var wheelFragBox : FragmentContainerView;
-	
+	private lateinit var jolliesRecycler : RecyclerView;
+	private lateinit var jolliesAdapter : RecyAdapter;
+
+	private lateinit var noLocationSetViewGroup : LinearLayout;
 	private lateinit var refreshBtn : Button;
+	private lateinit var noactiViewGroup : LinearLayout;
+	private lateinit var noActivitycretButton : Button;
 	
 	private var fbuser : FirebaseUser? = null;
 	
@@ -126,20 +134,23 @@ class WheelFragment : Fragment()
 		hideViewBtn = v.findViewById(R.id.wheel_hide_view_btn);
 		locationCopy = v.findViewById(R.id.wheel_location_copy);
 		addBtn = v.findViewById(R.id.wheel_add_btn);
-		locationPromptView = v.findViewById(R.id.wheel_location_prompt_grp);
+		noactiViewGroup = v.findViewById(R.id.wheel_no_events_grp);
+		noLocationSetViewGroup = v.findViewById(R.id.wheel_no_location_prompt_grp);
 		refreshBtn = v.findViewById(R.id.wheel_refresh_on_location_btn);
-		wheelFragBox = v.findViewById(R.id.wheel_frag_box);
+		noActivitycretButton = v.findViewById(R.id.wheel_no_activities_create_btn);
+		jolliesRecycler = v.findViewById(R.id.wheel_jollies_display);
+
 		return v;
 	}
 	
 	/**
 	 * *set up related view functions
 	 */
-	override fun onViewCreated(view: View, savedInstanceState: Bundle?)
-	{
+	@InternalCoroutinesApi
+	override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 		KF_SETUP_VIEWS();
-
 	}
+	@InternalCoroutinesApi
 	private fun KF_SETUP_VIEWS() {
 		//_ location display name
 		locationText.inputType = InputType.TYPE_NULL;
@@ -176,21 +187,7 @@ class WheelFragment : Fragment()
 		} else
 		{
 			addBtn.setOnClickListener {
-				if( ! appcache.getString(KONSTANT.lati_flag, "").isNullOrBlank()){
-					var bund: Bundle = Bundle();
-					var lati = appcache.getString(KONSTANT.lati_flag,"");
-					bund.apply {
-						putDouble(KONSTANT.lati_flag, lati!!.toDouble());
-						putDouble(KONSTANT.logi_flag, appcache.getString(KONSTANT.logi_flag, "")!!.toDouble());
-						putString(KONSTANT.username, appcache.getString(KONSTANT.username, ""));
-						putString(KONSTANT.usergid, appcache.getString(KONSTANT.usergid, ""));
-					}
-					it.findNavController().navigate(R.id.action_wheelFragment_to_jollyCreationFragment, bund);
-				}
-				else {
-					var actn = WheelFragmentDirections.actionWheelFragmentToJollyCreationFragment();
-					it.findNavController().navigate(actn);
-				}
+				KF_NAVIGATE_TO_JOLLY_CREATION();
 			}
 		}
 		//_ location settings button -> go to per settings
@@ -202,23 +199,47 @@ class WheelFragment : Fragment()
 		refreshBtn.setOnClickListener {
 			KF_GET_JOLLIES_ON_AREA();
 		}
+		//_ setup the no actvity -> create button
+		noActivitycretButton.setOnClickListener {
+			KF_NAVIGATE_TO_JOLLY_CREATION();
+		}
+		// _ setup recyclerview
+		jolliesAdapter = RecyAdapter(requireContext(), R.layout.wheel_evnt_item_design);
+		jolliesAdapter.KF_ASSIGN_VIEW_SETUP_INTERFACE(object : RecyAdapter.I_Adapter_View_Setup{
+			override fun InitView(v: View) {
+				Log.i(TAG, "InitView: -> hey this is a stage of setting view at view holder");
+			}
+
+			override fun FillingData(data: WheelJolly) {
+				Log.i(TAG, "InitView: -> hey im filling in the wheel data");
+			}
+
+		})
+		jolliesRecycler.layoutManager = LinearLayoutManager(requireContext());
+		jolliesRecycler.adapter = jolliesAdapter;
 	}
 	
 	/**
 	* * Good places to adding observer or listener callback
-	 * adding observer on location text
+	 * adding observer on live datas from view model
+	 * picked location
+	 * jolly
 	*/
+	@InternalCoroutinesApi
 	override fun onStart()
 	{
 		Log.i(TAG, "onStart: IS BEING CALLED");
 		super.onStart();
 		Log.d(TAG, "onStart: ==>>> setup OBSERVER ON VIEW MODEL");
+
 		dataKontrol.pickedLocation.observe(requireActivity(), locationWatcher);
 		if(dataKontrol.pickedLocation.value == null)
 		{
 			Log.w(TAG, "onStart: >>>> value of location on view model is null, call estimation");
 			KF_ESTIMATE_LOCATION();
 		}
+
+		dataKontrol.jolly.observe(requireActivity(), jollyWatcher);
 	}
 	
 	override fun onStop() {
@@ -260,8 +281,8 @@ class WheelFragment : Fragment()
 				KF_FRESHlocation();
 			} else{
 				locationPermCheckFlag = false;
-				locationPromptView.visibility = View.VISIBLE;
-				wheelFragBox.visibility = View.GONE;
+				noLocationSetViewGroup.visibility = View.VISIBLE;
+				jolliesRecycler.visibility = View.GONE;
 			}
 		})
 	}
@@ -323,17 +344,16 @@ class WheelFragment : Fragment()
 				if(loc != null)
 				{
 					KF_GET_ADDR_FROM_LATLNG(loc.latitude, loc.longitude, 1);
-					KF_POPUP_NO_LOCATION_PROMPT(false);
 				} else {
 					Log.w(TAG, "KF_FRESHlocation: = fresh location null so u may out of reach area" );
 					Toast.makeText(requireContext(), "Cannot reach you at your current location. Please try again later", Toast.LENGTH_SHORT).show();
-					KF_POPUP_NO_LOCATION_PROMPT(true);
+					KF_TOGGLE_VIEW_GRP(R.id.wheel_no_location_prompt_grp, View.VISIBLE);
 				}
 			} .addOnFailureListener {
 				cancelTokSrc.cancel();
 				Log.e(TAG, "KF_GET_LOCATION: = Failed to get current location", it);
 					Toast.makeText(requireContext(), "Cannot get your current location. Please check location settings, internet connection and try again", Toast.LENGTH_LONG).show();
-				KF_POPUP_NO_LOCATION_PROMPT(true);
+				KF_TOGGLE_VIEW_GRP(R.id.wheel_no_location_prompt_grp, View.VISIBLE);
 			}
 	}
 	/**
@@ -345,7 +365,6 @@ class WheelFragment : Fragment()
 	private fun KF_ESTIMATE_LOCATION(){
 		fulocation.lastLocation.addOnSuccessListener {
 			if(it != null){
-				KF_POPUP_NO_LOCATION_PROMPT(false);
 				viewLifecycleOwner.lifecycleScope.launch{
 					KF_GET_ADDR_FROM_LATLNG(it.latitude, it.longitude, 1);
 				}
@@ -361,7 +380,7 @@ class WheelFragment : Fragment()
 							KF_GET_ADDR_FROM_LATLNG(latcache.toDouble(), lngcache.toDouble(), 1);
 						}
 					} else {
-						KF_POPUP_NO_LOCATION_PROMPT(true);
+						KF_TOGGLE_VIEW_GRP(R.id.wheel_no_location_prompt_grp, View.VISIBLE);
 					}
 				}
 			}
@@ -390,30 +409,18 @@ class WheelFragment : Fragment()
 		}
 	}
 	/**
-	* * HELPER SETUP LOCATION PROMPT WHEN CANNOT RETRIEVING LAST LOCATION
-	*/
-	private fun KF_POPUP_NO_LOCATION_PROMPT(onoff:Boolean)
-	{
-		if(onoff) {
-			locationPromptView.visibility = View.VISIBLE;
-			wheelFragBox.visibility = View.GONE;
-		} else
-		{
-			locationPromptView.visibility = View.GONE;
-			wheelFragBox.visibility = View.VISIBLE;
-		}
-
-	}
-	/**
 	* ?REGISTER OBSERVER FOR LOCATION CHANGING
 	 * set up location text display N copy text view
 	 * saving region to appcache
 	 * get jollies from database at that location
+	 * disable the location prompt popup to display event result
 	*/
+	@InternalCoroutinesApi
 	private val locationWatcher = Observer<Kadress>(){
 		Log.d(TAG, "LOCATION Changed OBSERVER Callback is being CALLED");
 		if(it != null)
 		{
+			KF_TOGGLE_VIEW_GRP(R.id.wheel_jollies_display, View.VISIBLE);
 			currLocation = it; // -->> assign value of view model's location
 			if(it.neighbor != null )
 			{
@@ -440,7 +447,9 @@ class WheelFragment : Fragment()
 	}
 	//#endregion
 	
-	//#region RETURNING RESULT FROM LOCATION PICKUP FRAGEMENT
+	/**
+	* ? HANDLE RESULT COMING FROM LOCATION PICKED FRAGMENT
+	*/
 	fun KF_PICKED_PLACES_RETURN(resu : LocationResultContainer)
 	{
 		lifecycleScope.launch {
@@ -476,9 +485,8 @@ class WheelFragment : Fragment()
 		}
 		
 	}
-	//#endregion
 	/**
-	* * A CONTAINER FOR THE RETURNING RESULT FROM AUTOCOMPLETE FRAGMENT
+	* ? A CONTAINER FOR THE RETURNING RESULT FROM AUTOCOMPLETE FRAGMENT
 	*/
 	sealed class LocationResultContainer{
 		data class Success(var addcompo : AddressComponents, var latlng : LatLng): LocationResultContainer()
@@ -490,11 +498,80 @@ class WheelFragment : Fragment()
 	 * showing error view if there is error
 	 * showing result as list
 	*/
+	@InternalCoroutinesApi
 	private fun KF_GET_JOLLIES_ON_AREA()
 	{
 		Log.i(TAG, "KF_GET_JOLLIES_ON_AREA: >>>=== GETTING JOLLIES REFRESH AT ${currLocation?.locality}");
 		lifecycleScope.launch {
-			dataKontrol.KF_VM_GET_JOLLIES_AT(currLocation?.admin1!!, currLocation?.locality!!);
+			dataKontrol.KF_VM_GET_JOLLIES_AT(currLocation!!);
+		}
+	}
+
+	/**
+	* ? JOLLY OBSERVER
+	 *
+	*/
+	private val jollyWatcher = Observer<WheelJolly>(){
+		//Log.i(TAG, "JOLLY WATCHER:  is being called");
+		if(it == null )
+		{
+			Log.i(TAG, "JOLLY WATCHER: NO JOLLY FROM REALTIME DATABASE");
+			KF_TOGGLE_VIEW_GRP(R.id.wheel_no_events_grp, View.VISIBLE);
+		}
+		else {
+			//Log.i(TAG, "JOLLY WATCHER: DATABASE IS NOT EMPTY ");
+			jolliesAdapter.KF_CONSUME_JOLLY(it);
+			KF_TOGGLE_VIEW_GRP(R.id.wheel_jollies_display, View.VISIBLE);
+		}
+	}
+
+	/**
+	* ! *** === HELPERS FUNCTIONS === ***
+	 * */
+
+	/**
+	* ? SETUP LOCATION AND NAVIGATE TO CREATE JOLLY FRAGMENT
+	*/
+	private fun KF_NAVIGATE_TO_JOLLY_CREATION()
+	{
+		if(currLocation != null)
+		{
+			//Log.i(TAG, "KF_NAVIGATE_TO_JOLLY_CREATION: -- ;;; >> CURRENT LOCATION WHEN ADDING ACTIVITY $currLocation");
+			var bund = Bundle();
+			bund.apply {
+				putDouble(KONSTANT.lati_flag, currLocation?.lati!!);
+				putDouble(KONSTANT.logi_flag, currLocation?.longi!!);
+			}
+			findNavController().navigate(R.id.action_global_jollyCreationFragment, bund);
+		} else
+		{
+			var actn = WheelFragmentDirections.actionGlobalJollyCreationFragment();
+			findNavController().navigate(actn);
+		}
+	}
+
+	/**
+	* ? VIEW TOGGLING GROUP
+	 * only works, if only 1 view is enabled at a time
+	*/
+	private fun KF_TOGGLE_VIEW_GRP(vint : Int, enable : Int)
+	{
+		when(vint){
+			R.id.wheel_no_location_prompt_grp ->{
+				noLocationSetViewGroup.visibility = enable;
+				noactiViewGroup.visibility = View.GONE;
+				jolliesRecycler.visibility = View.GONE;
+			}
+			R.id.wheel_no_events_grp -> {
+				noactiViewGroup.visibility = enable;
+				noLocationSetViewGroup.visibility = View.GONE;
+				jolliesRecycler.visibility = View.GONE;
+			}
+			R.id.wheel_jollies_display -> {
+				jolliesRecycler.visibility = enable;
+				noactiViewGroup.visibility = View.GONE;
+				noLocationSetViewGroup.visibility = View.GONE;
+			}
 		}
 	}
 	

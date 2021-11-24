@@ -23,6 +23,16 @@
             app:destination="@id/wheelRoot" />
     </fragment>
 
+    <fragment
+        android:id="@+id/jollyCreationFragment"
+        android:name="desoft.studio.dewheel.JollyFragment"
+        android:label="frag_jolly_creating"
+        tools:layout="@layout/frag_jolly_creating" >
+
+        <action
+            android:id="@+id/action_jollyCreationFragment_to_wheelRoot"
+            app:destination="@id/wheelRoot" />
+    </fragment>
     <navigation android:id="@+id/wheelRoot"
         app:startDestination="@id/wheelFragment">
         <fragment
@@ -30,18 +40,10 @@
             android:name="desoft.studio.dewheel.WheelFragment"
             android:label="frag_wheel"
             tools:layout="@layout/frag_wheel">
-            <action
-                android:id="@+id/action_wheelFragment_to_jollyCreationFragment"
-                app:destination="@id/jollyCreationFragment" />
         </fragment>
-        <fragment
-            android:id="@+id/jollyCreationFragment"
-            android:name="desoft.studio.dewheel.JollyFragment"
-            android:label="frag_jolly_creating"
-            tools:layout="@layout/frag_jolly_creating" >
-            <action
-                android:id="@+id/action_jollyCreationFragment_to_wheelFragment"
-                app:destination="@id/wheelFragment" />
-        </fragment>
+        <action
+            android:id="@+id/action_global_jollyCreationFragment"
+            app:destination="@id/jollyCreationFragment" />
+
     </navigation>
 </navigation>

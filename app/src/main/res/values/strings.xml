@@ -5,7 +5,12 @@
    <string name="hello_blank_fragment">Hello blank fragment</string>
 
    <string name="dropdown_prompt">Select One</string>
-   <string name="no_internet_prompt">Something goes wrong!!! Please check your internet connections and restart the application</string>
+   <string name="no_internet_prompt">Something is wrong!!! Please check your internet connections
+      and restart the application</string>
+   <string name="set_location_prompt">Please set a location to see what\'s happening in the
+      area</string>
+   <string name="create_jolly_prompt">It\'s kind of a quiet day/night.\n Be the first one to stir
+      it up</string>
    <string-array name="gender_list">
       <item>Male</item>
       <item>Female</item>

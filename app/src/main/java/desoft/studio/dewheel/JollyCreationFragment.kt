@@ -25,6 +25,7 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
+import desoft.studio.dewheel.kata.Kadress
 import desoft.studio.dewheel.katic.KONSTANT
 import java.text.SimpleDateFormat
 import java.util.*
@@ -52,8 +53,7 @@ class JollyFragment : Fragment() {
 	private lateinit var lookupmaps: TextView;
 	private val fields = listOf<Place.Field>(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS_COMPONENTS, Place.Field.ADDRESS, Place.Field.LAT_LNG, Place.Field.PHOTO_METADATAS);
 	private var autocompleteLauncher : ActivityResultLauncher<Intent> = KF_AUTOCOMPLETE_RESULT_CB();
-	private var area : String = "";
-	private var admin1: String = "";
+	private var pickedVenue: Kadress = Kadress();
 	
 	private lateinit var donebtn: Button;
 	private lateinit var canbtn: Button;
@@ -63,8 +63,6 @@ class JollyFragment : Fragment() {
 		arguments?.let {
 			areaLati = it.getDouble(KONSTANT.lati_flag);
 			areaLogi = it.getDouble(KONSTANT.logi_flag);
-			username= it.getString(KONSTANT.username);
-			usergid = it.getString(KONSTANT.usergid);
 		}
 		
 		//_ init Google Places Client
@@ -123,12 +121,14 @@ class JollyFragment : Fragment() {
 		//_open google maps
 		lookupmaps.setOnClickListener {
 			var gmminte : Uri? = null;
-			if(areaLati != null)
+			if((areaLati != 0.0 && areaLogi != 0.0))
 			{
 				gmminte = Uri.parse("geo:${areaLati.toString()},${areaLogi.toString()}?z=14f");
+				Log.d(TAG, "KF_SETUP_VIEWS: GOOGLE MAPS GET THIS LINK ${gmminte.toString()}");
 			} else
 			{
-				gmminte = Uri.parse("geo:0,0?z=16f&q=${Locale.getDefault().getDisplayCountry()}");
+				gmminte = Uri.parse("geo:0,0?z=16f&q=${Locale.getDefault().displayCountry}");
+				Log.d(TAG, "KF_SETUP_VIEWS: GOOGLE MAPS GET THIS LINK ${gmminte.toString()}");
 			}
 			var mapinte = Intent(Intent.ACTION_VIEW, gmminte);
 			mapinte.setPackage(KONSTANT.goo_package_name);
@@ -154,10 +154,10 @@ class JollyFragment : Fragment() {
 			var name: String = jollyNameField.text.toString()!!;
 			var addr: String = placePickDisplay.text.toString()!!;
 			var time: Long = calen.timeInMillis;
-			(requireContext() as MainActivity).KF_UPLOAD_JOLLY(name, addr, area, admin1, time); //-> also navigate back to wheel fragment
+			(requireContext() as MainActivity).KF_UPLOAD_JOLLY(name, addr, time, pickedVenue); //-> also navigate back to wheel fragment
 		}
 		canbtn.setOnClickListener {
-			it.findNavController().navigate(R.id.action_jollyCreationFragment_to_wheelFragment);
+			it.findNavController().navigate(R.id.action_jollyCreationFragment_to_wheelRoot);
 		}
 	}
 	/**
@@ -173,14 +173,17 @@ class JollyFragment : Fragment() {
 				Activity.RESULT_OK ->{
 					var re = Autocomplete.getPlaceFromIntent(it.data);
 					Log.d(TAG, "KF_AUTOCOMPLETE_RESULT_CB: == user picks this places ${re.addressComponents}");
-					if(area.isNotBlank()) area = "";
+					if(pickedVenue.admin1?.isNotBlank() == true)
+					{
+						pickedVenue = Kadress(); // ->> create a new object cuz the last one is dirty
+					}
 					for(typ in re.addressComponents.asList())
 					{
 						if(typ.types.get(0).contentEquals("locality")) {
-								area = typ.name;
+							pickedVenue.locality = typ.name;
 						}
 						if(typ.types.get(0).contentEquals("administrative_area_level_1")){
-							admin1 = typ.name;
+							pickedVenue.admin1 = typ.name;
 						}
 					}
 					var finish = "${re.name}\n${re.address}";

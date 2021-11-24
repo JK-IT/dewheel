@@ -25,6 +25,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import desoft.studio.dewheel.Kontrol.DataControl
 import desoft.studio.dewheel.kata.K_User
+import desoft.studio.dewheel.kata.Kadress
 import desoft.studio.dewheel.katic.KONSTANT
 import kotlinx.coroutines.Dispatchers
 
@@ -62,7 +63,7 @@ class MainActivity : AppCompatActivity()
 		{
 			CheckUSERauthen(); //-> going back if user is null
 			Log.d(TAG, "onCreate: setup VIEW MODEL ON MAIN");
-			dataKontrol.KF_VM_SETUP_WITH_FIREBASE(fbauth.currentUser!!);
+			dataKontrol.KF_VM_SETUP_USER_FROM_FIREBASE();
 			//dataFutory = DataControl.DataFactory(application, fbauth.currentUser!!);
 			//dataKontrol = ViewModelProvider(this, dataFutory).get(DataControl::class.java);
 			dataKontrol.sucuload.observe(this, uploadFlagWatcher);
@@ -360,7 +361,7 @@ class MainActivity : AppCompatActivity()
 		if(it)
 		{
 			Toast.makeText(this, "Successful uploading the event", Toast.LENGTH_SHORT).show();
-			navContro.navigate(R.id.action_jollyCreationFragment_to_wheelFragment);
+			navContro.navigate(R.id.action_jollyCreationFragment_to_wheelRoot);
 		} else {
 			Log.e(TAG, "Jolly uploading flag: User is null or Failed to contact server", throw java.lang.RuntimeException("Check your View model if User is NUll"));
 			Toast.makeText(this, "Failed uploading the occurrence. Please try again later!!", Toast.LENGTH_SHORT).show();
@@ -369,9 +370,9 @@ class MainActivity : AppCompatActivity()
 	/**
 	* * UPLOADING JOLLY EVENT TO DATABASE
 	*/
-	fun KF_UPLOAD_JOLLY(iname: String, iaddr:String, inarea:String, inadmin1: String, itime:Long)
+	fun KF_UPLOAD_JOLLY(iname: String, iaddr:String, itime:Long, ivenue : Kadress)
 	{
-		dataKontrol.KF_VM_UP_JOLLY(iname, iaddr, inarea, inadmin1, itime);
+		dataKontrol.KF_VM_UP_JOLLY(iname, iaddr, itime, ivenue);
 	}
 }
 

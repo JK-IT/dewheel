@@ -6,11 +6,11 @@ package desoft.studio.dewheel.kata
 */
 
 data class WheelJolly(
-	var jid: String,
-	var creator: String,
-	var kid:String,
-	var name: String,
-	var addr: String,
-	var area: String,
-	var time: Long,
+	var jid: String? = null,
+	var creator: String? = null,
+	var kid:String? = null,
+	var name: String? = null,
+	var addr: String? = null,
+	var area: String? = null,
+	var time: Long? = null,
 )

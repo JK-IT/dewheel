@@ -166,8 +166,10 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/wheel_location_prompt_grp"
+            android:id="@+id/wheel_no_location_prompt_grp"
             android:orientation="vertical"
+            android:layout_marginVertical="20dp"
+            android:visibility="gone"
             app:layout_constraintTop_toBottomOf="@id/wheel_header_ctrl"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -176,7 +178,7 @@
             android:layout_height="match_parent">
 
             <TextView
-                android:text="Please set a location to see events/occurrences in the area"
+                android:text="@string/set_location_prompt"
                 android:gravity="center"
                 android:layout_gravity="center"
                 android:textSize="@dimen/medText"
@@ -205,7 +207,7 @@
 
         <LinearLayout
             android:id="@+id/wheel_no_events_grp"
-            android:visibility="gone"
+            android:visibility="visible"
             android:orientation="vertical"
             app:layout_constraintTop_toBottomOf="@id/wheel_header_ctrl"
             app:layout_constraintStart_toStartOf="parent"
@@ -215,9 +217,10 @@
             android:layout_height="wrap_content">
 
             <TextView
-                android:text="There are no activities/events going on now.\n Be the first one to start the jolly!!!"
+                android:text="@string/create_jolly_prompt"
                 android:textSize="@dimen/medText"
                 android:layout_gravity="center"
+                android:textStyle="bold"
                 android:gravity="center"
                 android:padding="10dp"
                 android:layout_marginVertical="10dp"
@@ -233,8 +236,8 @@
                 android:layout_height="wrap_content"/>
         </LinearLayout>
 
-        <androidx.fragment.app.FragmentContainerView
-            android:id="@+id/wheel_frag_box"
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/wheel_jollies_display"
             android:visibility="gone"
             app:layout_constraintTop_toBottomOf="@id/wheel_header_ctrl"
             app:layout_constraintStart_toStartOf="parent"
