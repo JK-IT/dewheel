@@ -66,7 +66,7 @@ class MainActivity : AppCompatActivity()
 			dataKontrol.KF_VM_SETUP_USER_FROM_FIREBASE();
 			//dataFutory = DataControl.DataFactory(application, fbauth.currentUser!!);
 			//dataKontrol = ViewModelProvider(this, dataFutory).get(DataControl::class.java);
-			dataKontrol.sucuload.observe(this, uploadFlagWatcher);
+			dataKontrol.userUploadFlag.observe(this, uploadFlagWatcher);
 			dataKontrol.jollyupload.observe(this, jollyWatcher);
 		}
 

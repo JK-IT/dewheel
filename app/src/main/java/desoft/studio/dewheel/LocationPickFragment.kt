@@ -1,6 +1,5 @@
 package desoft.studio.dewheel
 
-import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -21,7 +20,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import java.util.*
 
 
-class LocationPickFragment(var paramctx : Context): BottomSheetDialogFragment()
+class LocationPickFragment : BottomSheetDialogFragment()
 {
 	private val TAG: String = "-des [[-- LOCATION PICK FRAGMENT --]]";
 	

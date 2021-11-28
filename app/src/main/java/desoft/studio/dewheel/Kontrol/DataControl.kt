@@ -15,6 +15,7 @@ import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 private const val TAG : String = "-des- k-- DATA CONTROL ( VIEW MODEL) -->l";
@@ -30,10 +31,8 @@ class DataControl(@NonNull ctx : Application) : AndroidViewModel(ctx)
 	private var user : K_User = K_User();
 	private var userstore = Firebase.firestore.collection("users");
 
-	// * WHEEL JOLLY LIVE DATA
-	val wjolly: MutableLiveData<WheelJolly> = MutableLiveData<WheelJolly>();
 	// * uploading status
-	val sucuload :MutableLiveData<Boolean> by lazy {
+	val userUploadFlag :MutableLiveData<Boolean> by lazy {
 		MutableLiveData<Boolean>();
 	}
 	// * assigned location
@@ -41,13 +40,7 @@ class DataControl(@NonNull ctx : Application) : AndroidViewModel(ctx)
 
 	// * jolly FLOW JOB
 	private var jollyJob : Job? = null;
-	// * a map that will hold old data and area
-	//_ 1st param = city, 2nd param = list of jollies
-	val oldJollies : Map<String, List<WheelJolly>> = mutableMapOf();
-	// * jolly live data
-	val jollies : MutableLiveData<ArrayList<WheelJolly>> = MutableLiveData<ArrayList<WheelJolly>>(arrayListOf());
-
-	// * single jolly
+	// * single jolly, WHEEL JOLLY LIVE DATA
 	var jolly : MutableLiveData<WheelJolly?> = MutableLiveData<WheelJolly?>();
 	// * jolly update flag
 	val jollyupload: MutableLiveData<Boolean> by lazy {
@@ -115,11 +108,11 @@ class DataControl(@NonNull ctx : Application) : AndroidViewModel(ctx)
 		viewModelScope.launch (iodis) {
 			inusr.kid?.let {
 				userstore.document(it).set(inusr).addOnSuccessListener {
-					sucuload.value = true;
+					userUploadFlag.value = true;
 					user = inusr;
 					Log.i(TAG, "KF_VM_UP_USER: == User just sign up and got uploaded");
 				}.addOnFailureListener {
-					sucuload.value = false;
+					userUploadFlag.value = false;
 					Log.e(TAG, "KF_VMuploadUSER: = FAILED TO UPLOAD USER ", it);
 				}
 			}
@@ -159,6 +152,7 @@ class DataControl(@NonNull ctx : Application) : AndroidViewModel(ctx)
 	/**
 	* GET DATA FROM REALTIME BASE WITH AREA
 	 * * updating the events live data
+	 * display stale and update data from stale
 	*/
 	@InternalCoroutinesApi
 	fun KF_VM_GET_JOLLIES_AT(inarea : Kadress) {
@@ -169,12 +163,16 @@ class DataControl(@NonNull ctx : Application) : AndroidViewModel(ctx)
 			jolly.value = null; // reset data on view model
 			jollyJob = viewModelScope.launch(){
 				realdbSource.KF_GET_JOLLIES_AT(inarea)
+					.onEach{
+						//_ we should do sth about this
+						var area = pickedLocation.value?.locality;
+					}
 					.flowOn(defdis)
 					.collect {
 						Log.i(TAG, "KF_VM_GET_JOLLIES_AT: ===>>>=== i got the jolly ${it.jid}");
 						//jollies.value?.add(it);
 						jolly.value = it;
-				}
+					}
 			}
 		}
 	}

@@ -32,7 +32,13 @@ import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.tasks.CancellationTokenSource
+import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.AddressComponents
+import com.google.android.libraries.places.api.model.Place
+import com.google.android.libraries.places.api.model.TypeFilter
+import com.google.android.libraries.places.widget.Autocomplete
+import com.google.android.libraries.places.widget.AutocompleteActivity
+import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -48,7 +54,7 @@ import java.util.*
 
 private const val TAG :  String = "-des- [[== WHEEL FRAGMENT ==]]";
 
-class WheelFragment : Fragment()
+class WheelFragment() : Fragment()
 {
 	private val iodis = Dispatchers.IO;
 
@@ -70,9 +76,10 @@ class WheelFragment : Fragment()
 	private var currLocation : Kadress? = null;
 	private var locConfLauncher = KF_LOC_CONFIG_LAUNCHER();
 	private lateinit var locationHead : LinearLayout;
-	private lateinit var locationText : TextView;
+	private lateinit var locationTitle : TextView;
 	private lateinit var getCurrLocationBtn : TextView;
-	private lateinit var locationPickFrag : LocationPickFragment;
+	private var areaPickLauncher = KF_GOOGLE_PLACES_COMPLETE_CB_REGISTER();
+	private var pickedFields = listOf<Place.Field>(Place.Field.ADDRESS_COMPONENTS, Place.Field.LAT_LNG);
 	
 	private lateinit var hideViewBtn : ImageView;
 	private lateinit var locationCopy : TextView;
@@ -95,6 +102,9 @@ class WheelFragment : Fragment()
 	{
 		Log.i(TAG, "onCreate: IS BEING CALLED");
 		super.onCreate(savedInstanceState);
+		Places.initialize(requireContext(), BuildConfig.GOOG_KEY);
+		Places.createClient(requireContext());
+
 		CheckLOCATIONperm();
 
 		appcache = requireActivity().getSharedPreferences(getString(R.string.app_pref), Context.MODE_PRIVATE);
@@ -117,7 +127,6 @@ class WheelFragment : Fragment()
 			interval = 15000;
 			fastestInterval = 7000;
 		}!!
-		locationPickFrag = LocationPickFragment(requireActivity());
 
 		fbuser = FirebaseAuth.getInstance().currentUser;
 	}
@@ -129,7 +138,7 @@ class WheelFragment : Fragment()
 		var v = inflater.inflate(R.layout.frag_wheel, container, false);
 		locationEnableSettings = v.findViewById(R.id.wheel_location_setting_btn);
 		locationHead = v.findViewById(R.id.wheel_location_head);
-		locationText = v.findViewById(R.id.wheel_location_tedit);
+		locationTitle = v.findViewById(R.id.wheel_location_tedit);
 		getCurrLocationBtn = v.findViewById(R.id.wheel_get_current_location);
 		hideViewBtn = v.findViewById(R.id.wheel_hide_view_btn);
 		locationCopy = v.findViewById(R.id.wheel_location_copy);
@@ -153,10 +162,15 @@ class WheelFragment : Fragment()
 	@InternalCoroutinesApi
 	private fun KF_SETUP_VIEWS() {
 		//_ location display name
-		locationText.inputType = InputType.TYPE_NULL;
-		locationText.setOnClickListener {
+		locationTitle.inputType = InputType.TYPE_NULL;
+		locationTitle.setOnClickListener {
 			Log.i(TAG, "KF_SETUP_VIEWS: = location edit is clicked");
-			locationPickFrag.show(childFragmentManager, LocationPickFragment.fragtag);
+			var inte = Autocomplete.IntentBuilder(AutocompleteActivityMode.FULLSCREEN, pickedFields)
+				.setTypeFilter(TypeFilter.REGIONS)
+				.setCountry(Locale.getDefault().country)
+				.setHint("Enter zipcode or citi")
+				.build(requireContext());
+			areaPickLauncher.launch(inte);
 		}
 		//_ get current location btn
 		getCurrLocationBtn.setOnClickListener{
@@ -259,7 +273,7 @@ class WheelFragment : Fragment()
 	 */
 	private fun GetLOCATIONpermissionCB() : ActivityResultLauncher<Array<String>>
 	{
-		return registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions(), {
+		return registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions(),{
 			var resu: Boolean = true;
 			for(ele in it)
 			{
@@ -415,15 +429,15 @@ class WheelFragment : Fragment()
 			if(it.neighbor != null )
 			{
 				if(it.locality != null){
-					locationText.text = "${it.neighbor}, ${it.locality}";
-					locationCopy.text = locationText.text;
+					locationTitle.text = "${it.neighbor}, ${it.locality}";
+					locationCopy.text = locationTitle.text;
 				} else {
-					locationText.text = "${it.neighbor}";
-					locationCopy.text = locationText.text;
+					locationTitle.text = "${it.neighbor}";
+					locationCopy.text = locationTitle.text;
 				}
 			} else {
-				locationText.text = it.locality;
-				locationCopy.text = locationText.text;
+				locationTitle.text = it.locality;
+				locationCopy.text = locationTitle.text;
 			}
 			appcache.edit().apply {
 				putString(KONSTANT.lati_flag, it.lati.toString());
@@ -436,7 +450,30 @@ class WheelFragment : Fragment()
 			Log.w(TAG, "-->>> Location value on VIEW MODEL <<<--: IS NULL");
 	}
 	//#endregion
-	
+
+	//#region AUTOCOMPLETE PLACES ACTIVITY CALLBACK
+	/**
+	* ? register a callback for activity contract
+	*/
+
+	private fun KF_GOOGLE_PLACES_COMPLETE_CB_REGISTER() : ActivityResultLauncher<Intent>
+	{
+		return registerForActivityResult(ActivityResultContracts.StartActivityForResult(),{
+			if(it.resultCode == AutocompleteActivity.RESULT_OK)
+			{
+				var pla = Autocomplete.getPlaceFromIntent(it.data);
+				KF_PICKED_PLACES_RETURN(LocationResultContainer.Success(pla.addressComponents, pla.latLng));
+			} else if(it.resultCode == AutocompleteActivity.RESULT_CANCELED)
+			{
+				Log.w(TAG, "KF_GOOGLE_PLACES_COMPLETE_CB_REGISTER: AUTOCOMPLETE IS CANCELED");
+			}
+			else {
+				var stat = Autocomplete.getStatusFromIntent(it.data);
+				Log.e(TAG, "KF_GOOGLE_PLACES_COMPLETE_CB_REGISTER: error === >>", Throwable("Error getting picked places from auto complete ${stat.statusCode} <-> ${stat.statusMessage}"));
+			}
+		})
+	}
+
 	/**
 	* ? HANDLE RESULT COMING FROM LOCATION PICKED FRAGMENT
 	*/
@@ -473,7 +510,7 @@ class WheelFragment : Fragment()
 				}
 			}
 		}
-		
+
 	}
 	/**
 	* ? A CONTAINER FOR THE RETURNING RESULT FROM AUTOCOMPLETE FRAGMENT
@@ -482,7 +519,8 @@ class WheelFragment : Fragment()
 		data class Success(var addcompo : AddressComponents, var latlng : LatLng): LocationResultContainer()
 		data class Error(var msg:String?, var code:String?, var extra: Any?): LocationResultContainer()
 	}
-	
+	//#endregion
+
 	/**
 	* ! --- CALLING VIEW MODEL TO GET DATA WHEN LOCATION IS AVAILABLE
 	 * showing error view if there is error
@@ -493,6 +531,7 @@ class WheelFragment : Fragment()
 	{
 		Log.i(TAG, "KF_GET_JOLLIES_ON_AREA: >>>=== GETTING JOLLIES REFRESH AT ${currLocation?.locality}");
 		jolliesAdapter.KF_CLEAR_DATA();
+
 		lifecycleScope.launch {
 			dataKontrol.KF_VM_GET_JOLLIES_AT(currLocation!!);
 		}
@@ -503,16 +542,12 @@ class WheelFragment : Fragment()
 	 *
 	*/
 	private val jollyWatcher = Observer<WheelJolly?>(){
-		//Log.i(TAG, "JOLLY WATCHER:  is being called");
-		if(it == null )
+		if(it != null )
 		{
-			Log.i(TAG, "JOLLY WATCHER: NO JOLLY FROM REALTIME DATABASE");
-			KF_TOGGLE_VIEW_GRP(R.id.wheel_no_events_grp, View.VISIBLE);
-		}
-		else {
-			//Log.i(TAG, "JOLLY WATCHER: DATABASE IS NOT EMPTY ");
 			jolliesAdapter.KF_CONSUME_JOLLY(it);
 			KF_TOGGLE_VIEW_GRP(R.id.wheel_jollies_display, View.VISIBLE);
+		}else {
+			KF_TOGGLE_VIEW_GRP(R.id.wheel_no_events_grp, View.VISIBLE);
 		}
 	}
 

@@ -51,6 +51,7 @@
          <TextView
              android:id="@+id/jolly_prompt"
              android:text="Prompt"
+             android:inputType="text|textCapWords"
              style="@style/TextAppearance.MaterialComponents.Headline5"
              android:layout_marginVertical="5dp"
              android:paddingHorizontal="5dp"
@@ -59,6 +60,7 @@
          <TextView
              android:id="@+id/jolly_address"
              android:text="Place Address"
+             android:inputType="text|textMultiLine"
              android:maxLines="4"
              android:lines="2"
              android:gravity="center_vertical"
@@ -70,6 +72,7 @@
          <TextView
              android:id="@+id/jolly_time"
              android:text="Time"
+             android:inputType="text|datetime"
              android:drawableStart="@drawable/ic_baseline_time_24"
              android:drawablePadding="10dp"
              android:textSize="@dimen/bodyText1"
@@ -94,6 +97,7 @@
          <TextView
              android:id="@+id/jolly_creator_name"
              android:text="User Name"
+             android:inputType="text|textPersonName"
              android:textSize="@dimen/bodyText1"
              android:padding="10dp"
              android:layout_weight="1"

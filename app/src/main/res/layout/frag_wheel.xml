@@ -160,8 +160,8 @@
                     android:id="@+id/wheel_hide_view_btn"
                     android:src="@drawable/ic_baseline_arrow_drop_up_24"
                     android:layout_gravity="center"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"/>
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"/>
             </FrameLayout>
         </LinearLayout>
 

@@ -14,24 +14,30 @@ import desoft.studio.dewheel.kata.Kadress
 import desoft.studio.dewheel.kata.WheelJolly
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.buffer
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.transform
 
 class RealtimeSource {
 
     private val TAG = "-des- ||==*** REALTIME DATABASE SOURCE *** ==||";
 
     private val fbauth : FirebaseAuth = FirebaseAuth.getInstance();
-    private lateinit var fbuser : FirebaseUser;
+    private var fbuser : FirebaseUser;
 
     // ? jolly database reference
-    var jollydb = Firebase.database.getReference("jollies");
+
+    var jollydb : DatabaseReference;
     private var requestDatRef : DatabaseReference? = null;
     private var requestSpot : Kadress? = null;
     //private var jollycb : Flow<>? = null;
     private var jollyChildListener : ChildEventListener? = null;
 
     init {
+        //Firebase.database.setPersistenceEnabled(true);
         fbuser = fbauth.currentUser!!;
+        jollydb = Firebase.database.getReference("jollies");
     }
     /**
     * * --------------------------------------------------- ***
@@ -80,9 +86,9 @@ class RealtimeSource {
         .transform { inval ->
             inval.getValue<WheelJolly>()?.let { emit(it) };
         }
-        .onEach{
+        /*.onEach{
             Log.w(TAG, "KF_GET_JOLLIES_AT: ==;;;== REPO ${Thread.currentThread().name}");
-        }
+        }*/
     }
 
     sealed class JollyState{

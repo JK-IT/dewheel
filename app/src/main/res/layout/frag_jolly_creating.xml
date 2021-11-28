@@ -42,7 +42,7 @@
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/evnt_name_field"
                 android:lines="1"
-                android:inputType="text"
+                android:inputType="text|textCapWords"
                 android:imeOptions="actionDone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
@@ -52,6 +52,7 @@
              android:id="@+id/evnt_addrpick_btn"
              android:hint="Pick A Place"
              android:gravity="start"
+             android:inputType="textMultiLine"
              android:maxLines="4"
              android:textSize="@dimen/medText"
              android:layout_margin="15dp"
@@ -91,6 +92,7 @@
              android:id="@+id/evnt_picktime_btn"
              android:hint="Pick A Time"
              android:textSize="@dimen/medText"
+             android:inputType="text|time"
              android:layout_margin="15dp"
              android:padding="5dp"
              android:drawableStart="@drawable/ic_baseline_time_24"
@@ -108,6 +110,7 @@
              android:padding="15dp"
              android:layout_margin="5dp"
              android:textSize="@dimen/medText"
+             android:inputType="text|date"
              android:drawableStart="@drawable/ic_baseline_calendar_today_24"
              android:drawablePadding="10dp"
              android:layout_width="match_parent"
