@@ -320,9 +320,9 @@ class MainActivity : AppCompatActivity()
 		//set up
 	}
 
-	// _ --------->>-------->>--------->>*** -->>----------->>>>
+	// + --------->>-------->>--------->>*** -->>----------->>>>
 /**
- * ?VIEW MODEL - DATA CONTROL RELATED
+ * *VIEW MODEL - DATA CONTROL RELATED
  */
 	// ! uploading user to firestore using viewmodel
 	fun KF_UPuserTOstore(usr : K_User)
@@ -354,7 +354,8 @@ class MainActivity : AppCompatActivity()
 		}
 	}
 
-// _ --------->>-------->>--------->>*** -->>----------->>>>
+// + --------->>-------->>--------->>*** -->>----------->>>>
+
 	// ! UPLOADING JOLLY EVENT TO DATABASE
 	fun KF_UPLOAD_JOLLY(iname: String, iaddr:String, itime:Long, ivenue : Kadress) {
 		dataKontrol.KF_VM_UP_JOLLY(iname, iaddr, itime, ivenue);
@@ -379,12 +380,10 @@ class MainActivity : AppCompatActivity()
 
 		}
 	}
-
-// _ --------->>-------->>--------->>*** -->>----------->>>>
+// + --------->>-------->>--------->>*** -->>----------->>>>
 	/**
 	* * CHAT ROOM RELATED
 	*/
-
 	// ! FUNCTION KF_CHAT_ROOM
 	/**
 	* ? joining or creating a room on database
@@ -392,9 +391,11 @@ class MainActivity : AppCompatActivity()
 	fun KF_START_CHAT_ROOM(evnt: WheelJolly)	{
 		var bund = Bundle();
 		bund.apply {
-			putParcelable(WindFragment.JOLLY_ROOM_KEY, evnt);
+			putParcelable(ChatActivity.chatJollykey, evnt);
 		}
-		navContro.navigate(R.id.action_global_windFragment, bund);
+		var inte = Intent(this, ChatActivity::class.java);
+		inte.putExtra(ChatActivity.chatIntentkey, bund);
+		startActivity(inte);
 	}
 
 

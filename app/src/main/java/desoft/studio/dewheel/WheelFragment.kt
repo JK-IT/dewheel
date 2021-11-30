@@ -155,11 +155,13 @@ class WheelFragment() : Fragment()
 	/**
 	 * *set up related view functions
 	 */
-	@InternalCoroutinesApi
+
+	@OptIn(InternalCoroutinesApi::class)
 	override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 		KF_SETUP_VIEWS();
 	}
-	@InternalCoroutinesApi
+
+	@OptIn(InternalCoroutinesApi::class)
 	private fun KF_SETUP_VIEWS() {
 		//_ location display name
 		locationTitle.inputType = InputType.TYPE_NULL;
@@ -229,7 +231,7 @@ class WheelFragment() : Fragment()
 	 * picked location
 	 * jolly
 	*/
-	@InternalCoroutinesApi
+	@OptIn(InternalCoroutinesApi::class)
 	override fun onStart()
 	{
 		Log.i(TAG, "onStart: IS BEING CALLED");
@@ -419,7 +421,8 @@ class WheelFragment() : Fragment()
 	 * get jollies from database at that location
 	 * disable the location prompt popup to display event result
 	*/
-	@InternalCoroutinesApi
+
+	@OptIn(InternalCoroutinesApi::class)
 	private val locationWatcher = Observer<Kadress>(){
 		Log.d(TAG, "LOCATION Changed OBSERVER Callback is being CALLED");
 		if(it != null)
@@ -526,7 +529,9 @@ class WheelFragment() : Fragment()
 	 * showing error view if there is error
 	 * showing result as list
 	*/
-	@InternalCoroutinesApi
+
+
+	@OptIn(InternalCoroutinesApi::class)
 	private fun KF_GET_JOLLIES_ON_AREA()
 	{
 		Log.i(TAG, "KF_GET_JOLLIES_ON_AREA: >>>=== GETTING JOLLIES REFRESH AT ${currLocation?.locality}");
