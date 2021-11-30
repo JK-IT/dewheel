@@ -25,7 +25,7 @@ class DataControl(@NonNull ctx : Application) : AndroidViewModel(ctx)
 	private var defdis = Dispatchers.Default;
 	private var iodis = Dispatchers.IO;
 
-	private lateinit var realdbSource : RealtimeSource;
+	private var realdbSource : RealtimeSource;
 
 	//private var fbuser : FirebaseUser? = null;
 	private var user : K_User = K_User();
@@ -43,7 +43,7 @@ class DataControl(@NonNull ctx : Application) : AndroidViewModel(ctx)
 	// * single jolly, WHEEL JOLLY LIVE DATA
 	var jolly : MutableLiveData<WheelJolly?> = MutableLiveData<WheelJolly?>();
 	// * jolly update flag
-	val jollyupload: MutableLiveData<Boolean> by lazy {
+	val jollyUploadFlag: MutableLiveData<Boolean> by lazy {
 		MutableLiveData<Boolean>();
 	}
 
@@ -136,16 +136,16 @@ class DataControl(@NonNull ctx : Application) : AndroidViewModel(ctx)
 						if( ! it.isSuccessful)
 						{
 							Log.e(TAG, "KF_VM_UP_JOLLY: Failed to upload jolly why????", it.exception);
-							jollyupload.value = false;
+							jollyUploadFlag.value = false;
 						} else {
 							Log.d(TAG, "KF_VM_UP_JOLLY: == SUCCESSFULL UPLOADING JOLLY");
-							jollyupload.value = true;
+							jollyUploadFlag.value = true;
 						}
 					}
 			}
 		} else {
 			Log.e(TAG, "KF_VM_UP_JOLLY: == fbuser is anonymous ${FirebaseAuth.getInstance().currentUser?.isAnonymous} or user is null ${user == null}");
-			jollyupload.value = false;
+			jollyUploadFlag.value = false;
 		}
 	}
 
@@ -175,6 +175,24 @@ class DataControl(@NonNull ctx : Application) : AndroidViewModel(ctx)
 					}
 			}
 		}
+	}
+	//#endregion
+
+	//#region REALTIME DB CHAT ROOM SECTION
+	    // _ --------->>-------->>--------->>*** -->>----------->>>>
+
+	/**
+	* ? CREATE CHAT ROOM WITH USERS GID ON DATABASE
+	 * chatroom  location
+	 * gid_gid	--> status { gid, gid}
+	 * --> messages {mgid, mgid, timestamp}
+	*/
+	fun KF_VM_CHATROOM(jollydata : WheelJolly) {
+		var fromid = user.kid;
+		var toid = jollydata.kid;
+		var fromtoid = "${user.kid}_${jollydata.kid}";
+		Log.i(TAG, "KF_VM_CHATROOM: room id = $fromtoid");
+		//realdbSource.fbdb.getReference(fromtoid)
 	}
 	//#endregion
 

@@ -26,6 +26,7 @@ import com.google.firebase.auth.FirebaseUser
 import desoft.studio.dewheel.Kontrol.DataControl
 import desoft.studio.dewheel.kata.K_User
 import desoft.studio.dewheel.kata.Kadress
+import desoft.studio.dewheel.kata.WheelJolly
 import desoft.studio.dewheel.katic.KONSTANT
 import kotlinx.coroutines.Dispatchers
 
@@ -67,7 +68,7 @@ class MainActivity : AppCompatActivity()
 			//dataFutory = DataControl.DataFactory(application, fbauth.currentUser!!);
 			//dataKontrol = ViewModelProvider(this, dataFutory).get(DataControl::class.java);
 			dataKontrol.userUploadFlag.observe(this, uploadFlagWatcher);
-			dataKontrol.jollyupload.observe(this, jollyWatcher);
+			dataKontrol.jollyUploadFlag.observe(this, jollyWatcher);
 		}
 
 		SetupNavHost();
@@ -318,14 +319,12 @@ class MainActivity : AppCompatActivity()
 		
 		//set up
 	}
-	
-	/**
-	 * ?VIEW MODEL - DATA CONTROL RELATED
-	 * *
-	 */
-	/**
-	* ! uploading user to firestore using viewmodel
-	*/
+
+	// _ --------->>-------->>--------->>*** -->>----------->>>>
+/**
+ * ?VIEW MODEL - DATA CONTROL RELATED
+ */
+	// ! uploading user to firestore using viewmodel
 	fun KF_UPuserTOstore(usr : K_User)
 	{
 		Log.d(TAG, "KF_UPuserTOstore: == Get user to upload $usr");
@@ -354,28 +353,53 @@ class MainActivity : AppCompatActivity()
 			}
 		}
 	}
-	/**
-	* ** Jolly UPLOADING WATCHER
-	*/
+
+// _ --------->>-------->>--------->>*** -->>----------->>>>
+	// ! UPLOADING JOLLY EVENT TO DATABASE
+	fun KF_UPLOAD_JOLLY(iname: String, iaddr:String, itime:Long, ivenue : Kadress) {
+		dataKontrol.KF_VM_UP_JOLLY(iname, iaddr, itime, ivenue);
+	}
+
+	// ! Jolly UPLOADING WATCHER
 	private val jollyWatcher = Observer<Boolean> {
-		if(it)
-		{
+		if (it) {
 			Toast.makeText(this, "Successful uploading the event", Toast.LENGTH_SHORT).show();
 			navContro.navigate(R.id.action_jollyCreationFragment_to_wheelRoot);
 		} else {
-			Log.e(TAG, "Jolly uploading flag: User is null or Failed to contact server", throw java.lang.RuntimeException("Check your View model if User is NUll"));
-			Toast.makeText(this, "Failed uploading the occurrence. Please try again later!!", Toast.LENGTH_SHORT).show();
+			Log.e(
+				TAG,
+				"Jolly uploading flag: User is null or Failed to contact server",
+				throw java.lang.RuntimeException("Check your View model if User is NUll")
+			);
+			Toast.makeText(
+				this,
+				"Failed uploading the occurrence. Please try again later!!",
+				Toast.LENGTH_SHORT
+			).show();
+
 		}
 	}
-	/**
-	* * UPLOADING JOLLY EVENT TO DATABASE
-	*/
-	fun KF_UPLOAD_JOLLY(iname: String, iaddr:String, itime:Long, ivenue : Kadress)
-	{
-		dataKontrol.KF_VM_UP_JOLLY(iname, iaddr, itime, ivenue);
-	}
-}
 
+// _ --------->>-------->>--------->>*** -->>----------->>>>
+	/**
+	* * CHAT ROOM RELATED
+	*/
+
+	// ! FUNCTION KF_CHAT_ROOM
+	/**
+	* ? joining or creating a room on database
+	*/
+	fun KF_START_CHAT_ROOM(evnt: WheelJolly)	{
+		var bund = Bundle();
+		bund.apply {
+			putParcelable(WindFragment.JOLLY_ROOM_KEY, evnt);
+		}
+		navContro.navigate(R.id.action_global_windFragment, bund);
+	}
+
+
+
+}
 /*		// this callback keep being called -> waste of resource if u don't do anything
 		var activNetCallback = object : ConnectivityManager.OnNetworkActiveListener{
 			override fun onNetworkActive()

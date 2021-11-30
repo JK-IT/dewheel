@@ -3,10 +3,7 @@ package desoft.studio.dewheel.Kontrol
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.database.ChildEventListener
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.*
 import com.google.firebase.database.ktx.database
 import com.google.firebase.database.ktx.getValue
 import com.google.firebase.ktx.Firebase
@@ -25,9 +22,8 @@ class RealtimeSource {
 
     private val fbauth : FirebaseAuth = FirebaseAuth.getInstance();
     private var fbuser : FirebaseUser;
-
-    // ? jolly database reference
-
+    var fbdb : FirebaseDatabase;
+    // _ jolly database reference
     var jollydb : DatabaseReference;
     private var requestDatRef : DatabaseReference? = null;
     private var requestSpot : Kadress? = null;
@@ -35,13 +31,12 @@ class RealtimeSource {
     private var jollyChildListener : ChildEventListener? = null;
 
     init {
-        //Firebase.database.setPersistenceEnabled(true);
+        fbdb =  Firebase.database;
+        fbdb.setPersistenceEnabled(true);
         fbuser = fbauth.currentUser!!;
         jollydb = Firebase.database.getReference("jollies");
     }
-    /**
-    * * --------------------------------------------------- ***
-    */
+// _ --------->>-------->>--------->>*** -->>----------->>>>
 
     //#region JOLLY INTERACTIVE FUNCTIONS SECTION
     suspend fun KF_GET_JOLLIES_AT(inaddress : Kadress)  : Flow<WheelJolly>

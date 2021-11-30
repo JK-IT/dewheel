@@ -13,6 +13,7 @@
             android:id="@+id/action_windFragment_to_wheelRoot"
             app:destination="@id/wheelRoot" />
     </fragment>
+
     <fragment
         android:id="@+id/userFragment"
         android:name="desoft.studio.dewheel.UserFragment"
@@ -29,10 +30,10 @@
         android:label="frag_jolly_creating"
         tools:layout="@layout/frag_jolly_creating" >
 
-        <action
-            android:id="@+id/action_jollyCreationFragment_to_wheelRoot"
+        <action android:id="@+id/action_jollyCreationFragment_to_wheelRoot"
             app:destination="@id/wheelRoot" />
     </fragment>
+
     <navigation android:id="@+id/wheelRoot"
         app:startDestination="@id/wheelFragment">
         <fragment
@@ -46,4 +47,7 @@
             app:destination="@id/jollyCreationFragment" />
 
     </navigation>
+    <action
+        android:id="@+id/action_global_windFragment"
+        app:destination="@id/windFragment"/>
 </navigation>

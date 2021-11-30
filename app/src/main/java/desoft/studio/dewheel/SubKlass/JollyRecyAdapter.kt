@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import desoft.studio.dewheel.MainActivity
 import desoft.studio.dewheel.R
 import desoft.studio.dewheel.kata.WheelJolly
 import java.text.SimpleDateFormat
@@ -34,6 +35,9 @@ class JollyRecyAdapter(val ctx : Context, var design: Int) : RecyclerView.Adapte
             calen.timeInMillis = data.time!!;
             jollytime.text = sfm.format(data.time);
             creator.text = data.creator;
+            takbtn.setOnClickListener {
+                (ctx as MainActivity).KF_START_CHAT_ROOM(data);
+            }
         }
     }
 
@@ -43,6 +47,14 @@ class JollyRecyAdapter(val ctx : Context, var design: Int) : RecyclerView.Adapte
     private val TAG = "-des- ;;;=== -RECYCLERVIEW ADAPTER- ===;;;";
 
     private var itemlst : ArrayList<WheelJolly> = arrayListOf();
+
+    private var attchedRecyView : RecyclerView? = null;
+
+    // _ getting a referrence to recyclerview on attached
+    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+        super.onAttachedToRecyclerView(recyclerView);
+        attchedRecyView = recyclerView;
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): JollyRecyAdapter.Kholder {
         val v = LayoutInflater.from(parent.context).inflate(design, parent, false);
