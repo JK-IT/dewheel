@@ -13,19 +13,54 @@
        android:layout_width="match_parent"
        android:layout_height="wrap_content">
       <com.google.android.material.appbar.CollapsingToolbarLayout
-          app:layout_scrollFlags="enterAlways|snap"
+          android:id="@+id/chat_collapse_tb"
+          app:collapsedTitleTextAppearance="@color/white"
+          app:expandedTitleTextAppearance="@color/white"
+          app:layout_scrollFlags="scroll|enterAlwaysCollapsed|snap"
           android:fitsSystemWindows="true"
           android:layout_width="match_parent"
-          android:layout_height="wrap_content">
+          android:layout_height="150dp">
          <androidx.appcompat.widget.Toolbar
+             android:id="@+id/chat_toolbar"
              app:layout_collapseMode="pin"
              android:layout_width="match_parent"
-             android:layout_height="wrap_content"/>
+             android:layout_height="?attr/actionBarSize"/>
       </com.google.android.material.appbar.CollapsingToolbarLayout>
    </com.google.android.material.appbar.AppBarLayout>
 
-   <androidx.recyclerview.widget.RecyclerView
+   <androidx.core.widget.NestedScrollView
        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
        android:layout_width="match_parent"
-       android:layout_height="match_parent"/>
+       android:layout_height="match_parent">
+      <LinearLayout
+          android:orientation="vertical"
+          android:layout_width="match_parent"
+          android:layout_height="match_parent">
+         <TextView
+             android:textSize="90sp"
+             android:text="dang this is big"
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content"/>
+         <TextView
+             android:textSize="90sp"
+             android:text="dang this is big"
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content"/>
+         <TextView
+             android:textSize="90sp"
+             android:text="dang this is big"
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content"/>
+         <TextView
+             android:textSize="90sp"
+             android:text="dang this is big"
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content"/>
+      </LinearLayout>
+   </androidx.core.widget.NestedScrollView>
+
+<!--   <androidx.recyclerview.widget.RecyclerView
+       app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
+       android:layout_width="match_parent"
+       android:layout_height="match_parent"/>-->
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

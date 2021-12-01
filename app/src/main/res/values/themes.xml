@@ -15,6 +15,6 @@
     </style>
 
     <style name="Theme.Dewheel.Chat" parent="Theme.MaterialComponents.Light.NoActionBar">
-
+        <item name="windowActionBar">false</item>
     </style>
 </resources>
