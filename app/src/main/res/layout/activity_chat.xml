@@ -14,14 +14,15 @@
        android:layout_height="wrap_content">
       <com.google.android.material.appbar.CollapsingToolbarLayout
           android:id="@+id/chat_collapse_tb"
-          app:collapsedTitleTextAppearance="@color/white"
-          app:expandedTitleTextAppearance="@color/white"
-          app:layout_scrollFlags="scroll|enterAlwaysCollapsed|snap"
+          app:collapsedTitleGravity="top"
+          app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
           android:fitsSystemWindows="true"
           android:layout_width="match_parent"
-          android:layout_height="150dp">
+          android:layout_height="200dp">
          <androidx.appcompat.widget.Toolbar
              android:id="@+id/chat_toolbar"
+             android:layout_gravity="bottom"
+             android:fitsSystemWindows="true"
              app:layout_collapseMode="pin"
              android:layout_width="match_parent"
              android:layout_height="?attr/actionBarSize"/>

@@ -15,6 +15,7 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
@@ -29,6 +30,7 @@ import desoft.studio.dewheel.kata.Kadress
 import desoft.studio.dewheel.kata.WheelJolly
 import desoft.studio.dewheel.katic.KONSTANT
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity()
 {
@@ -299,6 +301,7 @@ class MainActivity : AppCompatActivity()
 	}
 	//#endregion
 	/**
+	 * *						SETUP BOTTOM SHEET()
 	 * Generate and set up bottomsheet dialog
 	 */
 	private fun SetupBOTTOMSheet()
@@ -322,9 +325,12 @@ class MainActivity : AppCompatActivity()
 
 	// + --------->>-------->>--------->>*** -->>----------->>>>
 /**
- * *VIEW MODEL - DATA CONTROL RELATED
+ * ?VIEW MODEL - DATA CONTROL RELATED
  */
-	// ! uploading user to firestore using viewmodel
+
+/**
+* 	*						KF_UPuserTOstore()
+*/
 	fun KF_UPuserTOstore(usr : K_User)
 	{
 		Log.d(TAG, "KF_UPuserTOstore: == Get user to upload $usr");
@@ -332,6 +338,7 @@ class MainActivity : AppCompatActivity()
 	}
 	
 	/**
+	 * *					UPLOAD FLAG WATCHER
 	 * // ! upload flag observer
 	 * write to cache to have appropriate action later
 	 */
@@ -355,12 +362,18 @@ class MainActivity : AppCompatActivity()
 	}
 
 // + --------->>-------->>--------->>*** -->>----------->>>>
-
-	// ! UPLOADING JOLLY EVENT TO DATABASE
+	/**
+	* 	*					KF_UPLOAD_JOLLY
+	 * 	! UPLOADING JOLLY EVENT TO DATABASE
+	*/
 	fun KF_UPLOAD_JOLLY(iname: String, iaddr:String, itime:Long, ivenue : Kadress) {
 		dataKontrol.KF_VM_UP_JOLLY(iname, iaddr, itime, ivenue);
 	}
 
+	/**
+	* *							JOLLY EVENT WATCHER
+	 * ! register observer watcher on jolly event
+	*/
 	// ! Jolly UPLOADING WATCHER
 	private val jollyWatcher = Observer<Boolean> {
 		if (it) {
@@ -381,21 +394,30 @@ class MainActivity : AppCompatActivity()
 		}
 	}
 // + --------->>-------->>--------->>*** -->>----------->>>>
+
 	/**
-	* * CHAT ROOM RELATED
+	 * *									KF_START_CHAT_ROOM
+	* . UPLOAD CHAT NODE ON DB
+	 * . START CHAT ACTIVITY
 	*/
-	// ! FUNCTION KF_CHAT_ROOM
-	/**
-	* ? joining or creating a room on database
-	*/
-	fun KF_START_CHAT_ROOM(evnt: WheelJolly)	{
+	fun KF_START_CHAT_ROOM(evnt: WheelJolly)
+	{
 		var bund = Bundle();
 		bund.apply {
 			putParcelable(ChatActivity.chatJollykey, evnt);
 		}
 		var inte = Intent(this, ChatActivity::class.java);
 		inte.putExtra(ChatActivity.chatIntentkey, bund);
-		startActivity(inte);
+		lifecycleScope.launch(iodis) {
+			dataKontrol.KF_VM_CHATROOM(evnt)
+				.addOnSuccessListener {
+					Log.d(TAG, "KF_START_CHAT_ROOM: on thread ${Thread.currentThread().name}");
+					startActivity(inte);
+				}
+				.addOnFailureListener {
+					Log.w(TAG, "KF_START_CHAT_ROOM: FAILED TO UPLOAD ROOM, ADD LOGIC TO HANDEL THIS ${Thread.currentThread().name}");
+				}
+		}
 	}
 
 

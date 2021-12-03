@@ -5,11 +5,13 @@ import android.util.Log
 import androidx.annotation.NonNull
 import androidx.lifecycle.*
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.ktx.database
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import desoft.studio.dewheel.kata.K_User
 import desoft.studio.dewheel.kata.Kadress
 import desoft.studio.dewheel.kata.WheelJolly
+import desoft.studio.dewheel.kata.WheelRoom
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.Job
@@ -26,38 +28,43 @@ class DataControl(@NonNull ctx : Application) : AndroidViewModel(ctx)
 	private var iodis = Dispatchers.IO;
 
 	private var realdbSource : RealtimeSource;
+	//! .info/connected = general status -> indicate if app is connecting to server
+	val infostate = Firebase.database.getReference(".info/connected");
 
 	//private var fbuser : FirebaseUser? = null;
-	private var user : K_User = K_User();
+	var userFilled : Boolean = false;
+	var user : K_User = K_User();
 	private var userstore = Firebase.firestore.collection("users");
 
-	// * uploading status
+	// ! uploading status
 	val userUploadFlag :MutableLiveData<Boolean> by lazy {
 		MutableLiveData<Boolean>();
 	}
-	// * assigned location
+	// ! assigned location
 	val pickedLocation : MutableLiveData<Kadress> = MutableLiveData<Kadress>();
 
-	// * jolly FLOW JOB
+	// ! jolly FLOW JOB
 	private var jollyJob : Job? = null;
-	// * single jolly, WHEEL JOLLY LIVE DATA
+	// ! single jolly, WHEEL JOLLY LIVE DATA
 	var jolly : MutableLiveData<WheelJolly?> = MutableLiveData<WheelJolly?>();
-	// * jolly update flag
+	// ! jolly update flag
 	val jollyUploadFlag: MutableLiveData<Boolean> by lazy {
 		MutableLiveData<Boolean>();
 	}
 
-	/***
+	/**
+	 * * 					INIT
 	 * Creating  A User class on init, fill out from cache or from FirebaseUser parameter
 	 * only creating Kuser if user is not anonymous
 	 */
-	//_ init
 	init
 	{
 		Log.w(TAG, "VIEW MODEL ININT: Data Control is created");
 		realdbSource = RealtimeSource();
 	}
-	//_ clean up function
+	/*
+	* * 					ONCLEARED
+	*/
 	override fun onCleared()
 	{
 		Log.i(TAG, "onCleared: == VIEW MODEL CLEAN UP IS CALLED");
@@ -66,7 +73,8 @@ class DataControl(@NonNull ctx : Application) : AndroidViewModel(ctx)
 
 	//#region SETUP K WHEEL USER SECTION
 	/**
-	* SETUP VIEW MODEL WITH ASSIGNED FIREBASE USER
+	 * * KF_VM_SETUP_USER_FROM_FIREBASE
+	! SETUP VIEW MODEL WITH ASSIGNED FIREBASE USER
 	*/
 	fun KF_VM_SETUP_USER_FROM_FIREBASE (){ //(inuser : FirebaseUser){
 		viewModelScope.launch(defdis) {
@@ -78,11 +86,13 @@ class DataControl(@NonNull ctx : Application) : AndroidViewModel(ctx)
 				var fbid = fbuser!!.providerData.get(0).uid;
 				var email = fbuser!!.email;
 				user = K_User(gid, fbid, email);
+				userFilled = true;
 				Log.w(TAG, "Init: Hey , This is the user calling View Model Init $user");
 			}
 		}
 	}
 	/**
+	 * *							KF_VM_SETUP_USER
 	*	SETUP USER NAME FROM CACHE
 	*/
 	fun KF_VM_SETUP_USER(iname :String, igender: String? =null, isexori : String? =null, ifavorite: String? = null)
@@ -101,6 +111,7 @@ class DataControl(@NonNull ctx : Application) : AndroidViewModel(ctx)
 	//#region USER AND FIRESTORE SECTION
 	/**
 	 * !UPload user to firestore
+	 * * KF_VM_UP_USER
 	 * assing user to this uploaded user
 	 * make sure to check that fb user is not anonymous, aka not failed to sign up with fb server
 	 */
@@ -122,7 +133,8 @@ class DataControl(@NonNull ctx : Application) : AndroidViewModel(ctx)
 
 	//#region REALTIME DATABASE AND JOLLIES SECTION
 	/**
-	* * Upload Jolly Occurrence to Database
+	* ! Upload Jolly Occurrence to Database
+	 * * KF_VM_UP_JOLLY
 	*/
 	fun KF_VM_UP_JOLLY(injoname: String, injoaddr:String, injotime:Long, inVenue: Kadress)
 	{
@@ -151,7 +163,8 @@ class DataControl(@NonNull ctx : Application) : AndroidViewModel(ctx)
 
 	/**
 	* GET DATA FROM REALTIME BASE WITH AREA
-	 * * updating the events live data
+	 * * KF_VM_GET_JOLLIES_AT
+	 * ? updating the events live data
 	 * display stale and update data from stale
 	*/
 	@InternalCoroutinesApi
@@ -182,17 +195,20 @@ class DataControl(@NonNull ctx : Application) : AndroidViewModel(ctx)
 	    // _ --------->>-------->>--------->>*** -->>----------->>>>
 
 	/**
-	* ? CREATE CHAT ROOM WITH USERS GID ON DATABASE
+	 * * 	*		KF_VM_CHATROOM
+	* ! CREATE CHAT ROOM WITH USERS GID ON DATABASE
 	 * chatroom  location
 	 * gid_gid	--> status { gid, gid}
 	 * --> messages {mgid, mgid, timestamp}
 	*/
-	fun KF_VM_CHATROOM(jollydata : WheelJolly) {
+	suspend fun KF_VM_CHATROOM(jollydata : WheelJolly) : com.google.android.gms.tasks.Task<Void>
+	{
 		var fromid = user.kid;
 		var toid = jollydata.kid;
 		var fromtoid = "${user.kid}_${jollydata.kid}";
 		Log.i(TAG, "KF_VM_CHATROOM: room id = $fromtoid");
-		//realdbSource.fbdb.getReference(fromtoid)
+		var room = WheelRoom(fromtoid, false, false, null, null);
+		return realdbSource.chatdb.child(fromtoid).setValue(room);
 	}
 	//#endregion
 

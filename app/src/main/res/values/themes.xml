@@ -14,7 +14,7 @@
         <!-- Customize your theme here. -->
     </style>
 
-    <style name="Theme.Dewheel.Chat" parent="Theme.MaterialComponents.Light.NoActionBar">
+    <style name="Theme.Dewheel.Chat" parent="Theme.MaterialComponents.Light.NoActionBar.Bridge">
         <item name="windowActionBar">false</item>
     </style>
 </resources>
