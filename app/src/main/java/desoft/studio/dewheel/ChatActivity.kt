@@ -22,16 +22,20 @@ class ChatActivity : AppCompatActivity() {
     private val TAG = "-des- <<++ CHAT ROOM ACTIVITY ++>>";
 
     private var jollyta: WheelJolly? = null;
+    private var roomid : String? = null;
 
     private var fbuser: FirebaseUser? = null;
 
     private var kiewmodel : DataControl? = null;
 
+    private var appisOnline : Boolean = false;
+
     /**
      * *                    ONCREATE
      * CHECK USER AUTHENTICATION
      * SET UP DATA FROM BUNDLE
-     * CONNECT TO DATABASE
+     * REGISTER OBSERVER FOR CONNECTION STATE WITH REALTIME DATABASE
+     * REGISTER FOR MSG WATCHER ON DATABASE
      */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,25 +45,29 @@ class ChatActivity : AppCompatActivity() {
         // _ get Intent bundle info
         var bdl = intent.getBundleExtra(chatIntentkey);
         if (bdl != null) {
-            Log.d(TAG, "onCreate: ${bdl.getParcelable<WheelJolly>(chatJollykey)}");
-            jollyta = bdl.getParcelable<WheelJolly>(chatJollykey);
+            Log.d(TAG, "onCreate: ${bdl.getParcelable<WheelJolly>(chatJollyBundlekey)}");
+            jollyta = bdl.getParcelable<WheelJolly>(chatJollyBundlekey);
+            roomid = bdl.getString(chatJollyRoomKey);
         }
         // _ setup view
         KF_SETUP_VIEWS();
-        // _ register observer when application is at least started state
+
         lifecycleScope.launch {
+        // _ register observer when application is at least started state
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 kiewmodel?.infostate?.addValueEventListener(fbLinkWatcher);
             }
-        }
-        //_ connect to database
+        //_ register for msg reference on database
+            repeatOnLifecycle(Lifecycle.State.RESUMED) {
 
+            }
+        }
     }
 
     /**
      * *            KF_SETUP_VIEWS
      * @ setup collapsing toolbar
-     * ----> assign title of chat room, using name from wheel jolly
+     * ----> assign title of chat room,  name from wheel jolly
      */
     private fun KF_SETUP_VIEWS() {
         setSupportActionBar(findViewById(R.id.chat_toolbar));
@@ -78,13 +86,16 @@ class ChatActivity : AppCompatActivity() {
     /** *                ONSTART
      * . check if user is error
      * . check if app is connected to database
+     * . send null msg to room for other one can parsing msg and get info from you
      */
     override fun onStart() {
         super.onStart();
-        if(fbuser == null || fbuser!!.isAnonymous == true)
-        {
-            Log.i(TAG, "onStart: USER IS NULL ${fbuser == null} OR ANONYMOUS ${fbuser?.isAnonymous == true}");
-            KF_BACKTO_GATE();
+        if(appisOnline) {
+            if(fbuser == null || fbuser!!.isAnonymous == true)
+            {
+                Log.i(TAG, "onStart: USER IS NULL ${fbuser == null} OR ANONYMOUS ${fbuser?.isAnonymous == true}");
+                KF_BACKTO_GATE();
+            }
         }
     }
 
@@ -131,15 +142,19 @@ class ChatActivity : AppCompatActivity() {
     /**
     * *                     fbLinkWatcher
      * ! firebase connection state observer
+     * . if connected -> send msg to the room on server
     */
     private val fbLinkWatcher  = object : ValueEventListener {
         override fun onDataChange(snapshot: DataSnapshot) {
             val state = snapshot.getValue(Boolean::class.java) ?: false;
             if(state) {
-                Log.d(TAG, "onDataChange: CONNTECTED TO DATABAE");
+                Log.d(TAG, "onDataChange: CONNTECTED TO Firebase DATABAE and ROOM ID $roomid");
+                appisOnline = true;
+                roomid?.let { kiewmodel?.KF_VM_SEND_DUMMY_MSG(it) };
             }
             else {
                 Log.d(TAG, "onDataChange: NO CONNECTION TO DATABASE");
+                appisOnline = false;
             }
         }
 
@@ -153,6 +168,7 @@ class ChatActivity : AppCompatActivity() {
     companion object
     {
         val chatIntentkey : String = "CHAT ROOM INFO INTENT KEY";
-        val chatJollykey: String = " CHAT JOLLY BUNDLE KEY";
+        val chatJollyBundlekey: String = " CHAT JOLLY BUNDLE KEY";
+        val chatJollyRoomKey: String = "CHAT ROOM ID KEY";
     }
 }

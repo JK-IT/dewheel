@@ -404,12 +404,13 @@ class MainActivity : AppCompatActivity()
 	{
 		var bund = Bundle();
 		bund.apply {
-			putParcelable(ChatActivity.chatJollykey, evnt);
+			putParcelable(ChatActivity.chatJollyBundlekey, evnt);
+			putString(ChatActivity.chatJollyRoomKey, evnt.jid);
 		}
 		var inte = Intent(this, ChatActivity::class.java);
 		inte.putExtra(ChatActivity.chatIntentkey, bund);
 		lifecycleScope.launch(iodis) {
-			dataKontrol.KF_VM_CHATROOM(evnt)
+			dataKontrol.KF_VM_CHATROOM(evnt.jid!! ,evnt)
 				.addOnSuccessListener {
 					Log.d(TAG, "KF_START_CHAT_ROOM: on thread ${Thread.currentThread().name}");
 					startActivity(inte);

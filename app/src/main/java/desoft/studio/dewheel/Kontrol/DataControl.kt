@@ -5,13 +5,15 @@ import android.util.Log
 import androidx.annotation.NonNull
 import androidx.lifecycle.*
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
+import com.google.firebase.database.ktx.getValue
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import desoft.studio.dewheel.kata.K_User
-import desoft.studio.dewheel.kata.Kadress
-import desoft.studio.dewheel.kata.WheelJolly
-import desoft.studio.dewheel.kata.WheelRoom
+import desoft.studio.dewheel.kata.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.Job
@@ -19,6 +21,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import java.util.concurrent.ConcurrentLinkedQueue
 
 private const val TAG : String = "-des- k-- DATA CONTROL ( VIEW MODEL) -->l";
 
@@ -30,6 +33,12 @@ class DataControl(@NonNull ctx : Application) : AndroidViewModel(ctx)
 	private var realdbSource : RealtimeSource;
 	//! .info/connected = general status -> indicate if app is connecting to server
 	val infostate = Firebase.database.getReference(".info/connected");
+	//!	roomid: id of requested room
+	var roomid: String? = null;
+	//! roomsg : a reference to realtime database location for message in the room
+	var rooMsgRef :DatabaseReference? = null;
+	//! concurrentLinkedQueue -> to store room msg and process with model FIFO
+	var roMsgContainer = ConcurrentLinkedQueue<Kmessage>();
 
 	//private var fbuser : FirebaseUser? = null;
 	var userFilled : Boolean = false;
@@ -191,29 +200,84 @@ class DataControl(@NonNull ctx : Application) : AndroidViewModel(ctx)
 	}
 	//#endregion
 
-	//#region REALTIME DB CHAT ROOM SECTION
 	    // _ --------->>-------->>--------->>*** -->>----------->>>>
+	//#region REALTIME DB CHAT ROOM SECTION
 
 	/**
 	 * * 	*		KF_VM_CHATROOM
-	* ! CREATE CHAT ROOM WITH USERS GID ON DATABASE
+	* ! CREATE CHAT ROOM WITH JOLLY ID ON DATABASE
+	 * . check if room exist, before creating new room
 	 * chatroom  location
 	 * gid_gid	--> status { gid, gid}
 	 * --> messages {mgid, mgid, timestamp}
 	*/
-	suspend fun KF_VM_CHATROOM(jollydata : WheelJolly) : com.google.android.gms.tasks.Task<Void>
+	suspend fun KF_VM_CHATROOM(rid : String ,jollydata : WheelJolly) : com.google.android.gms.tasks.Task<Void>
 	{
-		var fromid = user.kid;
-		var toid = jollydata.kid;
-		var fromtoid = "${user.kid}_${jollydata.kid}";
-		Log.i(TAG, "KF_VM_CHATROOM: room id = $fromtoid");
-		var room = WheelRoom(fromtoid, false, false, null, null);
-		return realdbSource.chatdb.child(fromtoid).setValue(room);
+		//// TODO: check if room exist 1st
+		var room = JollyRoom(jollydata.jid.toString(), null);
+		return realdbSource.chatdb.child(rid).setValue(room);
 	}
-	//#endregion
 
 	/**
-	 * *----------------------------------------
+	* 	* 			KF_VM_SEND_DUMMY_MSG
+	 * . check if the room already exist on database
+	 * . register roomid to array on viewmodel
+	 * todo: save it to room database
+	 * . sending dummy msg, which include only your info, and empty msg
+	*/
+	fun KF_VM_SEND_DUMMY_MSG(rid : String)
+	{
+		roomid = rid;
+		viewModelScope.launch(iodis) {
+			Log.w(TAG, "KF_VM_SEND_DUMMY_MSG: check if room exist on server");
+			realdbSource.chatdb.child(roomid!!).get()
+				.addOnSuccessListener {
+					if(it.exists()) {
+						Log.w(TAG, "KF_VM_SEND_DUMMY_MSG: ROOM EXIST AFTER CHECK");
+						KF_VM_REGISTER_MSG_RECALL();
+					} else {
+						Log.w(TAG, "KF_VM_SEND_DUMMY_MSG: ROOM not EXIST AFTER CHECK");
+						var dmsg =Kmessage(user.kid, "");
+						realdbSource.chatdb.child(roomid!!).child("roomsg").setValue(dmsg)
+							.addOnSuccessListener {
+								KF_VM_REGISTER_MSG_RECALL();
+							}
+							.addOnFailureListener {
+								Log.w(TAG, "KF_VM_SEND_DUMMY_MSG: ERROR = FAILED", it);
+							}
+					}
+				}
+				.addOnFailureListener {
+					Log.e(TAG, "KF_VM_SEND_DUMMY_MSG: ERROR", RuntimeException("Failed to get snapshot from database"));
+				}
+		}
+	}
+
+	/**
+	* *					KF_VM_REGISTER_MSG_RECALL
+	 * !recall when a room exist on database
+	 * TODO: SHOULD WE NOTIFY IF ROOM DOES NOT EXISTS
+	*/
+	fun KF_VM_REGISTER_MSG_RECALL()
+	{
+		roomid?.let {
+			rooMsgRef = realdbSource.chatdb.child(roomid!!).child("rooMsg");
+			rooMsgRef?.addValueEventListener(object : ValueEventListener{
+				override fun onDataChange(snapshot: DataSnapshot) {
+					var msg = snapshot.getValue<Kmessage>();
+					Log.d(TAG, "REGISTER MSG RECALL: This is new msg, $msg");
+				}
+
+				override fun onCancelled(error: DatabaseError) {
+					Log.e(TAG, "onCancelled: ERROR ON MSG DATABASE", error.toException());
+				}
+			})
+		}
+	}
+	//#endregion
+	// + --------->>-------->>--------->>*** -->>----------->>>>
+	/**
+	 * * 							DATA FACTORY
 	* ? THIS IS FACTORY OF THIS VIEW MODEL
 	*/
 	class DataFactory(private var appli: Application): ViewModelProvider.AndroidViewModelFactory(appli)
