@@ -402,22 +402,25 @@ class MainActivity : AppCompatActivity()
 	*/
 	fun KF_START_CHAT_ROOM(evnt: WheelJolly)
 	{
-		var bund = Bundle();
-		bund.apply {
-			putParcelable(ChatActivity.chatJollyBundlekey, evnt);
-			putString(ChatActivity.chatJollyRoomKey, evnt.jid);
-		}
 		var inte = Intent(this, ChatActivity::class.java);
-		inte.putExtra(ChatActivity.chatIntentkey, bund);
 		lifecycleScope.launch(iodis) {
-			dataKontrol.KF_VM_CHATROOM(evnt.jid!! ,evnt)
-				.addOnSuccessListener {
-					Log.d(TAG, "KF_START_CHAT_ROOM: on thread ${Thread.currentThread().name}");
-					startActivity(inte);
+			var done = dataKontrol.KF_VM_CHATROOM(evnt.jid!! ,evnt);
+			when(done) {
+				is DataControl.ResultBox.Failure -> {
+					Log.e(TAG, "KF_START_CHAT_ROOM: ${done.details}");
 				}
-				.addOnFailureListener {
-					Log.w(TAG, "KF_START_CHAT_ROOM: FAILED TO UPLOAD ROOM, ADD LOGIC TO HANDEL THIS ${Thread.currentThread().name}");
+				is DataControl.ResultBox.VoidResult -> {
+					done.resu.addOnSuccessListener {
+						var bund = Bundle();
+						bund.apply {
+							putParcelable(ChatActivity.chatJollyBundlekey, evnt);
+							putString(ChatActivity.chatJollyRoomKey, evnt.jid);
+						}
+						inte.putExtra(ChatActivity.chatIntentkey, bund);
+						startActivity(inte);
+					}
 				}
+			}
 		}
 	}
 

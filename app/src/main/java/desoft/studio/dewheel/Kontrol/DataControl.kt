@@ -4,6 +4,7 @@ import android.app.Application
 import android.util.Log
 import androidx.annotation.NonNull
 import androidx.lifecycle.*
+import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -21,6 +22,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import java.util.concurrent.ConcurrentLinkedQueue
 
 private const val TAG : String = "-des- k-- DATA CONTROL ( VIEW MODEL) -->l";
@@ -211,11 +213,18 @@ class DataControl(@NonNull ctx : Application) : AndroidViewModel(ctx)
 	 * gid_gid	--> status { gid, gid}
 	 * --> messages {mgid, mgid, timestamp}
 	*/
-	suspend fun KF_VM_CHATROOM(rid : String ,jollydata : WheelJolly) : com.google.android.gms.tasks.Task<Void>
+	suspend fun KF_VM_CHATROOM(rid : String ,jollydata : WheelJolly) : ResultBox
 	{
-		//// TODO: check if room exist 1st
-		var room = JollyRoom(jollydata.jid.toString(), null);
-		return realdbSource.chatdb.child(rid).setValue(room);
+		var snap = realdbSource.chatdb.child(rid).get().await();
+		if(!snap.exists()) {
+			Log.d(TAG, "KF_VM_CHATROOM: create room $rid");
+			var ro = JollyRoom(jollydata.jid, null);
+			var done =  realdbSource.chatdb.child(rid).setValue(ro);
+			return ResultBox.VoidResult(done);
+		} else {
+			Log.w(TAG, "KF_VM_CHATROOM: Room already exist $rid");
+			return ResultBox.Failure("Room already Exists");
+		}
 	}
 
 	/**
@@ -275,6 +284,17 @@ class DataControl(@NonNull ctx : Application) : AndroidViewModel(ctx)
 		}
 	}
 	//#endregion
+
+	// + --------->>-------->>--------->>*** -->>----------->>>>
+	/**
+	* *							SEAL CLASS FOR DATA AND ERROR
+	 *
+	*/
+	sealed class ResultBox {
+		data class VoidResult(var resu: Task<Void>) : ResultBox();
+		data class Failure(var details : String) : ResultBox();
+	}
+
 	// + --------->>-------->>--------->>*** -->>----------->>>>
 	/**
 	 * * 							DATA FACTORY
