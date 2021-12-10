@@ -35,17 +35,21 @@ data class JollyRoom(
 }
 
 data class Kmessage(
-    var sender : String?, // gid of sender
-    var msg: String? // the message
+    var senderid : String? = null, // gid of sender
+    var sendername: String?=null, // name of sender
+    var sendermsg: String?=null // the message
 ) : Parcelable {
     constructor(parcel: Parcel) : this(
         parcel.readString(),
+        parcel.readString(),
         parcel.readString()
-    ) {}
+    ) {
+    }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
-        parcel.writeString(sender)
-        parcel.writeString(msg)
+        parcel.writeString(senderid)
+        parcel.writeString(sendername)
+        parcel.writeString(sendermsg)
     }
 
     override fun describeContents(): Int {
@@ -61,4 +65,5 @@ data class Kmessage(
             return arrayOfNulls(size)
         }
     }
+
 }

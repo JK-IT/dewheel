@@ -99,7 +99,8 @@ class RealtimeSource {
 
     companion object
     {
-        val jollyRef : String = "jollies";
-        val roomRef: String = "chatrooms";
+        const val jollyRef : String = "jollies";
+        const val roomRef: String = "chatrooms";
+        const val roomsgRef : String = "roomsg";
     }
 }

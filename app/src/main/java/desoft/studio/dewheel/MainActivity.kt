@@ -92,13 +92,13 @@ class MainActivity : AppCompatActivity()
 		if(appCache.getBoolean(KONSTANT.verified, false) == true &&
 				appCache.getBoolean(KONSTANT.user_upload_flag, false) == true)
 		{
-			dataKontrol.KF_VM_SETUP_USER(appCache.getString(KONSTANT.username, "")!!,
+			dataKontrol.KF_VM_FILLOUT_USER(appCache.getString(KONSTANT.username, "")!!,
 													appCache.getString(KONSTANT.gender, ""),
 													appCache.getString(KONSTANT.sexori, ""),
 													appCache.getString(KONSTANT.favor, ""));
 		} else
 		{
-			dataKontrol.KF_VM_SETUP_USER(appCache.getString(KONSTANT.username, "")!!);
+			dataKontrol.KF_VM_FILLOUT_USER(appCache.getString(KONSTANT.username, "")!!);
 		}
 	}
 	
@@ -403,20 +403,21 @@ class MainActivity : AppCompatActivity()
 	fun KF_START_CHAT_ROOM(evnt: WheelJolly)
 	{
 		var inte = Intent(this, ChatActivity::class.java);
+		var bund = Bundle();
+		bund.apply {
+			putParcelable(ChatActivity.chatJollyBundlekey, evnt);
+			putString(ChatActivity.chatJollyRoomKey, evnt.jid);
+		}
+		inte.putExtra(ChatActivity.chatIntentkey, bund);
 		lifecycleScope.launch(iodis) {
 			var done = dataKontrol.KF_VM_CHATROOM(evnt.jid!! ,evnt);
+
 			when(done) {
-				is DataControl.ResultBox.Failure -> {
-					Log.e(TAG, "KF_START_CHAT_ROOM: ${done.details}");
+				is DataControl.ResultBox.RoomExist -> {
+					if(done.yesorno) startActivity(inte);
 				}
 				is DataControl.ResultBox.VoidResult -> {
 					done.resu.addOnSuccessListener {
-						var bund = Bundle();
-						bund.apply {
-							putParcelable(ChatActivity.chatJollyBundlekey, evnt);
-							putString(ChatActivity.chatJollyRoomKey, evnt.jid);
-						}
-						inte.putExtra(ChatActivity.chatIntentkey, bund);
 						startActivity(inte);
 					}
 				}

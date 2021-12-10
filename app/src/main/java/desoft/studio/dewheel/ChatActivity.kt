@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.appbar.CollapsingToolbarLayout
@@ -15,11 +16,14 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.ktx.Firebase
 import desoft.studio.dewheel.Kontrol.DataControl
+import desoft.studio.dewheel.kata.Kmessage
 import desoft.studio.dewheel.kata.WheelJolly
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class ChatActivity : AppCompatActivity() {
     private val TAG = "-des- <<++ CHAT ROOM ACTIVITY ++>>";
+    private val iodis = Dispatchers.IO;
 
     private var jollyta: WheelJolly? = null;
     private var roomid : String? = null;
@@ -53,15 +57,13 @@ class ChatActivity : AppCompatActivity() {
         KF_SETUP_VIEWS();
 
         lifecycleScope.launch {
-        // _ register observer when application is at least started state
+        // _ register firebase server connection observer when application is at least started state
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 kiewmodel?.infostate?.addValueEventListener(fbLinkWatcher);
             }
-        //_ register for msg reference on database
-            repeatOnLifecycle(Lifecycle.State.RESUMED) {
-
-            }
         }
+        //_ register for msg reference on database
+        kiewmodel?.romLiveMsg?.observe(this, msgWatcher);
     }
 
     /**
@@ -160,6 +162,16 @@ class ChatActivity : AppCompatActivity() {
 
         override fun onCancelled(error: DatabaseError) {
             Log.i(TAG, "onCancelled: FB LINK WATCHER IS CANCELLED");
+        }
+    }
+
+    /**
+    * *             msgWatcher
+     * ! watcher for live message on server
+    */
+    private val msgWatcher = object: Observer<Kmessage>{
+        override fun onChanged(t: Kmessage?) {
+            Log.i(TAG, "msgWatcher :  Data change on live msg $t");
         }
 
     }
