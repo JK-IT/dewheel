@@ -42,7 +42,7 @@ class JollyRecyAdapter(val ctx : Context, var design: Int) : RecyclerView.Adapte
     }
 
     /**
-    * ? ------> RECYCLERVIEW ADAPTER IMPLEMENTATION
+    * ! ------> RECYCLERVIEW ADAPTER IMPLEMENTATION
     */
     private val TAG = "-des- ;;;=== -RECYCLERVIEW ADAPTER- ===;;;";
 

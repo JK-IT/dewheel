@@ -246,6 +246,7 @@ class DataControl(@NonNull ctx : Application) : AndroidViewModel(ctx)
 	 * . register roomid to array on viewmodel
 	 * todo: save it to room database
 	 * . sending dummy msg, which include only your info, and empty msg
+	 * . call func to register msg recall on realtime database -> assign value for rooMsgRef
 	*/
 	fun KF_VM_SEND_DUMMY_MSG(rid : String)
 	{
@@ -263,6 +264,7 @@ class DataControl(@NonNull ctx : Application) : AndroidViewModel(ctx)
 	/**
 	* *					KF_VM_REGISTER_MSG_RECALL
 	 * !recall when a room exist on database
+	 * todo: wrap it to flow, so u dont have to worry about overflow of messages
 	*/
 	private fun KF_VM_REGISTER_MSG_RECALL()
 	{

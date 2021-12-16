@@ -1,14 +1,22 @@
 package desoft.studio.dewheel
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.inputmethod.InputMethodManager
+import android.widget.EditText
+import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.appbar.CollapsingToolbarLayout
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.DataSnapshot
@@ -16,6 +24,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.ktx.Firebase
 import desoft.studio.dewheel.Kontrol.DataControl
+import desoft.studio.dewheel.SubKlass.ChatRowAdapter
 import desoft.studio.dewheel.kata.Kmessage
 import desoft.studio.dewheel.kata.WheelJolly
 import kotlinx.coroutines.Dispatchers
@@ -27,12 +36,16 @@ class ChatActivity : AppCompatActivity() {
 
     private var jollyta: WheelJolly? = null;
     private var roomid : String? = null;
-
     private var fbuser: FirebaseUser? = null;
-
     private var kiewmodel : DataControl? = null;
-
     private var appisOnline : Boolean = false;
+    private var chatAdapter : ChatRowAdapter? = null;
+    private var ime : InputMethodManager? = null;
+    //_ ui stuffs
+    private var textInputGroup : LinearLayout? = null;
+    private var edtet : EditText? = null;
+    private var botshethavior: BottomSheetBehavior<LinearLayout>? = null;
+    private var chatRoomFab : ExtendedFloatingActionButton? = null;
 
     /**
      * *                    ONCREATE
@@ -51,8 +64,10 @@ class ChatActivity : AppCompatActivity() {
         if (bdl != null) {
             Log.d(TAG, "onCreate: ${bdl.getParcelable<WheelJolly>(chatJollyBundlekey)}");
             jollyta = bdl.getParcelable<WheelJolly>(chatJollyBundlekey);
-            roomid = bdl.getString(chatJollyRoomKey);
+            roomid = bdl.getString(chatJollyRoomKey); //-> jid
         }
+        //_ side setup
+        ime = (getSystemService(Context.INPUT_METHOD_SERVICE)) as InputMethodManager;
         // _ setup view
         KF_SETUP_VIEWS();
 
@@ -70,9 +85,10 @@ class ChatActivity : AppCompatActivity() {
      * *            KF_SETUP_VIEWS
      * @ setup collapsing toolbar
      * ----> assign title of chat room,  name from wheel jolly
+     * . setup recyclerview adapter
      */
     private fun KF_SETUP_VIEWS() {
-        setSupportActionBar(findViewById(R.id.chat_toolbar));
+        setSupportActionBar(findViewById(R.id.chat_room_toolbar));
         supportActionBar?.apply {
             title = jollyta?.creator;
             setDisplayShowHomeEnabled(true);
@@ -80,9 +96,45 @@ class ChatActivity : AppCompatActivity() {
             elevation = 5F;
         }
 
-        var tblayout = (findViewById<CollapsingToolbarLayout>(R.id.chat_collapse_tb));
+        var tblayout = (findViewById<CollapsingToolbarLayout>(R.id.chat_room_collapse_tb));
         tblayout.isTitleEnabled = false;
         //tblayout.title = jollyta?.creator;
+
+        chatAdapter = ChatRowAdapter(this);
+        var review = findViewById<RecyclerView>(R.id.chat_room_recyview);
+        review.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+        review.adapter = chatAdapter;
+
+        textInputGroup = findViewById(R.id.chat_room_input_grp);
+        edtet = findViewById(R.id.chat_room_edtet);
+        edtet!!.setOnFocusChangeListener { v, hasFocus ->
+            if(hasFocus) {
+                ime?.showSoftInput(edtet, InputMethodManager.SHOW_IMPLICIT);
+            } else {
+                ime?.hideSoftInputFromWindow(edtet?.windowToken, InputMethodManager.HIDE_IMPLICIT_ONLY);
+            }
+        }
+        chatRoomFab = findViewById(R.id.chat_room_fab);
+        botshethavior = BottomSheetBehavior.from(textInputGroup!!);
+        Log.d(TAG, "KF_SETUP_VIEWS: Bottomsheet is null ${botshethavior != null}");
+        botshethavior?.apply {
+            isHideable = true;
+            isFitToContents = true;
+            isDraggable = false;
+            state = BottomSheetBehavior.STATE_HIDDEN;
+        }
+        chatRoomFab?.setOnClickListener{
+            if(botshethavior?.state == BottomSheetBehavior.STATE_HIDDEN) {
+                botshethavior?.apply {
+                    state = BottomSheetBehavior.STATE_EXPANDED;
+                }
+                edtet!!.requestFocus();
+            } else {
+                botshethavior?.apply {
+                    state = BottomSheetBehavior.STATE_HIDDEN;
+                }
+            }
+        }
     }
 
     /** *                ONSTART
@@ -108,7 +160,8 @@ class ChatActivity : AppCompatActivity() {
      * . setup view model if user != null
      * . setup viewmodel with user from database
      */
-    private fun KF_CHECK_USER_AUTHENTICATION() {
+    private fun KF_CHECK_USER_AUTHENTICATION()
+    {
         var backtogate: Boolean = false;
         if (Firebase.auth.currentUser != null) {
             if (Firebase.auth.currentUser!!.isAnonymous != true) {
@@ -168,10 +221,17 @@ class ChatActivity : AppCompatActivity() {
     /**
     * *             msgWatcher
      * ! watcher for live message on server
+     * . update chat messages , with name and message body
+     *
     */
     private val msgWatcher = object: Observer<Kmessage>{
         override fun onChanged(t: Kmessage?) {
             Log.i(TAG, "msgWatcher :  Data change on live msg $t");
+            if (t != null) {
+                chatAdapter?.KF_ADD_MSG(t)
+            } else {
+                Log.i(TAG, "CHAT ACTIVITY, MSG WATCHER ::> message node on realtime database is null");
+            }
         }
 
     }

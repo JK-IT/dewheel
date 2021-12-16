@@ -13,14 +13,14 @@
        android:layout_width="match_parent"
        android:layout_height="wrap_content">
       <com.google.android.material.appbar.CollapsingToolbarLayout
-          android:id="@+id/chat_collapse_tb"
+          android:id="@+id/chat_room_collapse_tb"
           app:collapsedTitleGravity="top"
           app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
           android:fitsSystemWindows="true"
           android:layout_width="match_parent"
           android:layout_height="200dp">
          <androidx.appcompat.widget.Toolbar
-             android:id="@+id/chat_toolbar"
+             android:id="@+id/chat_room_toolbar"
              android:layout_gravity="bottom"
              android:fitsSystemWindows="true"
              app:layout_collapseMode="pin"
@@ -29,7 +29,7 @@
       </com.google.android.material.appbar.CollapsingToolbarLayout>
    </com.google.android.material.appbar.AppBarLayout>
 
-   <androidx.core.widget.NestedScrollView
+   <!--<androidx.core.widget.NestedScrollView
        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
        android:layout_width="match_parent"
        android:layout_height="match_parent">
@@ -58,10 +58,35 @@
              android:layout_width="match_parent"
              android:layout_height="wrap_content"/>
       </LinearLayout>
-   </androidx.core.widget.NestedScrollView>
+   </androidx.core.widget.NestedScrollView>-->
 
-<!--   <androidx.recyclerview.widget.RecyclerView
+   <androidx.recyclerview.widget.RecyclerView
+       android:id="@+id/chat_room_recyview"
        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
        android:layout_width="match_parent"
-       android:layout_height="match_parent"/>-->
+       android:layout_height="wrap_content"/>
+
+   <LinearLayout
+       android:id="@+id/chat_room_input_grp"
+       app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
+       style="?attr/bottomSheetStyle"
+       android:background="@color/purple_700"
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content">
+      <EditText
+          android:id="@+id/chat_room_edtet"
+          android:text="Enter a text here"
+          android:textColor="@color/white"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"/>
+   </LinearLayout>
+
+   <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+       android:id="@+id/chat_room_fab"
+       android:text="Send a text"
+       android:gravity="center"
+       android:layout_gravity="right|bottom"
+       android:layout_margin="15dp"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"/>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
