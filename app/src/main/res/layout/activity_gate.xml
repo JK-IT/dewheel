@@ -24,6 +24,7 @@
             android:layout_height="wrap_content"/>
         <com.google.android.gms.common.SignInButton
             android:id="@+id/gate_google_btn"
+            android:clickable="false"
             android:layout_marginBottom="20dp"
             android:layout_gravity="center"
             android:layout_width="wrap_content"
@@ -38,6 +39,7 @@
             android:layout_height="wrap_content"/>
         <Button
             android:id="@+id/gate_guest_btn"
+            android:clickable="false"
             android:text="Quick Login"
             android:layout_marginBottom="20dp"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"

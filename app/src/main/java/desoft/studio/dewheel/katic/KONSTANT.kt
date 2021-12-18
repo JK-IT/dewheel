@@ -2,8 +2,10 @@ package desoft.studio.dewheel.katic
 
 object KONSTANT
 {
-	val username : String = "USER DISPLAY NAME";
+	val userverified : String = "USER VERIFICATION";
 	val useruid : String = "USER UNIQUE ID";
+
+	val username : String = "USER DISPLAY NAME";
 	val usergid : String = "USER GOOGLE ID";
 	val usergmail : String = "USER GOOGLE MAIL ADDRESS";
 	val fone: String = "USER GOOGLE PHONE NUMBER";
@@ -16,7 +18,6 @@ object KONSTANT
 	 * or u cannot become verified user, if u don't fill out other required fields
 	 * ? VALUE TYPE == BOOLEAN
  	 */
-	val verified : String = "VERIFED USER";
 	// * BOOLEAN
 	val user_upload_flag: String = "USER UPLOADING FLAG";
 	// * STRING

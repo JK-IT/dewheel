@@ -89,7 +89,7 @@ class MainActivity : AppCompatActivity()
 /*		Log.d(TAG, "onStart:  == User verified ${appCache.getBoolean(KONSTANT.verified, false)}");
 		Log.d(TAG, "onStart:  == User Uploaded ${appCache.getBoolean(KONSTANT.upload_flag, false)}");
 		Log.d(TAG, "onStart:  == User Gender ${appCache.getString(KONSTANT.gender, "")}");*/
-		if(appCache.getBoolean(KONSTANT.verified, false) == true &&
+		if(appCache.getBoolean(KONSTANT.userverified, false) == true &&
 				appCache.getBoolean(KONSTANT.user_upload_flag, false) == true)
 		{
 			dataKontrol.KF_VM_FILLOUT_USER(appCache.getString(KONSTANT.username, "")!!,
@@ -346,7 +346,7 @@ class MainActivity : AppCompatActivity()
 		if(it) {
 			Log.i(TAG, "successfully updated user to store: ");
 			appCache.edit().apply{
-				putBoolean(KONSTANT.verified, true);
+				putBoolean(KONSTANT.userverified, true);
 				putBoolean(KONSTANT.user_upload_flag, true);
 				putLong(KONSTANT.cache_timestamp, System.currentTimeMillis());
 				apply();
@@ -354,7 +354,7 @@ class MainActivity : AppCompatActivity()
 		} else {
 			appCache.edit().apply {
 				putBoolean(KONSTANT.user_upload_flag, false);
-				putBoolean(KONSTANT.verified, false);
+				putBoolean(KONSTANT.userverified, false);
 				putLong(KONSTANT.cache_timestamp, System.currentTimeMillis());
 				apply();
 			}

@@ -259,7 +259,7 @@ class UserFragment : Fragment()
 	
 	override fun onStart() {
 		super.onStart();
-		if(appcache.getBoolean(KONSTANT.verified, false) == true)
+		if(appcache.getBoolean(KONSTANT.userverified, false) == true)
 		{
 			FieldChecked(false, false);
 		} else

@@ -12,6 +12,8 @@ import android.view.View
 import android.widget.Button
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
+import androidx.core.content.edit
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -20,36 +22,51 @@ import com.google.android.gms.common.SignInButton
 import com.google.android.gms.common.api.ApiException
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
+import desoft.studio.dewheel.Kontrol.DataControl
+import desoft.studio.dewheel.Kontrol.WedaKontrol
+import desoft.studio.dewheel.katic.KONSTANT
+import desoft.studio.dewheel.local.Kuser
 
 class GateActivity : AppCompatActivity()
 {
 	private val TAG = "-des- <<++ GATE ACTIVITY ++>>";
-	
+
+	private val dataKontrol : DataControl by viewModels{DataControl.DataFactory(application)};
+	private val wedaKontrol : WedaKontrol by viewModels {WedaKontrol.DataWheelKontrolFactory((application as Wapplication).repo)};
+
 	private lateinit var connmana : ConnectivityManager;
 	private lateinit var fbauth : FirebaseAuth;
 	private var fbuser : FirebaseUser? = null;
 	private lateinit var gooInOptions : GoogleSignInOptions;
 	private lateinit var gooInClient : GoogleSignInClient;
 	private var gooInAccount : GoogleSignInAccount? = null;
-	private var gooLauncher : ActivityResultLauncher<Intent> = KF_GOOlauncherCB();
-	private lateinit var shrepref : SharedPreferences;
-	private lateinit var goobtn : SignInButton;
-	private lateinit var guestbtn : Button;
-	
+	private var gooLauncher : ActivityResultLauncher<Intent> = KF_GOO_LAUNCHER_CB();
+	private lateinit var appCache : SharedPreferences;
+	private var goobtn : SignInButton? = null;
+	private var guestbtn : Button?=null;
+
+	/**
+	* *				onCreate
+	 * . get connection manager
+	 * . check connection
+	 * 		-> yes : get sharepreferences
+	 * 					. setup google signin client, firebase instance
+	 * 					.start authentication process, setup view
+	 * 		-> no: popup dialog saying user is offline, ask them to reconnect
+	*/
 	override fun onCreate(savedInstanceState: Bundle?)
 	{
 		super.onCreate(savedInstanceState)
 		setContentView(R.layout.activity_gate);
 		
 		connmana = getSystemService(ConnectivityManager::class.java);
-		if(CheckConnection())
+		if(KF_CHECK_ONLINE())
 		{
-			shrepref = getSharedPreferences(getString(R.string.app_pref), Context.MODE_PRIVATE);
+			appCache = getSharedPreferences(getString(R.string.app_pref), Context.MODE_PRIVATE);
 			
 			gooInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
 				.requestIdToken(getString(R.string.default_web_client_id))
@@ -57,131 +74,142 @@ class GateActivity : AppCompatActivity()
 			gooInClient = GoogleSignIn.getClient(this, gooInOptions);
 			
 			fbauth = FirebaseAuth.getInstance();
-			
+
 			goobtn = findViewById(R.id.gate_google_btn);
 			guestbtn = findViewById(R.id.gate_guest_btn);
-			
-			StartAuthen();
-			SetupVIEWfunc();
+
+			KF_SETUP_VIEW();
+			KF_VERIFY_USER();
 		}
 	}
-	
-	override fun onDestroy()
-	{
-		super.onDestroy();
-	}
-	
-	/* *---------------------------------------*/
+	// + --------->>-------->>--------->>*** -->>----------->>>>
 	/**
+	 * *		KF_CHECK_ONLINE
 	 * Check for connection
 	 * FAIL => SHOWING DIALOG FRAGMENT
 	 * SUCCESS => RETURN;
 	 */
-	private fun CheckConnection() : Boolean
+	private fun KF_CHECK_ONLINE() : Boolean
 	{
 		//Log.i(TAG, "CheckConnection: Active network null ?${connmana.activeNetwork == null} and curr net active ?${connmana.isDefaultNetworkActive}");
-		if(connmana.activeNetwork == null)
-		{
+		if(connmana.activeNetwork == null)  {
 			ShowingNOCONNECTIONdialog(this);
 			return false;
-		} else
-		{
+		}
+		else  {
 			return true;
 		}
 	}
-	
 	/**
-	 * fbuser == null --> user not login or data is deleted
-	 * -> then just let them login either with google or get new anonymous id if they wiped their data
-	 *
-	 * Flow : user == null, stay here, else ->> start next activity
+	 * *		KF_VERIFY_USER
+	 * . check share reference for verification
+	 * .-> if verifed -> check for current user on firebase server
+	 * -> incase user is deleted from server -> enable login interface again
 	 */
-	private fun StartAuthen()
+	private fun KF_VERIFY_USER()
 	{
-		fbuser = fbauth.currentUser;
-		if(fbuser != null) //-> start next activity
-		{
-			Log.d(TAG, "StartAuthen: ==> user is NOT null, uid ${fbuser?.uid}");
-			StartMain();
-		} else {
-			Log.w(TAG, "StartAuthen: == user is null");
+		var verified = appCache.getBoolean(KONSTANT.userverified, false);
+		if(verified) {
+			fbuser = fbauth.currentUser;
+			if(fbuser != null) {
+				Log.d(TAG, "StartAuthen: ==> user is NOT null, uid ${fbuser?.uid}");
+				KF_START_WHEEL();
+			} else {
+				Log.w(TAG, "StartAuthen: == user is null");
+				KF_ENA_LOGIN_INTERFACE();
+			}
+		}
+		else {
+			Log.d(TAG, "KF_VERIFY_USER: user not verified");
+			KF_ENA_LOGIN_INTERFACE();
 		}
 	}
-	
-	private fun SetupVIEWfunc()
+	/**
+	* * 	KF_ENA_LOGIN_INTERFACE
+	*/
+	private fun KF_ENA_LOGIN_INTERFACE()
 	{
-		GuestBtn();
-		GooBtn();
+		goobtn?.isEnabled = true;
+		guestbtn?.isEnabled = true;
+		appCache.edit {
+			putBoolean(KONSTANT.userverified, false);
+			putString(KONSTANT.useruid, "");
+			commit();
+		}
 	}
 	/**
-	 * if user== null,
-	 * Sign in anonymous - > success then start next activity
-	 * failed -> stay here
-	 */
-	private fun GuestBtn()
+	* * 	KF_SETUP_VIEW
+	*/
+	private fun KF_SETUP_VIEW()
 	{
-		guestbtn.setOnClickListener {
+		KF_SETUP_GUEST_LOGIN();
+		//_ setup google button
+		goobtn?.setOnClickListener {
+			var inte = gooInClient.signInIntent;
+			gooLauncher.launch(inte);
+		}
+	}
+	/**
+	 * *				KF_SETUP_GUEST_LOGIN
+	 * . Sign in anonymous
+	 * . onSUCCESS : save fb user id to appcache & room , then start next activity
+	 * . failed : check on connection
+	 */
+	private fun KF_SETUP_GUEST_LOGIN()
+	{
+		guestbtn?.setOnClickListener {
 			if(fbuser != null)  return@setOnClickListener;
-			fbauth.signInAnonymously().addOnSuccessListener {
-				fbuser = it.user;
-				Log.d(TAG, "GuestBtn: ==> success guest login - uid [${fbuser?.uid}");
-				StartMain();
-			}
+			fbauth.signInAnonymously()
+				.addOnSuccessListener {
+					Log.d(TAG, "GuestBtn: ==> success guest login - uid [${fbuser?.uid}");
+					fbuser = it.user;
+					KF_UPDATE_CACHE_ROOM();
+					KF_START_WHEEL();
+				}
 				.addOnFailureListener {
-				Log.e(TAG, "GuestBtn: failed to sign in as anonymous");
-				var snbar = Snackbar.make(window.decorView.rootView, "Opps!! Cannot connect to server, please restart the application", Snackbar.LENGTH_INDEFINITE);
+					Log.e(TAG, "GuestBtn: failed to sign in as anonymous");
+					goobtn?.isEnabled = false;
+					guestbtn?.isEnabled = false;
+					var snbar = Snackbar.make(window.decorView.rootView, "Opps!! Cannot connect to server, please restart the application", Snackbar.LENGTH_INDEFINITE);
+					snbar.setAction("OK", object : View.OnClickListener{
+						override fun onClick(p0: View?)
+						{
+							finishAndRemoveTask();
+						}
+					}).show();
+				}
+		}
+	}
+	/**
+	 * *				KF_GOO_LAUNCHER_CB
+	 * GOOGLE SIGN IN LAUNCHER
+	 */
+	private fun KF_GOO_LAUNCHER_CB() : ActivityResultLauncher<Intent>
+	{
+		return registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+			var tsk = GoogleSignIn.getSignedInAccountFromIntent(it.data);
+			try {
+				gooInAccount = tsk.getResult(ApiException::class.java)!!;
+				Log.d(TAG, "KF_GOOlauncherCB: == Successfully getting google sign in account");
+				KF_UPDATE_USER_AS_GOOGLE(gooInAccount!!);
+			}catch (e: ApiException	){
+				Log.e(TAG, "KF_GOOlauncherCB: == FAILED TO LOGIN AS GOOGLE ${e.message}");
+				var snbar = Snackbar.make(window.decorView.rootView, "Failed to sign in with google account. Please try again", Snackbar.LENGTH_LONG);
 				snbar.setAction("OK", object : View.OnClickListener{
 					override fun onClick(p0: View?)
 					{
-						finish();
-						var inte = intent; // get self intent
-						inte.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP;
-						startActivity(inte);
+						snbar.dismiss();
 					}
 				}).show();
 			}
 		}
 	}
-	
 	/**
-	 * GOOGLE SIGN IN LAUNCHER
+	 * *			KF_SIGNIN_AS_GOOGLE
+	 * . get credential from GoogleSignInAccount
+	 * . SIGN IN GOOGLE, will creade user on database with unique uid, which similar to anonymous uid
 	 */
-	private fun KF_GOOlauncherCB() : ActivityResultLauncher<Intent>
-	{
-		return registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
-			var tsk = GoogleSignIn.getSignedInAccountFromIntent(it.data);
-			try {
-				gooInAccount = tsk.getResult(ApiException::class.java)!!;
-				Log.d(TAG, "KF_GOOlauncherCB: == Successfully getting google sign in account");
-				LinkORsign(gooInAccount!!);
-			}catch (e: ApiException	){
-				Log.e(TAG, "KF_GOOlauncherCB: == FAILED TO LOGIN AS GOOGLE", RuntimeException(e.message));
-			}
-		}
-	}
-	
-	/**
-	 * Link with google account
-	 * NOTE: if google account already link to an anonymous, try to link it with another one will failed
-	 * * should we delete this anonymous for safety ????? or just disable it
-	 *
-	 */
-	private fun LinkWITHgoogle(gacc : GoogleSignInAccount)
-	{
-		var cred = GoogleAuthProvider.getCredential(gacc.idToken, null);
-		fbuser?.linkWithCredential(cred)
-			?.addOnSuccessListener {
-				Log.d(TAG, "LinkWITHgoogle: == success link to google account");
-				fbuser = it.user;
-			}?.addOnFailureListener {
-				Log.e(TAG, "LinkWITHgoogle: == failed to link with google", it);
-			}
-	}
-	
-	/**
-	 * SIGN IN GOOGLE, will creade user on database with unique uid, which similar to anonymous uid
-	 */
-	private fun SigninWITHgoogle(gacc : GoogleSignInAccount)
+	private fun KF_SIGNIN_AS_GOOGLE(gacc : GoogleSignInAccount)
 	{
 		var cred = GoogleAuthProvider.getCredential(gacc.idToken, null);
 		fbauth.signInWithCredential(cred)
@@ -189,62 +217,69 @@ class GateActivity : AppCompatActivity()
 				if(it.isSuccessful){
 					fbuser = it.result.user;
 					Log.d(TAG, "SigninWITHgoogle: == success signin , size of fbuser ${fbuser?.providerData?.size}");
-					StartMain();
+					KF_START_WHEEL();
 				} else
 				{
 					Log.e(TAG, "SigninWITHgoogle: == failed to sign in with google ",it.exception );
 				}
 			}
 	}
-	
 	/**
-	 * if user == null, log in as guest then link google account
-	 * -> which will throw error if google already link to another anonymous
-	 * solution :: ask user to log out and log in as google instead
-	 * or just use sign in instead of link
+	 * * 			KF_UPDATE_USER_AS_GOOGLE
+	 * . this is the function when user login with google
+	 * ! case: user login as anonymous, then get out of the app, then going back and log in with google account
+	 * -> . so we update the current user with google account.
 	 *
-	 * if user== null and isAnonymous - > just delete from server the anonymous and sign in with google
 	 */
-	private fun LinkORsign(gacc : GoogleSignInAccount)
+	private fun KF_UPDATE_USER_AS_GOOGLE(gacc : GoogleSignInAccount)
 	{
 		if(fbuser != null && (fbuser?.isAnonymous== true))
 		{
 			fbuser?.delete()?.addOnCompleteListener {
-				if(it.isSuccessful)
-				{
+				if(it.isSuccessful) {
 					Log.d(TAG, "LinkORsign: == success delete temp account");
-					SigninWITHgoogle(gacc);
-				} else {
+					KF_SIGNIN_AS_GOOGLE(gacc);
+				}
+				else {
 					Log.e(TAG, "LinkORsign: Failed to delete anonyID", it.exception);
+					var snbar = Snackbar.make(window.decorView.rootView, "Failed to connect to server. Please check your connection and try again", Snackbar.LENGTH_LONG);
+					snbar.setAction("OK", object : View.OnClickListener{
+						override fun onClick(p0: View?)
+						{
+							snbar.dismiss();
+						}
+					}).show();
 				}
 			}
 		}
 		else {
-			SigninWITHgoogle(gacc);
+			KF_SIGNIN_AS_GOOGLE(gacc);
 		}
 	}
+	// + --------->>-------->>--------->>*** -->>----------->>>>
+
 	/**
-	 * Google sign in button
-	 * user!=null and anonymous --> google btn will link goo account to this anonymous
-	 * else then this is google account, they already login , no need to ask for last signin
-	 * user==null then signin as google or anonymous
-	 * if signin as google, try to get last google signin account 
-	 */
-	private fun GooBtn()
+	* 		*			KF_UPDATE_CACHE_ROOM
+	*/
+	private fun KF_UPDATE_CACHE_ROOM()
 	{
-		goobtn.setOnClickListener {
-			var inte = gooInClient.signInIntent;
-			gooLauncher.launch(inte);
+		appCache.edit {
+			putBoolean(KONSTANT.userverified, true);
+			putString(KONSTANT.useruid, fbuser?.uid);
+			commit();
 		}
+		var kewuser = Kuser(0, fuid = fbuser!!.uid);
+		dataKontrol.KF_VM_ADD_USER_TO_ROOM(kewuser);
 	}
-	
+
+
 	/**
-	 * Going Forward to next
+	 * *				KF_START_WHEEL
 	 */
-	private fun StartMain()
+	private fun KF_START_WHEEL()
 	{
 		var inte = Intent(this, MainActivity::class.java);
-		//inte.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK;
+		inte.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK;
 		startActivity(inte);
 		finish();
 	}

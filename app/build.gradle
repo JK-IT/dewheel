@@ -83,14 +83,15 @@ dependencies {
     // For control over item selection of both touch and mouse driven selection
     implementation("androidx.recyclerview:recyclerview-selection:1.2.0-alpha01")
     // room
-    def roomver = "2.3.0"
+    def roomver = "2.4.0"
     implementation("androidx.room:room-runtime:$roomver")
     annotationProcessor("androidx.room:room-compiler:$roomver")
     // To use Kotlin annotation processing tool (kapt)
     kapt("androidx.room:room-compiler:$roomver")
     // optional - Kotlin Extensions and Coroutines support for Room
     implementation("androidx.room:room-ktx:$roomver")
-
+    // optional - Paging 3 Integration
+    implementation("androidx.room:room-paging:$roomver")
     // firebase
     implementation platform('com.google.firebase:firebase-bom:28.4.2')
     implementation 'com.google.android.gms:play-services-auth:19.2.0' // for google signin

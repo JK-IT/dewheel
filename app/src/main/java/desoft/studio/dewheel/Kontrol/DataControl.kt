@@ -15,6 +15,7 @@ import com.google.firebase.database.ktx.getValue
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import desoft.studio.dewheel.kata.*
+import desoft.studio.dewheel.local.Kuser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.Job
@@ -31,6 +32,7 @@ class DataControl(@NonNull ctx : Application) : AndroidViewModel(ctx)
 {
 	private var defdis = Dispatchers.Default;
 	private var iodis = Dispatchers.IO;
+
 
 	private var realdbSource : RealtimeSource;
 	//! .info/connected = general status -> indicate if app is connecting to server
@@ -83,6 +85,29 @@ class DataControl(@NonNull ctx : Application) : AndroidViewModel(ctx)
 		Log.i(TAG, "onCleared: == VIEW MODEL CLEAN UP IS CALLED");
 		super.onCleared();
 	}
+	
+//#region LOCAL USER ROOM DATABASE
+	/**
+	* * 		KF_VM_ADD_USER_TO_ROOM
+	 * . adding user to user table
+	*/
+    fun KF_VM_ADD_USER_TO_ROOM(inusr : Kuser)
+	{
+    	viewModelScope.launch(iodis) {
+
+		}
+    }
+
+	/**
+	* 	*		KF_VM_FIND_USER
+	*/
+	fun KF_VM_FIND_USER()
+	{
+		viewModelScope.launch {
+
+		}
+	}
+//#endregion
 
 	//#region SETUP K WHEEL USER SECTION
 	/**

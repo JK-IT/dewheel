@@ -8,6 +8,7 @@
    <uses-permission-sdk-23 android:name="android.permission.ACCESS_FINE_LOCATION" />
 
    <application
+       android:name=".Wapplication"
        android:allowBackup="true"
        android:hardwareAccelerated="true"
        android:icon="@mipmap/ic_launcher"
