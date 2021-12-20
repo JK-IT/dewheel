@@ -352,7 +352,7 @@ class UserFragment : Fragment()
 		} else
 		{
 			verifiedBtn.isEnabled = false;
-			verifiedImg.setColorFilter(ContextCompat.getColor(requireContext(),R.color.confirm));
+			verifiedImg.setColorFilter(ContextCompat.getColor(requireContext(),R.color.material_dynamic_secondary30));
 			genderDropLayout.isEnabled = false;
 			sorientDropLayout.isEnabled = false;
 			if(upload)

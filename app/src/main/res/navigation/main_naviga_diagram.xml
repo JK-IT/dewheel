@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main_naviga_diagram"
-    app:startDestination="@id/wheelRoot">
+    app:startDestination="@id/dashFragment">
     <fragment
         android:id="@+id/windFragment"
         android:name="desoft.studio.dewheel.WindFragment"
@@ -50,4 +50,9 @@
     <action
         android:id="@+id/action_global_windFragment"
         app:destination="@id/windFragment"/>
+    <fragment
+        android:id="@+id/dashFragment"
+        android:name="desoft.studio.dewheel.DashFragment"
+        android:label="frag_dash"
+        tools:layout="@layout/frag_dash" />
 </navigation>

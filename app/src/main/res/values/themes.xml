@@ -1,20 +1,64 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Theme.Dewheel" parent="Theme.MaterialComponents.Light.DarkActionBar">
-        <!-- Primary brand color. -->
-        <item name="colorPrimary">#2196F3</item>
-        <item name="colorPrimaryVariant">#167AD1</item>
-        <item name="colorOnPrimary">#EDC2E6</item>
-        <!-- Secondary brand color. -->
-        <item name="colorSecondary">#D444B9</item>
-        <item name="colorSecondaryVariant"> #EA5986</item>
-        <item name="colorOnSecondary">@color/white</item>
+    <style name="Theme.Dewheel"  parent="Theme.Material3.Light.NoActionBar">
+        <item name="colorPrimary">@color/md_theme_light_primary</item>
+        <item name="colorOnPrimary">@color/md_theme_light_onPrimary</item>
+        <item name="colorPrimaryContainer">@color/md_theme_light_primaryContainer</item>
+        <item name="colorOnPrimaryContainer">@color/md_theme_light_onPrimaryContainer</item>
+        <item name="colorSecondary">@color/md_theme_light_secondary</item>
+        <item name="colorOnSecondary">@color/md_theme_light_onSecondary</item>
+        <item name="colorSecondaryContainer">@color/md_theme_light_secondaryContainer</item>
+        <item name="colorOnSecondaryContainer">@color/md_theme_light_onSecondaryContainer</item>
+        <item name="colorTertiary">@color/md_theme_light_tertiary</item>
+        <item name="colorOnTertiary">@color/md_theme_light_onTertiary</item>
+        <item name="colorTertiaryContainer">@color/md_theme_light_tertiaryContainer</item>
+        <item name="colorOnTertiaryContainer">@color/md_theme_light_onTertiaryContainer</item>
+        <item name="colorError">@color/md_theme_light_error</item>
+        <item name="colorErrorContainer">@color/md_theme_light_errorContainer</item>
+        <item name="colorOnError">@color/md_theme_light_onError</item>
+        <item name="colorOnErrorContainer">@color/md_theme_light_onErrorContainer</item>
+        <item name="android:colorBackground">@color/md_theme_light_background</item>
+        <item name="colorOnBackground">@color/md_theme_light_onBackground</item>
+        <item name="colorSurface">@color/md_theme_light_surface</item>
+        <item name="colorOnSurface">@color/md_theme_light_onSurface</item>
+        <item name="colorSurfaceVariant">@color/md_theme_light_surfaceVariant</item>
+        <item name="colorOnSurfaceVariant">@color/md_theme_light_onSurfaceVariant</item>
+        <item name="colorOutline">@color/md_theme_light_outline</item>
+        <item name="colorOnSurfaceInverse">@color/md_theme_light_inverseOnSurface</item>
+        <item name="colorSurfaceInverse">@color/md_theme_light_inverseSurface</item>
+        <item name="colorPrimaryInverse">@color/md_theme_light_primaryInverse</item>
+
         <!-- Status bar color. -->
-        <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
+        <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimary</item>
         <!-- Customize your theme here. -->
+        <item name="fontFamily">@font/spinnaker</item>
+        <item name="android:textSize">18sp</item>
+        <item name="windowActionBar">false</item>
     </style>
 
     <style name="Theme.Dewheel.Chat" parent="Theme.MaterialComponents.Light.NoActionBar.Bridge">
         <item name="windowActionBar">false</item>
+    </style>
+
+    <style name="dewheel.text.headlineLarge" parent="TextAppearance.Material3.HeadlineLarge">
+        <item name="android:textSize">30sp</item>
+        <item name="fontFamily">@font/aldrich</item>
+    </style>
+
+    <style name="dewheel.button.cutshape.leftright" parent="ShapeAppearance.Material3.SmallComponent">
+        <item name="cornerFamilyTopLeft">cut</item>
+        <item name="cornerFamilyBottomRight">cut</item>
+        <item name="cornerSizeBottomRight">5dp</item>
+        <item name="cornerSizeTopLeft">5dp</item>
+    </style>
+
+    <style name="dewheel.widget.toobar" parent="Widget.Material3.Toolbar">
+        <item name="materialThemeOverlay">@style/dewheel.toolbar</item>
+    </style>
+
+    <style name="dewheel.toolbar" parent="">
+        <item name="colorSurface">#ffb947</item>
+        <item name="background">@color/quantum_tealA400</item>
+        <item name="colorOnSurface">@color/white</item>
     </style>
 </resources>

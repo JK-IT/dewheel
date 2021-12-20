@@ -279,9 +279,8 @@ class GateActivity : AppCompatActivity()
 	private fun KF_START_WHEEL()
 	{
 		var inte = Intent(this, MainActivity::class.java);
-		inte.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK;
+		//inte.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK;
 		startActivity(inte);
-		finish();
 	}
 	
 	

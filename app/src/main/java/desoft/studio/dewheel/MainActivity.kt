@@ -18,8 +18,6 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.ui.setupWithNavController
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.firebase.auth.FirebaseAuth
@@ -55,7 +53,6 @@ class MainActivity : AppCompatActivity()
 		Log.d(TAG, "onCreate: MAIN ACTIVITY");
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		SetupBOTTOMSheet();
 		
 		kHandler = Handler(Looper.getMainLooper());
 		conmana = getSystemService(ConnectivityManager::class.java);
@@ -113,7 +110,7 @@ class MainActivity : AppCompatActivity()
 	{
 		navHost = supportFragmentManager.findFragmentById(R.id.main_nav_host) as NavHostFragment;
 		navContro = navHost.navController;
-		findViewById<BottomNavigationView>(R.id.main_bottom_bar).setupWithNavController(navContro);
+		//findViewById<BottomNavigationView>(R.id.main_bottom_bar).setupWithNavController(navContro);
 	}
 	/**
 	 * Check if user == null. true return to gateActi, else process saving to cache

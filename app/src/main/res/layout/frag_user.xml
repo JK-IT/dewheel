@@ -140,7 +140,7 @@
                     android:layout_height="wrap_content">
                     <TextView
                         android:text="Gender"
-                        android:textColor="@color/base_adap1"
+                        android:textColor="@color/material_dynamic_secondary30"
                         android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
                         android:paddingVertical="5dp"
                         android:paddingHorizontal="10dp"
@@ -188,7 +188,7 @@
                     android:layout_height="match_parent">
                     <TextView
                         android:text="Interested In"
-                        android:textColor="@color/base_adap1"
+                        android:textColor="@color/material_dynamic_secondary30"
                         android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
                         android:paddingVertical="5dp"
                         android:paddingHorizontal="10dp"
@@ -234,7 +234,7 @@
                     android:layout_height="wrap_content">
                     <TextView
                         android:text="Favorites"
-                        android:textColor="@color/base_adap1"
+                        android:textColor="@color/material_dynamic_secondary30"
                         android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
                         android:paddingVertical="5dp"
                         android:paddingHorizontal="10dp"
