@@ -11,12 +11,12 @@
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/main_material_toolbar"
-        style="@style/dewheel.widget.toobar"
+        style="@style/Widget.MaterialComponents.Toolbar.PrimarySurface"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"/>
+        android:layout_height="wrap_content"/>
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/main_nav_host"

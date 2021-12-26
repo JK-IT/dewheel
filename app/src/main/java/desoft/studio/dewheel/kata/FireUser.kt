@@ -27,7 +27,7 @@ package desoft.studio.dewheel.kata
  * sexual orientation
  * favorite
  */
-data class K_User(
+data class FireUser(
 	var kid : String? = null,
 	var fbid: String? = null,
 	var email : String? = null,

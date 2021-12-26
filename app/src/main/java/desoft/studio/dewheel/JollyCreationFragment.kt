@@ -14,7 +14,6 @@ import android.widget.TextView
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
-import androidx.navigation.findNavController
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.net.PlacesClient
@@ -157,7 +156,7 @@ class JollyFragment : Fragment() {
 			(requireContext() as MainActivity).KF_UPLOAD_JOLLY(name, addr, time, pickedVenue); //-> also navigate back to wheel fragment
 		}
 		canbtn.setOnClickListener {
-			it.findNavController().navigate(R.id.action_jollyCreationFragment_to_wheelRoot);
+			//it.findNavController().navigate(R.id.action_jollyCreationFragment_to_wheelRoot);
 		}
 	}
 	/**

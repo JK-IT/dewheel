@@ -48,7 +48,7 @@ class DataControl(@NonNull ctx : Application) : AndroidViewModel(ctx)
 
 	//private var fbuser : FirebaseUser? = null;
 	var userFilled : Boolean = false;
-	var user : K_User = K_User();
+	var user : FireUser = FireUser();
 	private var userstore = Firebase.firestore.collection("users");
 
 	// ! uploading status
@@ -123,7 +123,7 @@ class DataControl(@NonNull ctx : Application) : AndroidViewModel(ctx)
 				var gid = fbuser!!.providerData.get(1).uid;
 				var fbid = fbuser!!.providerData.get(0).uid;
 				var email = fbuser!!.email;
-				user = K_User(gid, fbid, email);
+				user = FireUser(gid, fbid, email);
 				userFilled = true;
 				Log.w(TAG, "Init: Hey , This is the user calling View Model Init $user");
 			}
@@ -154,7 +154,7 @@ class DataControl(@NonNull ctx : Application) : AndroidViewModel(ctx)
 	 * assing user to this uploaded user
 	 * make sure to check that fb user is not anonymous, aka not failed to sign up with fb server
 	 */
-	fun KF_VM_UP_USER(inusr: K_User){
+	fun KF_VM_UP_USER(inusr: FireUser){
 		viewModelScope.launch (iodis) {
 			inusr.kid?.let {
 				userstore.document(it).set(inusr).addOnSuccessListener {

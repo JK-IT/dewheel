@@ -20,9 +20,11 @@
       <activity
           android:theme="@style/Theme.Dewheel.Chat"
           android:name=".ChatActivity"
+          android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
           android:exported="false" />
       <activity
           android:name=".GateActivity"
+          android:launchMode="singleTask"
           android:exported="true">
          <intent-filter>
             <action android:name="android.intent.action.MAIN" />

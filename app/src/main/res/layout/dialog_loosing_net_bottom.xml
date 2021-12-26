@@ -26,8 +26,9 @@
         </FrameLayout>
 
         <TextView
-            android:text="Connection Lost ... Retry"
+            android:text="Connection Lost ... Retry\n Please check your connection settings"
             android:layout_marginVertical="20dp"
+            android:paddingVertical="10dp"
             android:gravity="center"
             android:textSize="@dimen/medText"
             android:layout_width="match_parent"

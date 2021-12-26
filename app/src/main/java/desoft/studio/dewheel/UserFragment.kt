@@ -27,7 +27,7 @@ import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
-import desoft.studio.dewheel.kata.K_User
+import desoft.studio.dewheel.kata.FireUser
 import desoft.studio.dewheel.katic.KONSTANT
 import java.lang.RuntimeException
 
@@ -36,7 +36,7 @@ class UserFragment : Fragment()
 {
 	private var TAG : String = "-des- [[== USER FRAGMENT ==]]";
 	
-	private lateinit var khandler : Handler;
+	private lateinit var handlerWorker : Handler;
 	
 	private lateinit var fbauth : FirebaseAuth;
 	private lateinit var fbuser: FirebaseUser;
@@ -65,7 +65,7 @@ class UserFragment : Fragment()
 	override fun onCreate(savedInstanceState: Bundle?)
 	{
 		super.onCreate(savedInstanceState);
-		khandler = Handler(requireActivity().mainLooper);
+		handlerWorker = Handler(requireActivity().mainLooper);
 		appcache = requireContext().getSharedPreferences(getString(R.string.app_pref), Context.MODE_PRIVATE);
 		fbauth = FirebaseAuth.getInstance();
 		fbuser = fbauth.currentUser!!;
@@ -240,14 +240,14 @@ class UserFragment : Fragment()
 		//_logout button
 		logoutbtn.setOnClickListener {
 			fbauth.signOut();
-			(requireContext() as MainActivity).GoBACKtoGATE();
+			(requireContext() as MainActivity).KF_TO_GATE_ACTIVITY();
 		}
 		//_delete account button
 		delebtn.setOnClickListener {
 			fbuser.delete().addOnCompleteListener {
 				if(it.isSuccessful){
 					Toast.makeText(requireContext(), "Successful Delete Your Account", Toast.LENGTH_SHORT).show();
-					(requireContext() as MainActivity).GoBACKtoGATE();
+					(requireContext() as MainActivity).KF_TO_GATE_ACTIVITY();
 				}else
 				{
 					Log.e(TAG, "SetupVIEWfunc: == Failed to delete from server");
@@ -259,7 +259,7 @@ class UserFragment : Fragment()
 	
 	override fun onStart() {
 		super.onStart();
-		if(appcache.getBoolean(KONSTANT.userverified, false) == true)
+		if(appcache.getBoolean(KONSTANT.userexist, false) == true)
 		{
 			FieldChecked(false, false);
 		} else
@@ -398,7 +398,7 @@ class UserFragment : Fragment()
 		var gender: String = appcache.getString(KONSTANT.gender, "")!!;
 		var sorient: String = appcache.getString(KONSTANT.sexori, "")!!;
 		var favorite: String = appcache.getString(KONSTANT.favor, "")!!;
-		var usr = K_User(kid, fbid, email, app_user_name, gender, sorient, favorite);
+		var usr = FireUser(kid, fbid, email, app_user_name, gender, sorient, favorite);
 		(requireActivity() as MainActivity).KF_UPuserTOstore(usr);
 	}
 	

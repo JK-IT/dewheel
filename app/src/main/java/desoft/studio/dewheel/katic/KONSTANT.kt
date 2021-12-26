@@ -2,11 +2,14 @@ package desoft.studio.dewheel.katic
 
 object KONSTANT
 {
-	val userverified : String = "USER VERIFICATION";
+	val userexist : String = "USER EXIST";
+	val userauthen: String = "USER AUTHENTICATION";
 	val useruid : String = "USER UNIQUE ID";
+	val usergid : String = "USER GOOGLE ID";
+
+	val fstoreUsersdb = "users";
 
 	val username : String = "USER DISPLAY NAME";
-	val usergid : String = "USER GOOGLE ID";
 	val usergmail : String = "USER GOOGLE MAIL ADDRESS";
 	val fone: String = "USER GOOGLE PHONE NUMBER";
 	val gender: String = "USER GENDER";

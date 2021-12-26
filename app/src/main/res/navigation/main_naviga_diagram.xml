@@ -4,52 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main_naviga_diagram"
     app:startDestination="@id/dashFragment">
-    <fragment
-        android:id="@+id/windFragment"
-        android:name="desoft.studio.dewheel.WindFragment"
-        android:label="frag_wind"
-        tools:layout="@layout/frag_wind" >
-        <action
-            android:id="@+id/action_windFragment_to_wheelRoot"
-            app:destination="@id/wheelRoot" />
-    </fragment>
 
-    <fragment
-        android:id="@+id/userFragment"
-        android:name="desoft.studio.dewheel.UserFragment"
-        android:label="frag_user"
-        tools:layout="@layout/frag_user" >
-        <action
-            android:id="@+id/action_userFragment_to_wheelRoot"
-            app:destination="@id/wheelRoot" />
-    </fragment>
-
-    <fragment
-        android:id="@+id/jollyCreationFragment"
-        android:name="desoft.studio.dewheel.JollyFragment"
-        android:label="frag_jolly_creating"
-        tools:layout="@layout/frag_jolly_creating" >
-
-        <action android:id="@+id/action_jollyCreationFragment_to_wheelRoot"
-            app:destination="@id/wheelRoot" />
-    </fragment>
-
-    <navigation android:id="@+id/wheelRoot"
-        app:startDestination="@id/wheelFragment">
-        <fragment
-            android:id="@+id/wheelFragment"
-            android:name="desoft.studio.dewheel.WheelFragment"
-            android:label="frag_wheel"
-            tools:layout="@layout/frag_wheel">
-        </fragment>
-        <action
-            android:id="@+id/action_global_jollyCreationFragment"
-            app:destination="@id/jollyCreationFragment" />
-
-    </navigation>
-    <action
-        android:id="@+id/action_global_windFragment"
-        app:destination="@id/windFragment"/>
     <fragment
         android:id="@+id/dashFragment"
         android:name="desoft.studio.dewheel.DashFragment"

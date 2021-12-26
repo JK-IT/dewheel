@@ -25,7 +25,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.common.api.ResolvableApiException
@@ -203,7 +202,7 @@ class WheelFragment() : Fragment()
 		} else
 		{
 			addBtn.setOnClickListener {
-				KF_NAVIGATE_TO_JOLLY_CREATION();
+				//KF_NAVIGATE_TO_JOLLY_CREATION();
 			}
 		}
 		//_ location settings button -> go to per settings
@@ -217,7 +216,7 @@ class WheelFragment() : Fragment()
 		}
 		//_ setup the no actvity -> create button
 		noActivitycretButton.setOnClickListener {
-			KF_NAVIGATE_TO_JOLLY_CREATION();
+			//KF_NAVIGATE_TO_JOLLY_CREATION();
 		}
 		// _ setup recyclerview
 		jolliesAdapter = JollyRecyAdapter(requireContext(), R.layout.wheel_evnt_item_design);
@@ -563,7 +562,7 @@ class WheelFragment() : Fragment()
 	/**
 	* ? SETUP LOCATION AND NAVIGATE TO CREATE JOLLY FRAGMENT
 	*/
-	private fun KF_NAVIGATE_TO_JOLLY_CREATION()
+	/*private fun KF_NAVIGATE_TO_JOLLY_CREATION()
 	{
 		if(currLocation != null)
 		{
@@ -579,7 +578,7 @@ class WheelFragment() : Fragment()
 			var actn = WheelFragmentDirections.actionGlobalJollyCreationFragment();
 			findNavController().navigate(actn);
 		}
-	}
+	}*/
 
 	/**
 	* ? VIEW TOGGLING GROUP
