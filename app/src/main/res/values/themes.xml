@@ -68,28 +68,36 @@
         <item name="android:textColor">@color/md_theme_light_tertiary</item>
         <item name="android:textStyle">bold</item>
     </style>
+
+    <style name="dewheel.text.labelSmall" parent="TextAppearance.Material3.LabelSmall">
+        <item name="fontFamily">@font/spinnaker</item>
+        <item name="android:fontFamily">@font/spinnaker </item>
+    </style>
     <!--+ typo style-->
 
     <!--* button style-->
     <style name="dewheel.button.filled" parent="Widget.Material3.Button">
-        <item name="shapeAppearance">@style/dewheel.button.cutshape.leftright</item>
+        <item name="shapeAppearance">@style/dewheel.cutshape.leftright</item>
     </style>
 
     <style name="dewheel.button.tona.cut" parent="Widget.Material3.Button.TonalButton">
-        <item name="shapeAppearance">@style/dewheel.button.cutshape.leftright</item>
+        <item name="shapeAppearance">@style/dewheel.cutshape.leftright</item>
     </style>
 
-    <style name="dewheel.button.cutshape.leftright" parent="ShapeAppearance.Material3.SmallComponent">
+    <!--+ button style-->
+
+    <!-- *      shape style     -->
+    <style name="dewheel.cutshape.leftright" parent="ShapeAppearance.Material3.SmallComponent">
         <item name="cornerFamilyTopLeft">cut</item>
         <item name="cornerFamilyBottomRight">cut</item>
         <item name="cornerSizeBottomRight">6dp</item>
         <item name="cornerSizeTopLeft">6dp</item>
     </style>
 
-    <!--+ button style-->
-
-    <!-- *      shape style     -->
-
+    <style name="dewheel.cutshape.allcut" parent="ShapeAppearance.Material3.SmallComponent">
+        <item name="cornerFamily">cut</item>
+        <item name="cornerSize">7dp</item>
+    </style>
     <!-- +      shape style-->
 
     <!-- *      card style     -->
@@ -98,5 +106,19 @@
         <item name="cardCornerRadius">13dp</item>
     </style>
     <!-- +      card style-->
+
+    <!-- *      filter chip style     -->
+    <style name="dewheel.chip.filter" parent="Widget.Material3.Chip.Filter">
+        <item name="materialThemeOverlay">@style/ThemeOverlay.dewheel.chip</item>
+        <item name="chipBackgroundColor">@color/chip_state_color</item>
+        <item name="android:textAppearance">@style/dewheel.text.labelSmall</item>
+        <item name="shapeAppearance">@style/dewheel.cutshape.allcut</item>
+    </style>
+
+    <style name="ThemeOverlay.dewheel.chip" parent="">
+        <item name="colorOnSurface">@color/md_theme_light_primaryContainer</item>
+        <item name="colorOnSecondaryContainer">@color/md_theme_light_onPrimaryContainer</item>
+    </style>
+    <!-- +      filter chip style       -->
 
 </resources>

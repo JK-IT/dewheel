@@ -6,7 +6,7 @@ object KONSTANT
 	val userauthen: String = "USER AUTHENTICATION";
 	val useruid : String = "USER UNIQUE ID";
 	val usergid : String = "USER GOOGLE ID";
-
+	val userLocation : String = "USER FAVORITE LOCATION";
 	val fstoreUsersdb = "users";
 
 	val username : String = "USER DISPLAY NAME";

@@ -66,7 +66,7 @@ class UserFragment : Fragment()
 	{
 		super.onCreate(savedInstanceState);
 		handlerWorker = Handler(requireActivity().mainLooper);
-		appcache = requireContext().getSharedPreferences(getString(R.string.app_pref), Context.MODE_PRIVATE);
+		appcache = requireContext().getSharedPreferences(getString(R.string.app_cache_preference), Context.MODE_PRIVATE);
 		fbauth = FirebaseAuth.getInstance();
 		fbuser = fbauth.currentUser!!;
 		

@@ -16,6 +16,7 @@
         <entry key="..\:/Users/comic/K_Space/Android App/dewheel2/app/src/main/res/menu/main_bot_menu.xml" value="0.3645833333333333" />
         <entry key="..\:/Users/comic/Kspace/dewheel/app/src/main/res/drawable/ic__city_line.xml" value="0.31296296296296294" />
         <entry key="..\:/Users/comic/Kspace/dewheel/app/src/main/res/drawable/ic_baseline_emoji_face_24.xml" value="0.31296296296296294" />
+        <entry key="..\:/Users/comic/Kspace/dewheel/app/src/main/res/drawable/round_corner_bg.xml" value="0.3787037037037037" />
         <entry key="..\:/Users/comic/Kspace/dewheel/app/src/main/res/drawable/round_pink_bg.xml" value="0.3861111111111111" />
         <entry key="..\:/Users/comic/Kspace/dewheel/app/src/main/res/layout/activity_chat.xml" value="0.3442028985507246" />
         <entry key="..\:/Users/comic/Kspace/dewheel/app/src/main/res/layout/activity_chatroom.xml" value="0.3442028985507246" />
@@ -23,7 +24,7 @@
         <entry key="..\:/Users/comic/Kspace/dewheel/app/src/main/res/layout/activity_main.xml" value="0.22" />
         <entry key="..\:/Users/comic/Kspace/dewheel/app/src/main/res/layout/design_chat_row.xml" value="0.264" />
         <entry key="..\:/Users/comic/Kspace/dewheel/app/src/main/res/layout/dialog_loosing_net_bottom.xml" value="0.3984375" />
-        <entry key="..\:/Users/comic/Kspace/dewheel/app/src/main/res/layout/frag_dash.xml" value="0.37681159420289856" />
+        <entry key="..\:/Users/comic/Kspace/dewheel/app/src/main/res/layout/frag_dash.xml" value="0.33" />
         <entry key="..\:/Users/comic/Kspace/dewheel/app/src/main/res/layout/frag_evnt_dialog.xml" value="0.2115036231884058" />
         <entry key="..\:/Users/comic/Kspace/dewheel/app/src/main/res/layout/frag_gps_explain.xml" value="0.22192028985507245" />
         <entry key="..\:/Users/comic/Kspace/dewheel/app/src/main/res/layout/frag_jolly.xml" value="0.3591485507246377" />

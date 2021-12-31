@@ -6,7 +6,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    android:animateLayoutChanges="true"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".DashFragment">
    <androidx.constraintlayout.widget.ConstraintLayout
@@ -15,11 +14,12 @@
        android:layout_width="match_parent"
        android:layout_height="match_parent">
 
+      <!--user header cardview-->
       <androidx.cardview.widget.CardView
           android:id="@+id/dashboard_header_cardview"
           style="@style/dewheel.card.elevated"
           android:layout_marginVertical="10dp"
-          android:layout_marginHorizontal="5dp"
+          android:layout_marginHorizontal="13dp"
           app:layout_constraintTop_toTopOf="parent"
           app:layout_constraintStart_toStartOf="parent"
           app:layout_constraintEnd_toEndOf="parent"
@@ -40,6 +40,7 @@
                    android:layout_width="match_parent"
                    android:layout_height="match_parent"/>
                <ImageView
+                   android:id="@+id/dashboard_verified_img"
                    android:src="@drawable/ic_baseline_verified_user_24"
                    android:layout_gravity="bottom|end"
                    android:layout_width="25dp"
@@ -70,18 +71,6 @@
                </FrameLayout>
             </LinearLayout>
 
-            <!--            <FrameLayout
-                android:layout_gravity="end"
-                android:layout_width="40dp"
-                android:layout_height="40dp">
-               <ImageView
-                   android:id="@+id/dashboard_header_showinfo_btn"
-                   android:src="@drawable/ic_baseline_arrow_drop_up_24"
-                   android:scaleType="fitCenter"
-                   android:layout_width="match_parent"
-                   android:layout_height="match_parent"/>
-            </FrameLayout>-->
-            <!--user info group -->
             <LinearLayout
                android:orientation="vertical"
                 android:gravity="center"
@@ -104,7 +93,6 @@
                    android:layout_height="wrap_content"/>
             </LinearLayout>
 
-
             <LinearLayout
                 android:id="@+id/dashboard_header_user_info_grp"
                 android:orientation="vertical"
@@ -123,7 +111,7 @@
                       android:layout_width="match_parent"
                       android:layout_height="wrap_content"/>
                </com.google.android.material.textfield.TextInputLayout>
-               <com.google.android.material.textfield.TextInputLayout
+               <!--<com.google.android.material.textfield.TextInputLayout
                    android:hint="Date of Birth"
                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                    android:layout_marginVertical="5dp"
@@ -133,7 +121,7 @@
                       android:imeOptions="actionNext"
                       android:layout_width="match_parent"
                       android:layout_height="wrap_content"/>
-               </com.google.android.material.textfield.TextInputLayout>
+               </com.google.android.material.textfield.TextInputLayout>-->
                <com.google.android.material.textfield.TextInputLayout
                    android:hint="Gender"
                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -181,11 +169,12 @@
          </LinearLayout>
       </androidx.cardview.widget.CardView>
 
+      <!--location cardview-->
       <androidx.cardview.widget.CardView
           android:id="@+id/dashboard_location_reference_cardview"
           style="@style/dewheel.card.elevated"
           android:layout_marginVertical="10dp"
-          android:layout_marginHorizontal="5dp"
+          android:layout_marginHorizontal="13dp"
           app:layout_constraintTop_toBottomOf="@id/dashboard_header_cardview"
           app:layout_constraintStart_toStartOf="parent"
           app:layout_constraintEnd_toEndOf="parent"
@@ -197,7 +186,7 @@
              android:layout_width="match_parent"
              android:layout_height="wrap_content">
             <TextView
-                android:text="Your Favorite Location"
+                android:text="Favorite Location"
                 android:layout_gravity="start"
                 android:gravity="start"
                 android:padding="10dp"
@@ -205,6 +194,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
             <TextView
+                android:id="@+id/dashboard_favorite_location"
                 android:hint="Pick a location"
                 android:layout_gravity="center"
                 android:gravity="center"
@@ -214,25 +204,151 @@
                 android:layout_height="wrap_content"/>
             <Button
                 android:text="Set Location"
+                android:inputType="textCapWords"
                 style="@style/Widget.Material3.Button.TextButton"
+                app:icon="@drawable/ic_baseline_my_location_24"
                 android:layout_gravity="center"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
             <Button
                 android:text="See Events Around You"
                 style="@style/Widget.Material3.Button.TextButton"
+                android:inputType="textCapWords"
                 android:layout_gravity="center"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
          </LinearLayout>
       </androidx.cardview.widget.CardView>
 
+      <!--event creation cardview-->
       <androidx.cardview.widget.CardView
-          android:id="@+id/dashboard_loved_events_cardview"
+          android:id="@+id/dashboard_create_events_cardview"
           style="@style/dewheel.card.elevated"
           android:layout_marginVertical="10dp"
-          android:layout_marginHorizontal="5dp"
+          android:layout_marginHorizontal="13dp"
           app:layout_constraintTop_toBottomOf="@id/dashboard_location_reference_cardview"
+          app:layout_constraintStart_toStartOf="parent"
+          app:layout_constraintEnd_toEndOf="parent"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content">
+         <LinearLayout
+             android:orientation="vertical"
+             android:paddingVertical="10dp"
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content">
+            <TextView
+                android:text="Create An Event/Party"
+                android:padding="10dp"
+                android:textAppearance="@style/dewheel.title.small"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+            <com.google.android.material.textfield.TextInputLayout
+                android:hint="Event Name"
+                app:errorEnabled="true"
+                app:hintTextColor="@color/grey"
+                android:layout_margin="5dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+               <com.google.android.material.textfield.TextInputEditText
+                   android:inputType="textCapWords"
+                   style="@style/Widget.Material3.TextInputEditText.OutlinedBox"
+                   android:layout_width="match_parent"
+                   android:layout_height="wrap_content"/>
+            </com.google.android.material.textfield.TextInputLayout>
+            <com.google.android.material.textfield.TextInputLayout
+                android:hint="Event Description"
+                app:errorEnabled="true"
+                app:hintTextColor="@color/grey"
+                android:layout_margin="5dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+               <com.google.android.material.textfield.TextInputEditText
+                   android:inputType="textMultiLine"
+                   android:maxLines="4"
+                   style="@style/Widget.Material3.TextInputEditText.OutlinedBox"
+                   android:layout_width="match_parent"
+                   android:layout_height="wrap_content"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <TextView
+                android:text="Event Type"
+                android:textStyle="bold"
+                android:layout_margin="5dp"
+                android:paddingHorizontal="5dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+            <com.google.android.material.chip.ChipGroup
+                app:singleSelection="true"
+                app:chipSpacingHorizontal="10dp"
+                android:layout_margin="5dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+               <com.google.android.material.chip.Chip
+                   android:text="Regular"
+                   style="@style/dewheel.chip.filter"
+                   android:checked="true"
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"/>
+               <com.google.android.material.chip.Chip
+                   android:text="Instant"
+                   style="@style/dewheel.chip.filter"
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"/>
+            </com.google.android.material.chip.ChipGroup>
+            <TextView
+                android:text="Instant events are realtime/on-going events"
+                android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+                android:textSize="10dp"
+                android:gravity="center"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:hint="Event Time"
+                android:drawableStart="@drawable/ic_baseline_time_24"
+                android:drawablePadding="10dp"
+                android:layout_margin="5dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+            <View
+                android:layout_width="60dp"
+                android:layout_gravity="center"
+                android:background="@color/grey"
+                android:layout_height="1dp"
+                android:paddingHorizontal="20dp"
+                android:layout_marginVertical="15dp"
+               android:layout_margin="5dp"/>
+            <TextView
+                android:hint="Event Location"
+                android:drawableStart="@drawable/ic_baseline_add_location_24"
+                android:drawablePadding="10dp"
+                android:layout_margin="5dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+            <View
+                android:layout_width="60dp"
+                android:layout_gravity="center"
+                android:background="@color/grey"
+                android:layout_height="1dp"
+                android:layout_margin="5dp"/>
+            <Button
+                android:text="Create"
+                android:layout_gravity="end"
+                android:layout_margin="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+         </LinearLayout>
+      </androidx.cardview.widget.CardView>
+
+      <!--saved event-->
+      <androidx.cardview.widget.CardView
+          android:id="@+id/dashboard_saved_events_cardview"
+          style="@style/dewheel.card.elevated"
+          android:layout_marginVertical="10dp"
+          android:layout_marginHorizontal="13dp"
+          app:layout_constraintTop_toBottomOf="@id/dashboard_create_events_cardview"
           app:layout_constraintStart_toStartOf="parent"
           app:layout_constraintEnd_toEndOf="parent"
           android:layout_width="match_parent"
@@ -243,7 +359,7 @@
              android:layout_width="match_parent"
              android:layout_height="wrap_content">
             <TextView
-                android:text="Your Interested Events"
+                android:text="Saved Events"
                 android:layout_gravity="center"
                 android:textAppearance="@style/dewheel.title.small"
                 android:gravity="start"
@@ -253,20 +369,59 @@
          </LinearLayout>
       </androidx.cardview.widget.CardView>
 
+      <!--social chat card view-->
       <androidx.cardview.widget.CardView
           android:id="@+id/dashboard_social_cardview"
-          app:layout_constraintTop_toBottomOf="@id/dashboard_loved_events_cardview"
+          style="@style/dewheel.card.elevated"
+          android:layout_marginVertical="10dp"
+          android:layout_marginHorizontal="13dp"
+          app:layout_constraintTop_toBottomOf="@id/dashboard_saved_events_cardview"
           app:layout_constraintStart_toStartOf="parent"
           app:layout_constraintEnd_toEndOf="parent"
           android:layout_width="match_parent"
           android:layout_height="wrap_content">
          <LinearLayout
-            android:orientation="vertical"
+             android:orientation="vertical"
+             android:paddingVertical="10dp"
              android:layout_width="match_parent"
              android:layout_height="wrap_content">
-
+            <TextView
+                android:text="Recent Chats"
+                android:layout_gravity="center"
+                android:textAppearance="@style/dewheel.title.small"
+                android:gravity="start"
+                android:padding="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
          </LinearLayout>
       </androidx.cardview.widget.CardView>
 
+      <!--Bottom UI -->
+      <LinearLayout
+          android:orientation="vertical"
+          android:padding="10dp"
+          app:layout_constraintTop_toBottomOf="@+id/dashboard_social_cardview"
+          app:layout_constraintStart_toStartOf="parent"
+          app:layout_constraintEnd_toEndOf="parent"
+          app:layout_constraintBottom_toBottomOf="parent"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content">
+         <com.google.android.material.button.MaterialButton
+             android:text="Log Out"
+             style="@style/dewheel.button.tona.cut"
+             android:layout_gravity="center"
+             android:layout_marginVertical="10dp"
+             android:layout_marginHorizontal="20dp"
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content"/>
+         <com.google.android.material.button.MaterialButton
+             android:text="Delete Account"
+             style="@style/dewheel.button.tona.cut"
+             android:layout_gravity="center"
+             android:layout_marginVertical="10dp"
+             android:layout_marginHorizontal="20dp"
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content"/>
+      </LinearLayout>
    </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

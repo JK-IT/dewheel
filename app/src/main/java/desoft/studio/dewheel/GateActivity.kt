@@ -14,6 +14,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.core.content.edit
+import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -32,7 +33,9 @@ import desoft.studio.dewheel.Kontrol.DataControl
 import desoft.studio.dewheel.Kontrol.WedaKontrol
 import desoft.studio.dewheel.katic.KONSTANT
 import desoft.studio.dewheel.local.Kuser
-import kotlinx.coroutines.newFixedThreadPoolContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class GateActivity : AppCompatActivity()
 {
@@ -70,7 +73,7 @@ class GateActivity : AppCompatActivity()
 		connmana = getSystemService(ConnectivityManager::class.java);
 		if(KF_CHECK_ONLINE())
 		{
-			appCache = getSharedPreferences(getString(R.string.app_pref), Context.MODE_PRIVATE);
+			appCache = getSharedPreferences(getString(R.string.app_cache_preference), Context.MODE_PRIVATE);
 			
 			gooInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
 				.requestIdToken(getString(R.string.default_web_client_id))
@@ -241,13 +244,20 @@ class GateActivity : AppCompatActivity()
 		var cred = GoogleAuthProvider.getCredential(gacc.idToken, null);
 		fbauth.signInWithCredential(cred)
 			.addOnCompleteListener {
-				if(it.isSuccessful){
+				if(it.isSuccessful)	{
 					fbuser = it.result.user;
 					Log.d(TAG, "SigninWITHgoogle: == success SIGNING , size of fbuser ${fbuser?.providerData?.size}");
-					var done =KF_UPDATE_CACHE_GOOGLE(it.result.user!!);
-					if(done) {KF_START_WHEEL();}
-				} else
-				{
+					var goouser = fbuser?.providerData?.get(1);
+					var kser = Kuser(0, fbuser?.uid!!, goouser?.email, goouser?.uid);
+					lifecycleScope.launch {
+						withContext(Dispatchers.IO) {
+							var resid = wedaKontrol.VM_ADD_USER_LOCAL(kser);
+							Log.d(TAG, "KF_SIGNIN_AS_GOOGLE: ADDING USER TO DATABASE $resid");
+						}
+						var done =KF_UPDATE_CACHE_GOOGLE(it.result.user!!);
+						if(done) {KF_START_WHEEL();}
+					}
+				} else {
 					Log.e(TAG, "SigninWITHgoogle: == failed to sign in with google ",it.exception );
 					var snbar = Snackbar.make(window.decorView.rootView, "Failed to sign in with google account. Please try again", Snackbar.LENGTH_SHORT);
 					snbar.setAction("OK", object : View.OnClickListener{
@@ -274,8 +284,17 @@ class GateActivity : AppCompatActivity()
 				fbuser?.linkWithCredential(cred)
 					?.addOnSuccessListener {
 						Log.d(TAG, "SigninWITHgoogle: == success LINKING, size of fbuser ${it.user?.providerData?.size}");
-						var done =KF_UPDATE_CACHE_GOOGLE(it.user!!);
-						if(done) {KF_START_WHEEL();}
+						fbuser = it.user;
+						var goouser = fbuser?.providerData?.get(1);
+						var kser = Kuser(0, fbuser?.uid!!, goouser?.email, goouser?.uid);
+						lifecycleScope.launch {
+							withContext(Dispatchers.IO) {
+								var resid = wedaKontrol.VM_ADD_USER_LOCAL(kser);
+								Log.d(TAG, "KF_SIGNIN_AS_GOOGLE: ADDING USER TO DATABASE $resid");
+							}
+							var done =KF_UPDATE_CACHE_GOOGLE(it.user!!);
+							if(done) {KF_START_WHEEL();}
+						}
 					}
 					?.addOnFailureListener {
 						Log.w(TAG, "KF_UPDATE_USER_AS_GOOGLE: FAILED TO LINK USER ${it.message}");

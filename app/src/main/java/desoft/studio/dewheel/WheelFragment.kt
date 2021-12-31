@@ -106,7 +106,7 @@ class WheelFragment() : Fragment()
 
 		CheckLOCATIONperm();
 
-		appcache = requireActivity().getSharedPreferences(getString(R.string.app_pref), Context.MODE_PRIVATE);
+		appcache = requireActivity().getSharedPreferences(getString(R.string.app_cache_preference), Context.MODE_PRIVATE);
 		
 		fulocation = LocationServices.getFusedLocationProviderClient(requireContext());
 		cliSettings = LocationServices.getSettingsClient(requireContext());

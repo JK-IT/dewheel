@@ -15,6 +15,7 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.edit
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
@@ -56,6 +57,9 @@ class MainActivity : AppCompatActivity()
 	/**
 	* *				onCreate
 	 * .check online status of your app
+	 * . if online -> get fb user , compare to appcache id
+	 * . if appcache id == fb.uid -> query from rom to get update user live data
+	 * . if not - > go back to gate
 	 * .chech if user identity has any errors, like cannot get current user from firebase
 	*/
 	override fun onCreate(savedInstanceState: Bundle?)
@@ -65,25 +69,43 @@ class MainActivity : AppCompatActivity()
 		
 		handlerWorker = Handler(Looper.getMainLooper());
 		conmana = getSystemService(ConnectivityManager::class.java);
-		appCache = getSharedPreferences(getString(R.string.app_pref), Context.MODE_PRIVATE);
+		appCache = getSharedPreferences(getString(R.string.app_cache_preference), Context.MODE_PRIVATE);
 		fbauth = FirebaseAuth.getInstance();
 
+		if(KF_CHECK_ONLINE_STAT()) {
+			KF_VERIFY_USER();
+			var cacheid = appCache.getString(KONSTANT.useruid, "");
+			if(cacheid.equals(fbuser?.uid)) {
+				wedaKontrol.VM_FIND_USER(fbuser?.uid!!);
+			} else {
+				appCache.edit {
+					clear();
+					commit();
+				}
+				KF_TO_GATE_ACTIVITY();
+			}
+		}
 		UI_SETUP_CONNECTION_DIALOG();
 		UI_SETUP_APPBAR();
 		UI_SETUP_HOST();
 	}
 	/**
 	* *						onStart
+	 * . register for connection callback
 	*/
 	override fun onStart()
 	{
 		Log.d(TAG, "onStart: MAIN ACTIVITY");
 		super.onStart();
-
-		if(KF_CHECK_ONLINE_STAT())
-		{
-			KF_VERIFY_USER(); //-> going back if user is null
-		}
+		conmana.registerDefaultNetworkCallback(defNetworkCallback, handlerWorker);
+	}
+	/**
+	*	*					onStop
+	 *. unregister network callback
+	*/
+	override fun onStop() {
+		super.onStop();
+		conmana.unregisterNetworkCallback(defNetworkCallback);
 	}
 	// + --------->>-------->>--------->>*** -->>----------->>>>
 	/**
@@ -175,7 +197,6 @@ class MainActivity : AppCompatActivity()
 	 */
 	private fun KF_CHECK_ONLINE_STAT(): Boolean
 	{
-		conmana.registerDefaultNetworkCallback(defNetworkCallback, handlerWorker);
 		currentActiveNet = conmana.activeNetwork;
 		if(currentActiveNet == null)
 		{// showing no connection dialog
