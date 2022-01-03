@@ -140,7 +140,7 @@ class DataControl(@NonNull ctx : Application) : AndroidViewModel(ctx)
 			user.app_user_name = iname;
 			if(igender != null)
 			{
-				user.gender = igender; user.sorient = isexori; user.favorite = ifavorite;
+				user.gender = igender; user.sorient = isexori; user.about = ifavorite;
 			}
 			Log.i(TAG, "KF_VM_SETUP_USER: == Setup user uptodate $user");
 		}
@@ -156,7 +156,7 @@ class DataControl(@NonNull ctx : Application) : AndroidViewModel(ctx)
 	 */
 	fun KF_VM_UP_USER(inusr: FireUser){
 		viewModelScope.launch (iodis) {
-			inusr.kid?.let {
+			inusr.gid?.let {
 				userstore.document(it).set(inusr).addOnSuccessListener {
 					userUploadFlag.value = true;
 					user = inusr;
@@ -181,7 +181,7 @@ class DataControl(@NonNull ctx : Application) : AndroidViewModel(ctx)
 		{
 			viewModelScope.launch() {
 				Log.i(TAG, "KF_VM_UP_JOLLY: == Uploading jolly");
-				var wjo = WheelJolly(System.currentTimeMillis().toString(), user.app_user_name!!, user.kid!!, injoname, injoaddr,inVenue.locality.toString(), injotime);
+				var wjo = WheelJolly(System.currentTimeMillis().toString(), user.app_user_name!!, user.gid!!, injoname, injoaddr,inVenue.locality.toString(), injotime);
 				realdbSource.jollydb.child(inVenue.admin1!!).child(wjo.area!!).child(wjo.jid!!).setValue(wjo)
 					.addOnCompleteListener {
 						if( ! it.isSuccessful)
@@ -278,7 +278,7 @@ class DataControl(@NonNull ctx : Application) : AndroidViewModel(ctx)
 		roomid = rid;
 		viewModelScope.launch(iodis) {
 			Log.i(TAG, "KF_VM_SEND_DUMMY_MSG: user of this chat activity $user");
-			var dmsg =Kmessage(user.kid, System.currentTimeMillis().toString(), "");
+			var dmsg =Kmessage(user.gid, System.currentTimeMillis().toString(), "");
 			realdbSource.chatdb.child(roomid!!).child(RealtimeSource.roomsgRef).setValue(dmsg)
 				.addOnSuccessListener {
 					KF_VM_REGISTER_MSG_RECALL();

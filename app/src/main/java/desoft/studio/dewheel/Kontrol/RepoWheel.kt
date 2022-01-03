@@ -10,12 +10,20 @@ class RepoWheel (private val indaba : Klocalbase )
 {
     private val TAG :String = "+++ WHEEL REPOSITORY +++";
     
-    suspend fun REPO_LOCAL_INSERT_USER(inuser : Kuser) : Long
+    suspend fun REPO_LOCAL_INSERT_USER(inuser : Kuser)
     {
         return withContext(Dispatchers.IO){
+            Log.w(TAG, "REPO_LOCAL_INSERT_USER: ");
             var res = indaba.kablesDao().InsertUser(inuser);
-            Log.w(TAG, "REPO_LOCAL_INSERT_USER: Row id that is inserted $res");
-            res.get(0);
+            //Log.w(TAG, "REPO_LOCAL_INSERT_USER: Row id that is inserted $res");
+        }
+    }
+
+    suspend fun REPO_UPDATE_USER(inuer : Kuser)
+    {
+        withContext(Dispatchers.IO) {
+            Log.w(TAG, "REPO_UPDATE_USER: ");
+            indaba.kablesDao().UpdateUser(inuer);
         }
     }
 

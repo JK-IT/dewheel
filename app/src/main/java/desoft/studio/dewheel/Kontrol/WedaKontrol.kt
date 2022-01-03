@@ -26,10 +26,21 @@ class WedaKontrol(private val repo: RepoWheel) :  ViewModel()
     /**
     * *             VM_ADD_USER_LOCAL
     */
-    fun VM_ADD_USER_LOCAL(inuser : Kuser): Job {
+    fun VM_ADD_USER_LOCAL(inuser : Kuser): Job
+    {
         // using withcontext as an alternative for aync/wait
         return viewModelScope.launch {
             repo.REPO_LOCAL_INSERT_USER(inuser);
+        }
+    }
+    /**
+    * *             VM_UPDATE_USER_LOCAL
+     * . update current existing user
+    */
+    fun VM_UPDATE_USER_LOCAL(inser : Kuser) : Job
+    {
+        return viewModelScope.launch {
+            repo.REPO_UPDATE_USER(inser);
         }
     }
 

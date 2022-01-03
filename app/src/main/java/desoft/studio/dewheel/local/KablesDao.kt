@@ -5,7 +5,7 @@ import androidx.room.*
 @Dao
 interface KablesDao {
     @Insert(entity = Kuser::class,onConflict = OnConflictStrategy.REPLACE)
-    suspend fun InsertUser(vararg kus: Kuser):List<Long>;
+    suspend fun InsertUser(vararg kus: Kuser);
 
     @Update(entity = Kuser::class, onConflict = OnConflictStrategy.REPLACE)
     suspend fun UpdateUser(vararg kus: Kuser);

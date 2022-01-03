@@ -149,7 +149,7 @@ class GateActivity : AppCompatActivity()
 				}
 				(application as Wapplication).threadpoolExecutor.execute {
 					Log.d(TAG, "KF_QUICK_CHECK_USER: DELETE USER FROM FIRE STORE");
-					fstore.collection(KONSTANT.fstoreUsersdb).document(useruid!!).delete();
+					fstore.collection(KONSTANT.userFirestorePath).document(useruid!!).delete();
 				}
 				KF_START_WHEEL();
 			}
@@ -248,7 +248,7 @@ class GateActivity : AppCompatActivity()
 					fbuser = it.result.user;
 					Log.d(TAG, "SigninWITHgoogle: == success SIGNING , size of fbuser ${fbuser?.providerData?.size}");
 					var goouser = fbuser?.providerData?.get(1);
-					var kser = Kuser(0, fbuser?.uid!!, goouser?.email, goouser?.uid);
+					var kser = Kuser(fbuser?.uid!!, goouser?.email, goouser?.uid,null, goouser?.displayName);
 					lifecycleScope.launch {
 						withContext(Dispatchers.IO) {
 							var resid = wedaKontrol.VM_ADD_USER_LOCAL(kser);
@@ -286,7 +286,7 @@ class GateActivity : AppCompatActivity()
 						Log.d(TAG, "SigninWITHgoogle: == success LINKING, size of fbuser ${it.user?.providerData?.size}");
 						fbuser = it.user;
 						var goouser = fbuser?.providerData?.get(1);
-						var kser = Kuser(0, fbuser?.uid!!, goouser?.email, goouser?.uid);
+						var kser = Kuser(fbuser?.uid!!, goouser?.email, goouser?.uid, null, goouser?.displayName);
 						lifecycleScope.launch {
 							withContext(Dispatchers.IO) {
 								var resid = wedaKontrol.VM_ADD_USER_LOCAL(kser);

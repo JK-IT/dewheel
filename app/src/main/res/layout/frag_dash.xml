@@ -100,14 +100,30 @@
                 android:layout_marginHorizontal="10dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
+
+               <TextView
+                   android:text="These information will be public to other users"
+                   android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+                   android:textSize="10dp"
+                   android:gravity="center"
+                   android:layout_marginVertical="5dp"
+                   android:layout_width="match_parent"
+                   android:layout_height="wrap_content"/>
+
                <com.google.android.material.textfield.TextInputLayout
+                   android:id="@+id/dashboard_header_user_name_layout"
                    android:hint="Username"
                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                    android:layout_marginVertical="5dp"
+
                    android:layout_width="match_parent"
                    android:layout_height="wrap_content">
                   <com.google.android.material.textfield.TextInputEditText
+                      android:id="@+id/dashboard_header_user_name_edt"
+                      android:inputType="text"
                       android:imeOptions="actionNext"
+                      android:lines="1"
+                      android:maxLines="1"
                       android:layout_width="match_parent"
                       android:layout_height="wrap_content"/>
                </com.google.android.material.textfield.TextInputLayout>
@@ -123,48 +139,87 @@
                       android:layout_height="wrap_content"/>
                </com.google.android.material.textfield.TextInputLayout>-->
                <com.google.android.material.textfield.TextInputLayout
+                   android:id="@+id/dashboard_header_user_gender_layout"
                    android:hint="Gender"
                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                    android:layout_marginVertical="5dp"
                    android:layout_width="match_parent"
                    android:layout_height="wrap_content">
                   <com.google.android.material.textfield.TextInputEditText
+                      android:id="@+id/dashboard_header_user_gender_edt"
+                      android:inputType="text|textCapWords"
                       android:imeOptions="actionNext"
+                      android:lines="1"
+                      android:maxLines="1"
                       android:layout_width="match_parent"
                       android:layout_height="wrap_content"/>
                </com.google.android.material.textfield.TextInputLayout>
                <com.google.android.material.textfield.TextInputLayout
+                   android:id="@+id/dashboard_header_user_sexori_layout"
                    android:hint="Sexual Orientation"
                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                    android:layout_marginVertical="5dp"
                    android:layout_width="match_parent"
                    android:layout_height="wrap_content">
                   <com.google.android.material.textfield.TextInputEditText
+                      android:id="@+id/dashboard_header_user_sexori_edt"
+                      android:inputType="text|textCapWords"
                       android:imeOptions="actionNext"
+                      android:lines="1"
+                      android:maxLines="1"
                       android:layout_width="match_parent"
                       android:layout_height="wrap_content"/>
                </com.google.android.material.textfield.TextInputLayout>
                <com.google.android.material.textfield.TextInputLayout
+                   android:id="@+id/dashboard_header_user_about_layout"
                    android:hint="About Yourself"
                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                    android:layout_marginVertical="5dp"
                    android:layout_width="match_parent"
                    android:layout_height="wrap_content">
                   <com.google.android.material.textfield.TextInputEditText
+                      android:id="@+id/dashboard_header_user_about_edt"
+                      android:inputType="textMultiLine|textCapSentences"
                       android:lines="2"
-                      android:inputType="textMultiLine"
+                      android:maxLines="5"
                       android:imeOptions="actionDone"
                       android:layout_width="match_parent"
                       android:layout_height="wrap_content"/>
                </com.google.android.material.textfield.TextInputLayout>
-
-               <Button
-                   android:id="@+id/dashboard_header_user_info_update_btn"
-                   android:text="Update"
+               <RelativeLayout
                    android:layout_margin="10dp"
-                   android:layout_width="wrap_content"
-                   android:layout_height="wrap_content"
-                   android:layout_gravity="end"/>
+                   android:layout_width="match_parent"
+                   android:layout_height="wrap_content">
+
+                  <Button
+                      android:id="@+id/dashboard_header_user_info_update_btn"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:layout_gravity="center_vertical"
+                      android:layout_alignParentTop="true"
+                      android:layout_alignParentBottom="true" android:layout_toStartOf="@id/dashboard_header_edt_unlock_btn"
+                      android:layout_marginStart="10dp"
+                      android:layout_marginTop="10dp"
+                      android:layout_marginEnd="10dp"
+                      android:layout_marginBottom="10dp"
+                      android:text="Update" />
+
+                  <Button
+                      android:id="@+id/dashboard_header_edt_unlock_btn"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:layout_alignParentTop="true"
+                      android:layout_alignParentEnd="true"
+                      android:layout_alignParentBottom="true"
+                      android:layout_gravity="center_vertical"
+                      android:layout_marginStart="10dp"
+                      android:layout_marginTop="10dp"
+                      android:layout_marginEnd="10dp"
+                      android:layout_marginBottom="10dp"
+                      android:text="Edit"
+                      app:icon="@drawable/ic_baseline_edit_24" />
+               </RelativeLayout>
+
             </LinearLayout>
          </LinearLayout>
       </androidx.cardview.widget.CardView>
