@@ -28,11 +28,20 @@ package desoft.studio.dewheel.kata
  * favorite
  */
 data class FireUser(
-	var fid: String? = null,
-	var gid : String? = null,
-	var email : String? = null,
-	var app_user_name: String? = null,
-	var gender: String?=null,
-	var sorient: String?=null,
-	var about: String?=null
-               )
+    var fid: String? = null,
+    var gid : String? = null,
+    var email : String? = null,
+    var app_user_name: String? = null,
+    var gender: String?=null,
+    var sorient: String?=null,
+    var about: String?=null
+)
+
+data class FireEvent(
+    var name:String,
+    var hostname:String,
+    var hostid:String, //-> fbid
+    var about: String?=null,
+    var time:String,
+    var location:String
+)

@@ -219,7 +219,7 @@ class WheelFragment() : Fragment()
 			//KF_NAVIGATE_TO_JOLLY_CREATION();
 		}
 		// _ setup recyclerview
-		jolliesAdapter = JollyRecyAdapter(requireContext(), R.layout.wheel_evnt_item_design);
+		jolliesAdapter = JollyRecyAdapter(requireContext(), R.layout.design_evnt_row);
 		jolliesRecycler.layoutManager = LinearLayoutManager(requireContext());
 		jolliesRecycler.adapter = jolliesAdapter;
 	}

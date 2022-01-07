@@ -56,6 +56,7 @@ class MainActivity : AppCompatActivity()
 
 	/**
 	* *				onCreate
+	 * . initialize places api
 	 * .check online status of your app
 	 * . if online -> get fb user , compare to appcache id
 	 * . if appcache id == fb.uid -> query from rom to get update user live data
@@ -66,7 +67,7 @@ class MainActivity : AppCompatActivity()
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		
+
 		handlerWorker = Handler(Looper.getMainLooper());
 		conmana = getSystemService(ConnectivityManager::class.java);
 		appCache = getSharedPreferences(getString(R.string.app_cache_preference), Context.MODE_PRIVATE);

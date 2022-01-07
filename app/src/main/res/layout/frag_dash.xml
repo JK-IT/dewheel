@@ -197,7 +197,8 @@
                       android:layout_height="wrap_content"
                       android:layout_gravity="center_vertical"
                       android:layout_alignParentTop="true"
-                      android:layout_alignParentBottom="true" android:layout_toStartOf="@id/dashboard_header_edt_unlock_btn"
+                      android:layout_alignParentBottom="true"
+                      android:layout_toStartOf="@id/dashboard_header_edt_unlock_btn"
                       android:layout_marginStart="10dp"
                       android:layout_marginTop="10dp"
                       android:layout_marginEnd="10dp"
@@ -248,8 +249,14 @@
                 android:textAppearance="@style/dewheel.title.small"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
+            <View
+                android:layout_width="250dp"
+                android:layout_gravity="start"
+                android:background="@color/grey"
+                android:layout_height="1dp"
+                android:layout_margin="5dp"/>
             <TextView
-                android:id="@+id/dashboard_favorite_location"
+                android:id="@+id/dashboard_location_tet"
                 android:hint="Pick a location"
                 android:layout_gravity="center"
                 android:gravity="center"
@@ -258,8 +265,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
             <Button
+                android:id="@+id/dashboard_set_location_btn"
                 android:text="Set Location"
-                android:inputType="textCapWords"
                 style="@style/Widget.Material3.Button.TextButton"
                 app:icon="@drawable/ic_baseline_my_location_24"
                 android:layout_gravity="center"
@@ -297,7 +304,14 @@
                 android:textAppearance="@style/dewheel.title.small"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
+            <View
+                android:layout_width="250dp"
+                android:layout_gravity="start"
+                android:background="@color/grey"
+                android:layout_height="1dp"
+                android:layout_margin="5dp"/>
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/dashboard_evnt_title_lout"
                 android:hint="Event Name"
                 app:errorEnabled="true"
                 app:hintTextColor="@color/grey"
@@ -305,21 +319,26 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
                <com.google.android.material.textfield.TextInputEditText
-                   android:inputType="textCapWords"
+                   android:id="@+id/dashboard_evnt_title"
+                   android:inputType="text|textCapWords"
+                   android:imeOptions="actionNext"
                    style="@style/Widget.Material3.TextInputEditText.OutlinedBox"
                    android:layout_width="match_parent"
                    android:layout_height="wrap_content"/>
             </com.google.android.material.textfield.TextInputLayout>
             <com.google.android.material.textfield.TextInputLayout
-                android:hint="Event Description"
+                android:hint="Event Description/Notes (Optional)"
                 app:errorEnabled="true"
                 app:hintTextColor="@color/grey"
                 android:layout_margin="5dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
                <com.google.android.material.textfield.TextInputEditText
-                   android:inputType="textMultiLine"
-                   android:maxLines="4"
+                   android:id="@+id/dashboard_evnt_description"
+                   android:inputType="text|textMultiLine"
+                   android:imeOptions="actionDone"
+                   android:lines="2"
+                   android:maxLines="5"
                    style="@style/Widget.Material3.TextInputEditText.OutlinedBox"
                    android:layout_width="match_parent"
                    android:layout_height="wrap_content"/>
@@ -335,18 +354,23 @@
             <com.google.android.material.chip.ChipGroup
                 app:singleSelection="true"
                 app:chipSpacingHorizontal="10dp"
+                android:layout_gravity="center"
                 android:layout_margin="5dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
                <com.google.android.material.chip.Chip
+                   android:id="@+id/dashboard_chip_regular"
                    android:text="Regular"
                    style="@style/dewheel.chip.filter"
                    android:checked="true"
+                   android:gravity="center"
                    android:layout_width="wrap_content"
                    android:layout_height="wrap_content"/>
                <com.google.android.material.chip.Chip
+                   android:id="@+id/dashboard_chip_instant"
                    android:text="Instant"
                    style="@style/dewheel.chip.filter"
+                   android:gravity="center"
                    android:layout_width="wrap_content"
                    android:layout_height="wrap_content"/>
             </com.google.android.material.chip.ChipGroup>
@@ -359,8 +383,14 @@
                 android:layout_marginBottom="10dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
-
+            <View
+                android:layout_width="60dp"
+                android:layout_gravity="center"
+                android:background="@color/grey"
+                android:layout_height="1dp"
+                android:layout_margin="5dp"/>
             <TextView
+                android:id="@+id/dashboard_evnt_time"
                 android:hint="Event Time"
                 android:drawableStart="@drawable/ic_baseline_time_24"
                 android:drawablePadding="10dp"
@@ -376,7 +406,10 @@
                 android:layout_marginVertical="15dp"
                android:layout_margin="5dp"/>
             <TextView
+                android:id="@+id/dashboard_evnt_location"
                 android:hint="Event Location"
+                android:lines="4"
+                android:gravity="center_vertical"
                 android:drawableStart="@drawable/ic_baseline_add_location_24"
                 android:drawablePadding="10dp"
                 android:layout_margin="5dp"
@@ -389,9 +422,28 @@
                 android:layout_height="1dp"
                 android:layout_margin="5dp"/>
             <Button
+                android:id="@+id/dashboard_evnt_create_btn"
                 android:text="Create"
                 android:layout_gravity="end"
                 android:layout_margin="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_gravity="center"
+                android:background="@color/grey"
+                android:layout_height="1dp"
+                android:layout_marginHorizontal="30dp"
+                android:paddingHorizontal="30dp"
+                android:layout_margin="5dp"/>
+
+            <Button
+                android:id="@+id/dashboard_evnt_see_yours"
+                android:text="See your created/saved events"
+                android:gravity="center"
+                android:layout_gravity="center"
+                style="@style/Widget.Material3.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
          </LinearLayout>
@@ -462,20 +514,22 @@
           android:layout_width="match_parent"
           android:layout_height="wrap_content">
          <com.google.android.material.button.MaterialButton
+             android:id="@+id/dashboard_logout_btn"
              android:text="Log Out"
              style="@style/dewheel.button.tona.cut"
              android:layout_gravity="center"
              android:layout_marginVertical="10dp"
              android:layout_marginHorizontal="20dp"
-             android:layout_width="match_parent"
+             android:layout_width="wrap_content"
              android:layout_height="wrap_content"/>
          <com.google.android.material.button.MaterialButton
+             android:id="@+id/dashboard_delete_btn"
              android:text="Delete Account"
              style="@style/dewheel.button.tona.cut"
              android:layout_gravity="center"
              android:layout_marginVertical="10dp"
              android:layout_marginHorizontal="20dp"
-             android:layout_width="match_parent"
+             android:layout_width="wrap_content"
              android:layout_height="wrap_content"/>
       </LinearLayout>
    </androidx.constraintlayout.widget.ConstraintLayout>

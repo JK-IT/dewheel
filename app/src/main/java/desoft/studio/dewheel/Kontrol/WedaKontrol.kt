@@ -5,6 +5,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.firestore.FirebaseFirestore
+import desoft.studio.dewheel.local.Kevent
 import desoft.studio.dewheel.local.Kuser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -22,7 +25,7 @@ class WedaKontrol(private val repo: RepoWheel) :  ViewModel()
         Log.w(TAG, "Init: ViewMODEL IS CREATED" );
     }
 
-    // + --------->>-------->>--------->>*** -->>----------->>>>
+    // + USER DATA REPO CONTROL--------->>-------->>--------->>*** -->>----------->>>>
     /**
     * *             VM_ADD_USER_LOCAL
     */
@@ -56,6 +59,13 @@ class WedaKontrol(private val repo: RepoWheel) :  ViewModel()
         }
     }
 
+    // + EVENT DATA REPO CONTROL--------->>-------->>--------->>*** -->>----------->>>>
+
+    suspend fun VM_ADD_EVENT(evnk : Kevent): Long
+    {
+        return repo.REPO_LOCAL_ADD_EVENT(evnk);
+    }
+
     // + --------->>-------->>--------->>*** -->>----------->>>>
     // * DATA WHEEL KONTROL FACTORY
     class DataWheelKontrolFactory(private val repoWheel: RepoWheel) : ViewModelProvider.Factory
@@ -70,6 +80,12 @@ class WedaKontrol(private val repo: RepoWheel) :  ViewModel()
         }
 
     }
+
+    // + REMOTE THING--------->>-------->>--------->>*** -->>----------->>>>
+    private var fbdata = FirebaseDatabase.getInstance();
+    private var fbstore = FirebaseFirestore.getInstance();
+
+
 }
 // Log.i("TIME MEASURING $time");
 val time = measureTimeMillis {

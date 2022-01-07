@@ -33,7 +33,6 @@ class DataControl(@NonNull ctx : Application) : AndroidViewModel(ctx)
 	private var defdis = Dispatchers.Default;
 	private var iodis = Dispatchers.IO;
 
-
 	private var realdbSource : RealtimeSource;
 	//! .info/connected = general status -> indicate if app is connecting to server
 	val infostate = Firebase.database.getReference(".info/connected");

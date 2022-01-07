@@ -21,10 +21,10 @@ class JollyRecyAdapter(val ctx : Context, var design: Int) : RecyclerView.Adapte
     */
     inner class Kholder(iv: View) : RecyclerView.ViewHolder(iv)
     {
-        var prompt = iv.findViewById<TextView>(R.id.jolly_prompt);
-        var addr : TextView = iv.findViewById(R.id.jolly_address);
-        var jollytime :TextView = iv.findViewById(R.id.jolly_time);
-        var creator : TextView = iv.findViewById(R.id.jolly_creator_name);
+        var prompt = iv.findViewById<TextView>(R.id.evnt_row_title);
+        var addr : TextView = iv.findViewById(R.id.evnt_row_address);
+        var jollytime :TextView = iv.findViewById(R.id.evnt_row_time);
+        var creator : TextView = iv.findViewById(R.id.evnt_host_name);
         var takbtn : Button = iv.findViewById(R.id.jolly_talk_btn);
         var sfm = SimpleDateFormat("EEE, MMM dd 'at' hh:mm a", Locale.getDefault());
 

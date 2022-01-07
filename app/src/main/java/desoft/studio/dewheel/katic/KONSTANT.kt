@@ -4,10 +4,19 @@ object KONSTANT
 {
 	val userexist : String = "USER EXIST";
 	val userauthen: String = "USER AUTHENTICATION";
+	val useronstore : String = "USER ON FIRESTORE";
 	val useruid : String = "USER UNIQUE ID";
 	val usergid : String = "USER GOOGLE ID";
 	val usergmail : String = "USER GOOGLE MAIL ADDRESS";
-	val userLocation : String = "USER FAVORITE LOCATION";
+	val locationSuborNei : String = "LOCATION SUB-REGION";
+	val locationRegion : String = "USER FAVORITE REGION-CITI-LOCATION";
+
+	val evntRegularType : Int = 0;
+	val evntInstantType : Int = 1;
+
+	val timePickerReqKey = "TIME PICKER REQUEST KEY";
+	val timeMilliSecBundleKey = "TIME MILLISECOND BUNDLE KEY";
+
 	val userFirestorePath = "users";
 
 	val username : String = "USER DISPLAY NAME";
@@ -16,6 +25,11 @@ object KONSTANT
 	val sexori: String = "USER SEXUAL ORIENTATION";
 	val favor: String = "USER FAVORITE THINGS";
 	val cache_timestamp : String = "CACHE SAVING TIME";
+
+/*	val ACTIVITY_REQ_CODE : String = "ACTIVITY REQUEST CODE";
+	val GOO_IN_REQ_CODE : Int = 111;
+	val AUTOCOMPLETE_REQ_CODE : Int = 112;*/
+
 	/**
 	 * verified user -> create a user account from data control, upload it to firestore, or should i wait till user fill out all information
 	 * or u cannot become verified user, if u don't fill out other required fields

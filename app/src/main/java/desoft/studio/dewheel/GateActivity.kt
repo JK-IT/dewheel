@@ -131,7 +131,8 @@ class GateActivity : AppCompatActivity()
 	 * . check share reference for verification
 	 * . check user from server database
 	 * . if user == null && userexist == true
-	 * . -> change app cache value = false, delete user from firestore
+	 * . -> this may be user signout using fbauth.signout
+	 * . ->OR error -> change app cache value = false, delete user from firestore
 	 * . if user == null && userexist == false -> do nothing
 	 * . if user != null -> update app cache and start next activity
 	 */
