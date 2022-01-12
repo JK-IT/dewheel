@@ -20,6 +20,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavController
+import androidx.navigation.fragment.findNavController
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -27,7 +29,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.Places
-import com.google.android.libraries.places.api.model.AddressComponent
 import com.google.android.libraries.places.api.model.AddressComponents
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.model.TypeFilter
@@ -37,9 +38,7 @@ import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
 import com.google.android.material.chip.Chip
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.auth.*
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.FirebaseFirestore
 import desoft.studio.dewheel.Kontrol.WedaKontrol
@@ -49,11 +48,8 @@ import desoft.studio.dewheel.kata.FireUser
 import desoft.studio.dewheel.katic.KONSTANT
 import desoft.studio.dewheel.local.Kevent
 import desoft.studio.dewheel.local.Kuser
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import kotlinx.coroutines.tasks.asTask
-import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -78,12 +74,14 @@ class DashFragment : Fragment() {
     private var fbdata : FirebaseDatabase = FirebaseDatabase.getInstance();
     private var uiUser : Kuser? = null;
     private var appCache : SharedPreferences? = null;
+    private lateinit var navKontroller : NavController;
+
     private lateinit var gooInOption : GoogleSignInOptions;
     private lateinit var gooInClient: GoogleSignInClient;
     private var gooInAcnt : GoogleSignInAccount? = null;
     private val gooinLaunchin = KF_GOOIN_FOR_RESULT_CB();
-    private val autoUserLaunchin = KF_USERLOCATION_FOR_RESULT_CB();
-    private val autoEvntLaunchin = KF_EVNT_LOCATION_FOR_RESULT_CB();
+    private val pickUserLocationLaunchin = KF_USERLOCATION_FOR_RESULT_CB();
+    private val pickEvntLocationLaunchin = KF_EVNT_LOCATION_FOR_RESULT_CB();
 
     //.. ui variable
     private lateinit var uiUsername : TextView;
@@ -97,12 +95,15 @@ class DashFragment : Fragment() {
     private lateinit var uiUserSorientEdit: TextInputEditText;
     private lateinit var uiUserTrailLayout: TextInputLayout;
     private lateinit var uiUserTrailEdit: TextInputEditText;
-    private lateinit var uiUpdateBtn : Button;
-    private lateinit var uiUserLocationTet:TextView;
-    private lateinit var uiUserLocationBtn: Button;
     private lateinit var userfillinGrp: LinearLayout;
     private lateinit var uiOpenUserFieldsBtn: FrameLayout;
     private lateinit var uiUnlockUserEdtBtn: Button;
+    private lateinit var uiUserUpdateBtn : Button;
+
+    private lateinit var uiUserLocationTet:TextView;
+    private lateinit var uiUserLocationBtn: Button;
+    private lateinit var uiUserDiscoverBtn: Button;
+    private var lastUserLocation:String? = null;
 
     private lateinit var uiEvntTitleLout : TextInputLayout;
     private lateinit var uiEvntTitle : TextInputEditText;
@@ -117,6 +118,8 @@ class DashFragment : Fragment() {
     private var evntAddrcomponent : AddressComponents? = null;
     private var evntLatlng : LatLng? = null;
 
+    private lateinit var uiDeleBtn : Button;
+
     private var uihandler : Handler? = null;
     private var fragStart : Boolean  = false;
     /**
@@ -129,11 +132,14 @@ class DashFragment : Fragment() {
     {
         Log.d(TAG, "onCreate: DASHBOARD ${Locale.getDefault().country}");
         super.onCreate(savedInstanceState);
+
         Places.initialize(requireContext(), BuildConfig.GOOG_KEY);
         placlient = Places.createClient(requireContext());
 
         uihandler = Handler(Looper.getMainLooper());
         appCache = activity?.getSharedPreferences(getString(R.string.app_cache_preference), Context.MODE_PRIVATE);
+        navKontroller = findNavController();
+
         gooInOption = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(getString(R.string.default_web_client_id))
             .requestId().requestEmail().build();
@@ -176,8 +182,9 @@ class DashFragment : Fragment() {
         uiVerifiedImg = v.findViewById(R.id.dashboard_verified_img);
         uiUserLocationTet = v.findViewById(R.id.dashboard_location_tet);
         uiUserLocationBtn = v.findViewById(R.id.dashboard_set_location_btn);
+        uiUserDiscoverBtn = v.findViewById(R.id.dashboard_discover_around_btn);
         uiOpenUserFieldsBtn = v.findViewById(R.id.dashboard_header_edit_btn);
-        uiUpdateBtn  = v.findViewById(R.id.dashboard_header_user_info_update_btn);
+        uiUserUpdateBtn  = v.findViewById(R.id.dashboard_header_user_info_update_btn);
         uiUnlockUserEdtBtn = v.findViewById(R.id.dashboard_header_edt_unlock_btn);
         userfillinGrp = v.findViewById(R.id.dashboard_header_user_info_grp);
 
@@ -210,11 +217,14 @@ class DashFragment : Fragment() {
             var inte = gooInClient.signInIntent;
             try {
                 gooinLaunchin.launch(inte);
+                if(gooInAcnt != null) {
+                    KF_SETUP_VERIFIED_UI();
+                }
             } catch (err : ActivityNotFoundException) {
                 Log.e(TAG, "GOOGLE INTNET ACTIITY NOT FOUND ",err);
             }
         }
-        uiUpdateBtn.setOnClickListener {
+        uiUserUpdateBtn.setOnClickListener {
             if(appCache?.getBoolean(KONSTANT.userauthen, false) == false || uiUser == null) {
                 KF_SIMPLE_INFORM_DIALOG("Please loging in with Google account to continue").show();
             }
@@ -239,15 +249,18 @@ class DashFragment : Fragment() {
                                             Toast.makeText(requireContext(), "Successfully Updating", Toast.LENGTH_SHORT).show();
                                             appCache?.edit {
                                                 putBoolean(KONSTANT.useronstore, true);
+                                                putString(KONSTANT.username, uiUser?.local_username);
                                                 commit();
                                             }
                                             UI_TOGGLE_USER_FILLING_FIELDS(false);
+                                            uiUsername.text = uiUser?.local_username;
                                         }
                                         .addOnFailureListener {
                                             Log.w(TAG, "UPLOADING USER ERROR", it);
                                             KF_SIMPLE_INFORM_DIALOG("Failed to update user information. Please try again later").show();
                                             appCache?.edit {
                                                 putBoolean(KONSTANT.useronstore, false);
+                                                putString(KONSTANT.username, uiUser?.local_username);
                                                 commit();
                                             }
                                             UI_TOGGLE_USER_FILLING_FIELDS(true);
@@ -260,19 +273,55 @@ class DashFragment : Fragment() {
             }
         }
         uiUnlockUserEdtBtn.setOnClickListener {
-            UI_TOGGLE_USER_FILLING_FIELDS(!(uiUpdateBtn.isEnabled)) ;
+            UI_TOGGLE_USER_FILLING_FIELDS(!(uiUserUpdateBtn.isEnabled)) ;
         }
 
-        var caclocation = appCache?.getString(KONSTANT.locationRegion, "");
-        if(!caclocation.isNullOrBlank()) {
-            uiUserLocationTet.setText(caclocation);
+        var subregion = appCache?.getString(KONSTANT.userSavedNeighborhood, "");
+        var region = appCache?.getString(KONSTANT.userSavedCity, "");
+        //Log.i(TAG, "onViewCreated: CACHE USER LOCATION $subregion $region");
+        if(subregion.isNullOrBlank()) {
+            uiUserLocationTet.text = region.toString();
+        } else {
+            if(region.isNullOrBlank())
+                uiUserLocationTet.text = "$subregion";
+            else
+                uiUserLocationTet.text = "$subregion, $region";
         }
+
         uiUserLocationBtn.setOnClickListener {
             var plainte = Autocomplete.IntentBuilder(AutocompleteActivityMode.FULLSCREEN, listOf(Place.Field.ADDRESS_COMPONENTS))
                 .setTypeFilter(TypeFilter.REGIONS).setCountry(Locale.getDefault().country)
                 .setHint("Enter Citi or Zipcode")
                 .build(requireContext());
-            autoUserLaunchin.launch(plainte);
+            pickUserLocationLaunchin.launch(plainte);
+        }
+
+        uiUserDiscoverBtn.setOnClickListener {
+            if(uiUserLocationTet.text.isNullOrBlank()) {
+                KF_SIMPLE_INFORM_DIALOG("Please set your favorite location").show();
+            }
+            else {
+                var state = appCache?.getString(KONSTANT.userSavedState, "");
+                var sub = appCache?.getString(KONSTANT.userSavedNeighborhood, "");
+                var region = appCache?.getString(KONSTANT.userSavedCity, "");
+                if(state.isNullOrBlank())
+                    KF_SIMPLE_INFORM_DIALOG("Please set a default location").show();
+                else {
+                    if (lastUserLocation.isNullOrBlank()) {
+                        lastUserLocation = uiUserLocationTet.text.toString();
+                    }
+                    else if (!lastUserLocation.contentEquals(uiUserLocationTet.text.toString())) {
+                        wedakontrol.VM_STOP_DATABASE_EVENT_FETCHING();
+                        lastUserLocation = uiUserLocationTet.text.toString();
+                    }
+                    var desact = DashFragmentDirections.actionDashFragmentToEventListFragment(uiUserLocationTet.text.toString());
+                    navKontroller.navigate(desact);
+                    /*if (region.isNullOrBlank() && !sub.isNullOrBlank())
+                        wedakontrol.VM_GET_REMOTE_EVENTS(state, sub);
+                    else
+                        wedakontrol.VM_GET_REMOTE_EVENTS(state, region!!);*/
+                }
+            }
         }
 
         uiEvntTitleLout = v.findViewById(R.id.dashboard_evnt_title_lout);
@@ -313,7 +362,7 @@ class DashFragment : Fragment() {
             var fielst = listOf(Place.Field.ADDRESS, Place.Field.NAME, Place.Field.LAT_LNG, Place.Field.ADDRESS_COMPONENTS);
             var autointe = Autocomplete.IntentBuilder(AutocompleteActivityMode.FULLSCREEN, fielst)
                 .setCountry(Locale.getDefault().country).build(requireContext());
-            autoEvntLaunchin.launch(autointe);
+            pickEvntLocationLaunchin.launch(autointe);
         }
             // . put evnt to rom, upload to fb
         uiEvntCreateBtn.setOnClickListener {
@@ -332,7 +381,10 @@ class DashFragment : Fragment() {
                                 comlst["locality"] =  comp.name;
                             }
                             if(comp.types[0].contentEquals("administrative_area_level_1")) {
-                                comlst["admin1"] = comp.name;
+                                if(comp.shortName.isNullOrBlank())
+                                    comlst["admin1"] = comp.name;
+                                else
+                                    comlst["admin1"] = comp.shortName;
                             }
                             if(comp.types[0].contentEquals("postal_code")) {
                                 comlst["zipcode"] =  comp.name;
@@ -345,15 +397,15 @@ class DashFragment : Fragment() {
                             comlst["locality"], comlst["neighborhood"], comlst["admin1"], comlst["zipcode"], comlst["country"]);
 
                         //var remoteupload =
-                        var resid = async { wedakontrol.VM_ADD_EVENT(evnk); }
+                        var resid = async { wedakontrol.VM_ADD_EVENT_LOCAL(evnk); }
                         resid.asTask().addOnSuccessListener {
                             Log.i(TAG, "new evnt id ${it}");
                         }
                         async {
                             uiUser?.let {
-                                var fireevnt = FireEvent(uiEvntTitle.text.toString(), (it.local_username?: it.remote_username)!!, it.fuid!!, uiEvntAbout.text.toString(),
-                                uiEvntTime.text.toString(), uiEvntLocation.text.toString());
-                                fbdata.getReference("events").child(Locale.getDefault().country).child(comlst["admin1"]!!).child(((comlst["locality"]?: comlst["neighborhood"]).toString())).child(System.currentTimeMillis().toString())
+                                var curtime : Long = System.currentTimeMillis();
+                                var fireevnt = FireEvent(uiEvntTitle.text.toString(), (it.local_username?: it.remote_username)!!, it.fuid!!, uiEvntAbout.text.toString(), uiEvntTime.text.toString(), evntCale.timeInMillis, curtime , uiEvntLocation.text.toString());
+                                fbdata.getReference("events").child(Locale.getDefault().country).child(comlst["admin1"]!!).child(((comlst["locality"]?: comlst["neighborhood"]).toString())).child(curtime.toString())
                                     .setValue(fireevnt).addOnSuccessListener {
                                         KF_CLEAR_EVNT_FIELDS();
                                         uihandler?.post {
@@ -372,8 +424,11 @@ class DashFragment : Fragment() {
                 }
             }
         }
+        uiDeleBtn = v.findViewById(R.id.dashboard_delete_btn);
+        uiDeleBtn.setOnClickListener {
+            KF_DELETE_USER();
+        }
     }
-
     /**
     * *                 onStart
     */
@@ -384,6 +439,10 @@ class DashFragment : Fragment() {
         fragStart = true;
         uiUser?.let {
             UI_UPDATE_UI(it);
+        }
+        if(gooInAcnt == null ) {
+            Log.i(TAG, "onStart: GOOGLE IN ACC IS NULL");
+            gooInAcnt = GoogleSignIn.getLastSignedInAccount(requireContext());
         }
     }
     // + --------->>-------->>--------->>*** -->>----------->>>>
@@ -424,7 +483,7 @@ class DashFragment : Fragment() {
         uiUserGenderLayout.isEnabled = enab;
         uiUserSorientEdit.isEnabled = enab;
         uiUserTrailEdit.isEnabled = enab;
-        uiUpdateBtn.isEnabled = enab;
+        uiUserUpdateBtn.isEnabled = enab;
     }
     /**
     * *         userObserver
@@ -486,7 +545,7 @@ class DashFragment : Fragment() {
                 gooInAcnt = GoogleSignIn.getSignedInAccountFromIntent(it.data).getResult(ApiException::class.java);
                 Log.i(TAG, "KF_INTENT_LAUNCHER_CB: gooInAcnt ${gooInAcnt?.id}");
                 Log.d(TAG, "KF_SETUP_VERIFIED_UI: id token ${gooInAcnt?.idToken}");
-                KF_SETUP_VERIFIED_UI();
+                //KF_SETUP_VERIFIED_UI();
             } catch (exc : ApiException) {
                 Log.e(TAG, "KF_INTENT_LAUNCHER_CB: Error == $exc");
             }
@@ -502,6 +561,8 @@ class DashFragment : Fragment() {
             var repla  = Autocomplete.getPlaceFromIntent(it.data);
             var sub = "";
             var region = "";
+            var admin1 = "";
+            var zip = "";
             var loctring = "";
             Log.d(TAG, "KF_AUTOPLACE_FOR_RESULT_CB: ${repla.addressComponents}");
             for(comp in repla.addressComponents.asList()) {
@@ -513,12 +574,23 @@ class DashFragment : Fragment() {
                     region = comp.name;
                     loctring = comp.name;
                 }
+                if(comp.types[0].contentEquals("administrative_area_level_1")) {
+                    if(comp.shortName.isNullOrBlank())
+                        admin1 = comp.name;
+                    else
+                        admin1 = comp.shortName;
+                }
+                if(comp.types[0].contentEquals("postal_code")) {
+                    zip = comp.name;
+                }
             }
 
             uiUserLocationTet.setText("$loctring");
             appCache?.edit {
-                putString(KONSTANT.locationSuborNei, sub);
-                putString(KONSTANT.locationRegion, region);
+                putString(KONSTANT.userSavedNeighborhood, sub);
+                putString(KONSTANT.userSavedCity, region);
+                putString(KONSTANT.userSavedState, admin1);
+                putString(KONSTANT.userSavedZip, zip);
                 commit();
             }
             Log.d(TAG, "KF_AUTOPLACE_FOR_RESULT_CB: $repla");
@@ -626,5 +698,73 @@ class DashFragment : Fragment() {
             })
             .create();
     }
+    /**
+    * *             KF_DELETE_USER
+    */
+    private fun KF_DELETE_USER()
+    {
+        viewLifecycleOwner.lifecycleScope.launch(iodis) {
+            launch() {
+                fbstore.collection(KONSTANT.userFirestorePath).document(fbuser?.uid!!).delete();
+                /*fbstore.collection(KONSTANT.userFirestorePath).whereEqualTo(FieldPath.documentId(), fbuser?.uid)
+                    .get()
+                    .addOnSuccessListener {
+                        var res =it.toObjects(FireUser::class.java);
+                        Log.i(TAG, "DELETE USER ${res[0]}");
+                    }*/
+            }
+            Log.i(TAG, "Start deleting user ${fbuser?.uid}");
+            fbuser?.delete()
+                ?.addOnSuccessListener {
+                    Log.i(TAG, "User is deleted from server");
+                    appCache?.edit {
+                        clear();
+                        commit();
+                    }
+                    wedakontrol.VM_DELETE_ALL_USER_LOCAL();
+                    wedakontrol.VM_DELETE_ALL_EVENT_LOCAL();
+                    Log.i(TAG, "Done deleting user");
+                    var inte = Intent(requireContext(), GateActivity::class.java);
+                    startActivity(inte);
+                }
+                ?.addOnFailureListener {
+                    Log.w(TAG, "fAIled to delete user from fb with ${it.message}");
+                    if(it is FirebaseAuthRecentLoginRequiredException) {
+                        if(gooInAcnt == null ) {
+                            gooInAcnt = GoogleSignIn.getLastSignedInAccount(requireContext());
+                        }
+                        var aucred = GoogleAuthProvider.getCredential(gooInAcnt?.idToken, null);
+                        fbuser?.reauthenticate(aucred)
+                            ?.addOnSuccessListener {
+                                Log.d(TAG, "onStart: Successful re authenticating user");
+                                KF_DELETE_USER();
+                            }
+                            ?.addOnFailureListener { reexception ->
+                                if(reexception is FirebaseAuthInvalidUserException) {
+                                    Log.w(TAG, "onStart: USER ACCOUNT HAS BEEN DELETED OR DISABLED");
+                                    appCache?.edit {
+                                        clear();
+                                        apply();
+                                    }
+                                    wedakontrol.VM_DELETE_ALL_USER_LOCAL();
+                                    Log.i(TAG, "Done deleting user");
+                                    var inte = Intent(requireContext(), GateActivity::class.java);
+                                    startActivity(inte);
+                                }
+                                else if(reexception is FirebaseAuthInvalidCredentialsException) {
+                                    Log.w(TAG, "onStart: USER CRED IS MALFORMED OR EXPIRED, restart google login activity" );
+                                    var inte = gooInClient.signInIntent;
+                                    try {
+                                        gooinLaunchin.launch(inte);
+                                        KF_DELETE_USER();
+                                    } catch (err : ActivityNotFoundException) {
+                                        Log.e(TAG, "GOOGLE INTNET ACTIITY NOT FOUND ",err);
+                                    }
+                                }
+                            }
+                }
 
+            }
+        }
+    }
 }

@@ -77,7 +77,7 @@ class MainActivity : AppCompatActivity()
 			KF_VERIFY_USER();
 			var cacheid = appCache.getString(KONSTANT.useruid, "");
 			if(cacheid.equals(fbuser?.uid)) {
-				wedaKontrol.VM_FIND_USER(fbuser?.uid!!);
+				wedaKontrol.VM_FIND_USER_LOCAL(fbuser?.uid!!);
 			} else {
 				appCache.edit {
 					clear();
@@ -100,6 +100,19 @@ class MainActivity : AppCompatActivity()
 		super.onStart();
 		conmana.registerDefaultNetworkCallback(defNetworkCallback, handlerWorker);
 	}
+
+/*	override fun onBackPressed() {
+		var alerdia = AlertDialog.Builder(this)
+			.setMessage("You are about to exit. Do you want to continue?")
+			.setCancelable(true)
+			.setPositiveButton("Exit"){_, _ ->
+				finishAndRemoveTask();
+			}
+			.setNegativeButton("Cancel", {dia , _ ->
+				dia.dismiss();
+			});
+		alerdia.show();
+	}*/
 	/**
 	*	*					onStop
 	 *. unregister network callback

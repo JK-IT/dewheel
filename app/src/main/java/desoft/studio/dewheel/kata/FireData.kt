@@ -38,10 +38,12 @@ data class FireUser(
 )
 
 data class FireEvent(
-    var name:String,
-    var hostname:String,
-    var hostid:String, //-> fbid
+    var name:String?=null,
+    var hostname:String?=null,
+    var hostid:String?=null, //-> fbid
     var about: String?=null,
-    var time:String,
-    var location:String
+    var time:String?=null,
+    var evntimilli : Long?=null,
+    var timestamp: Long?=null,
+    var location:String?=null
 )

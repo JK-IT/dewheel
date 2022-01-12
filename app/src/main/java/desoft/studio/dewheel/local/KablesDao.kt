@@ -15,6 +15,9 @@ interface KablesDao {
     @Query("SELECT * FROM Kuser WHERE fuid = :uid")
     suspend fun FindUser(uid : String): Kuser?;
 
+    @Query("DELETE FROM Kuser")
+    suspend fun DeleteAllUser();
+
     @Delete(entity = Kuser::class)
     suspend fun DeleteUser(vararg kus:Kuser);
 
@@ -30,6 +33,9 @@ interface KablesDao {
 
     @Query("SELECT * FROM Kevent WHERE id = :ineid")
     suspend fun GetEvent(ineid : Long) : Kevent;
+
+    @Query("DELETE FROM Kevent")
+    suspend fun DeleteAllEvent();
 
     @Delete(entity = Kevent::class)
     suspend fun DeleteEvent(evnt: Kevent);

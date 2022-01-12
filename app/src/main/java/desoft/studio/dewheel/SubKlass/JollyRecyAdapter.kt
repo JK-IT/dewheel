@@ -13,7 +13,7 @@ import desoft.studio.dewheel.kata.WheelJolly
 import java.text.SimpleDateFormat
 import java.util.*
 
-class JollyRecyAdapter(val ctx : Context, var design: Int) : RecyclerView.Adapter<JollyRecyAdapter.Kholder>() {
+class JollyRecyAdapter(val ctx : Context, var recyview : RecyclerView) : RecyclerView.Adapter<JollyRecyAdapter.Kholder>() {
 
     /**
     * VIEW HOLDER CLASS = inner -> access properties of outer class
@@ -57,7 +57,7 @@ class JollyRecyAdapter(val ctx : Context, var design: Int) : RecyclerView.Adapte
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): JollyRecyAdapter.Kholder {
-        val v = LayoutInflater.from(parent.context).inflate(design, parent, false);
+        val v = LayoutInflater.from(parent.context).inflate(R.layout.design_evnt_row, parent, false);
         return Kholder(v);
     }
 

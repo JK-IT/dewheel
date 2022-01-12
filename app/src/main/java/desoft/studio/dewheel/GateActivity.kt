@@ -98,13 +98,14 @@ class GateActivity : AppCompatActivity()
 	{
 		super.onNewIntent(intent);
 		Log.d(TAG, "onNewIntent: Gate Activity is RELAUNCHED");
-
 	}
 /**
 * *					onStart
 */
-	override fun onStart() {
+	override fun onStart()
+	{
 		super.onStart();
+		Log.d(TAG, "onStart: ")
 		KF_SETUP_VIEW();
 	}
 
@@ -130,32 +131,11 @@ class GateActivity : AppCompatActivity()
 	 * *		KF_QUICK_CHECK_USER
 	 * . check share reference for verification
 	 * . check user from server database
-	 * . if user == null && userexist == true
-	 * . -> this may be user signout using fbauth.signout
-	 * . ->OR error -> change app cache value = false, delete user from firestore
-	 * . if user == null && userexist == false -> do nothing
-	 * . if user != null -> update app cache and start next activity
+	 * . if user != null -> start the wheel
 	 */
 	private fun KF_QUICK_CHECK_USER()
 	{
-		var exist = appCache.getBoolean(KONSTANT.userexist, false);
-		if(fbuser == null ) {
-			if(exist) {
-				var useruid = appCache.getString(KONSTANT.useruid, "");
-				appCache.edit{
-					putBoolean(KONSTANT.userexist, false);
-					putBoolean(KONSTANT.userauthen, false);
-					putString(KONSTANT.useruid, "");
-					apply();
-				}
-				(application as Wapplication).threadpoolExecutor.execute {
-					Log.d(TAG, "KF_QUICK_CHECK_USER: DELETE USER FROM FIRE STORE");
-					fstore.collection(KONSTANT.userFirestorePath).document(useruid!!).delete();
-				}
-				KF_START_WHEEL();
-			}
-		}
-		else {
+		if(fbuser != null ) {
 			var done = appCache.edit().putBoolean(KONSTANT.userexist, true).commit();
 			if(done) {
 				KF_START_WHEEL();
@@ -167,8 +147,16 @@ class GateActivity : AppCompatActivity()
 	*/
 	private fun KF_SETUP_VIEW()
 	{
-		if(fbuser != null) {
+		var exist = appCache.getBoolean(KONSTANT.userexist, false);
+		if(exist == true && fbuser != null) {
+			Log.i(TAG, "KF_SETUP_VIEW: user is NOT NULL");
+			Log.i(TAG, "KF_SETUP_VIEW: ${appCache.getBoolean(KONSTANT.userexist, false)}");
+			Log.i(TAG, "KF_SETUP_VIEW: ${fbuser?.uid}");
 			guestbtn?.isEnabled = false;
+		}
+		else {
+			Log.i(TAG, " Set up View : user is NULL");
+			guestbtn?.isEnabled = true;
 		}
 		KF_SETUP_GUEST_LOGIN();
 		//_ setup google button
@@ -184,7 +172,7 @@ class GateActivity : AppCompatActivity()
 	private fun KF_SETUP_GUEST_LOGIN()
 	{
 		guestbtn?.setOnClickListener {
-			if(fbuser != null)  return@setOnClickListener;
+			if(fbuser != null && (appCache.getBoolean(KONSTANT.userexist, false) == true))  return@setOnClickListener;
 			fbauth.signInAnonymously()
 				.addOnSuccessListener {
 					Log.d(TAG, "GuestBtn: ==> success guest login");
@@ -202,8 +190,7 @@ class GateActivity : AppCompatActivity()
 					Log.e(TAG, "GuestBtn: failed to sign in as anonymous");
 					var snbar = Snackbar.make(window.decorView.rootView, "Opps!! Cannot connect to server, please try again", Snackbar.LENGTH_SHORT);
 					snbar.setAction("OK", object : View.OnClickListener{
-						override fun onClick(p0: View?)
-						{
+						override fun onClick(p0: View?) {
 							snbar.dismiss();
 						}
 					}).show();
@@ -238,6 +225,9 @@ class GateActivity : AppCompatActivity()
 	/**
 	 * *			KF_SIGNIN_AS_GOOGLE
 	 * . get credential from GoogleSignInAccount
+	 * . check if it is the same google account
+	 * . -> true = > start the wheel, value already in user room database
+	 * . -> false = > create a new user in room database
 	 * . SIGN IN GOOGLE, will creade user on database with unique uid, which similar to anonymous uid
 	 */
 	private fun KF_SIGNIN_AS_GOOGLE(gacc : GoogleSignInAccount)
@@ -258,7 +248,8 @@ class GateActivity : AppCompatActivity()
 						var done =KF_UPDATE_CACHE_GOOGLE(it.result.user!!);
 						if(done) {KF_START_WHEEL();}
 					}
-				} else {
+				}
+				else {
 					Log.e(TAG, "SigninWITHgoogle: == failed to sign in with google ",it.exception );
 					var snbar = Snackbar.make(window.decorView.rootView, "Failed to sign in with google account. Please try again", Snackbar.LENGTH_SHORT);
 					snbar.setAction("OK", object : View.OnClickListener{
@@ -312,8 +303,7 @@ class GateActivity : AppCompatActivity()
 				Log.w(TAG, "KF_UPDATE_USER_AS_GOOGLE: ${exc.message}");
 				var snbar = Snackbar.make(window.decorView.rootView, "Opps!! Cannot connect to server, please try again", Snackbar.LENGTH_SHORT);
 				snbar.setAction("OK", object : View.OnClickListener{
-					override fun onClick(p0: View?)
-					{
+					override fun onClick(p0: View?) {
 						snbar.dismiss();
 					}
 				}).show();
@@ -352,7 +342,7 @@ class GateActivity : AppCompatActivity()
 	}
 	
 	
-	companion object{
+	companion object	{
 		/**
 		 * NO INTERNET CONNECTION BOTTOM SHEET DIALOG
 		 */

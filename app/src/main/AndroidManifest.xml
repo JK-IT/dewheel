@@ -25,6 +25,7 @@
       <activity
           android:name=".GateActivity"
           android:launchMode="singleTask"
+          android:noHistory="true"
           android:exported="true">
          <intent-filter>
             <action android:name="android.intent.action.MAIN" />

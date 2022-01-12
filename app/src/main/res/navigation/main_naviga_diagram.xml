@@ -9,5 +9,24 @@
         android:id="@+id/dashFragment"
         android:name="desoft.studio.dewheel.DashFragment"
         android:label="frag_dash"
-        tools:layout="@layout/frag_dash" />
+        tools:layout="@layout/frag_dash" >
+        <action
+            android:id="@+id/action_dashFragment_to_eventListFragment"
+            app:destination="@id/eventListFragment" >
+            <argument
+                android:name="regiontext"
+                app:argType="string"
+                android:defaultValue=""/>
+        </action>
+    </fragment>
+    <fragment
+        android:id="@+id/eventListFragment"
+        android:name="desoft.studio.dewheel.EventListFragment"
+        android:label="frag_event_list"
+        tools:layout="@layout/frag_event_list" >
+        <action
+            android:id="@+id/action_eventListFragment_to_dashFragment"
+            app:destination="@id/dashFragment" >
+        </action>
+    </fragment>
 </navigation>

@@ -2,14 +2,20 @@ package desoft.studio.dewheel.katic
 
 object KONSTANT
 {
+	//_ check for firebase user == null ?
 	val userexist : String = "USER EXIST";
+	//_ check for user verification ?
 	val userauthen: String = "USER AUTHENTICATION";
+	//_ check if user is upload to store
+	val username : String = "USER DISPLAY NAME";
 	val useronstore : String = "USER ON FIRESTORE";
 	val useruid : String = "USER UNIQUE ID";
 	val usergid : String = "USER GOOGLE ID";
 	val usergmail : String = "USER GOOGLE MAIL ADDRESS";
-	val locationSuborNei : String = "LOCATION SUB-REGION";
-	val locationRegion : String = "USER FAVORITE REGION-CITI-LOCATION";
+	val userSavedNeighborhood : String = "LOCATION SUB-REGION";
+	val userSavedCity : String = "USER FAVORITE REGION-CITI-LOCATION";
+	val userSavedZip : String = "USER FAVORITE REGION ZIPCODE";
+	val userSavedState : String = "USER FAVORITE STATE";
 
 	val evntRegularType : Int = 0;
 	val evntInstantType : Int = 1;
@@ -18,8 +24,8 @@ object KONSTANT
 	val timeMilliSecBundleKey = "TIME MILLISECOND BUNDLE KEY";
 
 	val userFirestorePath = "users";
+	val evntFireDatabasePath = "events";
 
-	val username : String = "USER DISPLAY NAME";
 	val fone: String = "USER GOOGLE PHONE NUMBER";
 	val gender: String = "USER GENDER";
 	val sexori: String = "USER SEXUAL ORIENTATION";
