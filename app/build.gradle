@@ -17,7 +17,11 @@ android {
         targetSdk 31
         versionCode 1
         versionName "1.0"
-
+        kapt{
+            arguments {
+                arg("room.schemaLocation", "$projectDir/roomSchemas".toString())
+            }
+        }
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 

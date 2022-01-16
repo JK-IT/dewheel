@@ -6,10 +6,12 @@ import android.content.*
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.text.InputType
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import android.widget.*
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -305,13 +307,15 @@ class DashFragment : Fragment() {
                 var sub = appCache?.getString(KONSTANT.userSavedNeighborhood, "");
                 var region = appCache?.getString(KONSTANT.userSavedCity, "");
                 if(state.isNullOrBlank())
-                    KF_SIMPLE_INFORM_DIALOG("Please set a default location").show();
+                    KF_SIMPLE_INFORM_DIALOG("Please set your favorite location").show();
                 else {
                     if (lastUserLocation.isNullOrBlank()) {
                         lastUserLocation = uiUserLocationTet.text.toString();
                     }
                     else if (!lastUserLocation.contentEquals(uiUserLocationTet.text.toString())) {
-                        wedakontrol.VM_STOP_DATABASE_EVENT_FETCHING();
+                        /*lifecycleScope.launch {
+                            wedakontrol.VM_STOP_DATABASE_EVENT_FETCHING();
+                        }*/
                         lastUserLocation = uiUserLocationTet.text.toString();
                     }
                     var desact = DashFragmentDirections.actionDashFragmentToEventListFragment(uiUserLocationTet.text.toString());
@@ -327,6 +331,8 @@ class DashFragment : Fragment() {
         uiEvntTitleLout = v.findViewById(R.id.dashboard_evnt_title_lout);
         uiEvntTitle = v.findViewById(R.id.dashboard_evnt_title);
         uiEvntAbout = v.findViewById(R.id.dashboard_evnt_description);
+        uiEvntAbout.imeOptions = (EditorInfo.IME_ACTION_DONE);
+        uiEvntAbout.setRawInputType(InputType.TYPE_CLASS_TEXT);
         uiEvntChipRegular = v.findViewById(R.id.dashboard_chip_regular);
         uiEvntChipInstant = v.findViewById(R.id.dashboard_chip_instant);
         uiEvntTime = v.findViewById(R.id.dashboard_evnt_time);

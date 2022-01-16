@@ -1,0 +1,200 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 8,
+    "identityHash": "c1f68abc473af2cb1e30a87267fae8da",
+    "entities": [
+      {
+        "tableName": "Kuser",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`fuid` TEXT NOT NULL, `google_email` TEXT, `google_id` TEXT, `local_username` TEXT, `remote_username` TEXT, `user_gender` TEXT, `user_sorientation` TEXT, `user_trails` TEXT, PRIMARY KEY(`fuid`))",
+        "fields": [
+          {
+            "fieldPath": "fuid",
+            "columnName": "fuid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "google_email",
+            "columnName": "google_email",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "google_id",
+            "columnName": "google_id",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "local_username",
+            "columnName": "local_username",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "remote_username",
+            "columnName": "remote_username",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "user_gender",
+            "columnName": "user_gender",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "user_sorientation",
+            "columnName": "user_sorientation",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "user_trails",
+            "columnName": "user_trails",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "fuid"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "Kevent",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `event_name` TEXT NOT NULL, `event_description` TEXT, `event_type` INTEGER NOT NULL, `event_time` TEXT, `event_time_inmilli` INTEGER, `event_location` TEXT NOT NULL, `event_lati` REAL NOT NULL, `event_longi` REAL NOT NULL, `event_locality` TEXT, `event_sub_locality` TEXT, `event_admin1` TEXT, `event_zip_code` TEXT, `event_country` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "event_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "event_description",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "event_type",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "time",
+            "columnName": "event_time",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "timeInMilli",
+            "columnName": "event_time_inmilli",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "location",
+            "columnName": "event_location",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lati",
+            "columnName": "event_lati",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "longi",
+            "columnName": "event_longi",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "locality",
+            "columnName": "event_locality",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "sublocality",
+            "columnName": "event_sub_locality",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "admin1",
+            "columnName": "event_admin1",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "zipCode",
+            "columnName": "event_zip_code",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "country",
+            "columnName": "event_country",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "Ksaved",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`saved_id` TEXT NOT NULL, `fire_evnt` TEXT, PRIMARY KEY(`saved_id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "saved_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "firevnt",
+            "columnName": "fire_evnt",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "saved_id"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c1f68abc473af2cb1e30a87267fae8da')"
+    ]
+  }
+}

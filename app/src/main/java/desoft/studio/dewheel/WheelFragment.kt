@@ -219,7 +219,7 @@ class WheelFragment() : Fragment()
 			//KF_NAVIGATE_TO_JOLLY_CREATION();
 		}
 		// _ setup recyclerview
-		jolliesAdapter = JollyRecyAdapter(requireContext(), R.layout.design_evnt_row);
+		jolliesAdapter = JollyRecyAdapter(requireContext(), jolliesRecycler, null);
 		jolliesRecycler.layoutManager = LinearLayoutManager(requireContext());
 		jolliesRecycler.adapter = jolliesAdapter;
 	}
@@ -534,7 +534,7 @@ class WheelFragment() : Fragment()
 	private fun KF_GET_JOLLIES_ON_AREA()
 	{
 		Log.i(TAG, "KF_GET_JOLLIES_ON_AREA: >>>=== GETTING JOLLIES REFRESH AT ${currLocation?.locality}");
-		jolliesAdapter.KF_CLEAR_DATA();
+		jolliesAdapter.KF_CLEAR_EVENT();
 
 		lifecycleScope.launch {
 			dataKontrol.KF_VM_GET_JOLLIES_AT(currLocation!!);
@@ -548,7 +548,7 @@ class WheelFragment() : Fragment()
 	private val jollyWatcher = Observer<WheelJolly?>(){
 		if(it != null )
 		{
-			jolliesAdapter.KF_CONSUME_JOLLY(it);
+			//jolliesAdapter.KF_ADD_EVENT(it);
 			KF_TOGGLE_VIEW_GRP(R.id.wheel_jollies_display, View.VISIBLE);
 		}else {
 			KF_TOGGLE_VIEW_GRP(R.id.wheel_no_events_grp, View.VISIBLE);

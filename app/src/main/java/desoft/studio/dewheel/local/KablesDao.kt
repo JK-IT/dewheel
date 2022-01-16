@@ -39,4 +39,20 @@ interface KablesDao {
 
     @Delete(entity = Kevent::class)
     suspend fun DeleteEvent(evnt: Kevent);
+
+    // +    SAVED EVENT DAO --------->>-------->>--------->>*** -->>----------->>>>
+    @Insert(entity = Ksaved::class, onConflict = OnConflictStrategy.REPLACE)
+    suspend fun AddSavedEvnt(ksaved: Ksaved);
+
+    @Query("SELECT * FROM Ksaved WHERE saved_id = :inid")
+    suspend fun FindSaved(inid : String): Ksaved;
+
+    @Query("SELECT * FROM Ksaved")
+    suspend fun GetAllSaved(): List<Ksaved>;
+
+    @Query("DELETE FROM Ksaved WHERE saved_id = :inid")
+    suspend fun DeleteWithId(inid: String);
+
+    @Delete(entity = Ksaved::class)
+    suspend fun DeleteSaved(ksaved: Ksaved);
 }

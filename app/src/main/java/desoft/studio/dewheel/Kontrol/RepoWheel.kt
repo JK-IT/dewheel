@@ -5,19 +5,19 @@ import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
+import desoft.studio.dewheel.kata.BriefFireEvent
 import desoft.studio.dewheel.kata.FireEvent
 import desoft.studio.dewheel.katic.KONSTANT
 import desoft.studio.dewheel.local.Kevent
 import desoft.studio.dewheel.local.Klocalbase
+import desoft.studio.dewheel.local.Ksaved
 import desoft.studio.dewheel.local.Kuser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.onFailure
 import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.withContext
 import java.util.*
@@ -25,9 +25,9 @@ import kotlin.coroutines.cancellation.CancellationException
 
 class RepoWheel (private val indaba : Klocalbase )
 {
-    private val TAG :String = "+++ WHEEL REPOSITORY +++";
+    private val TAG :String = "-des- +++ WHEEL REPOSITORY +++";
 
-    // +    USER LOCAL REPO --------->>-------->>--------->>*** -->>----------->>>>
+    //+    USER LOCAL REPO --------->>-------->>--------->>*** -->>----------->>>>
     suspend fun REPO_LOCAL_INSERT_USER(inuser : Kuser)
     {
         return withContext(Dispatchers.IO){
@@ -54,7 +54,7 @@ class RepoWheel (private val indaba : Klocalbase )
     {
         indaba.kablesDao().DeleteAllUser();
     }
-// +        EVENT LOCAL REPO --------->>-------->>--------->>*** -->>----------->>>>
+    // +        EVENT LOCAL REPO --------->>-------->>--------->>*** -->>----------->>>>
 
     suspend fun REPO_LOCAL_ADD_EVENT(evnt: Kevent) : Long
     {
@@ -69,6 +69,27 @@ class RepoWheel (private val indaba : Klocalbase )
         indaba.kablesDao().DeleteAllEvent();
     }
 
+    // +        SAVED EVENT LOCAL REPO--------->>-------->>--------->>*** -->>----------->>>>
+    suspend fun REPO_ADD_SAVED_EVNT(sevnt : Ksaved)
+    {
+        indaba.kablesDao().AddSavedEvnt(sevnt);
+    }
+
+    suspend fun REPO_GET_ALL_SAVED() : List<Ksaved>
+    {
+        return indaba.kablesDao().GetAllSaved();
+    }
+
+    suspend fun REPO_GET_SAVED(inid: String) : Ksaved
+    {
+        return indaba.kablesDao().FindSaved(inid);
+    }
+
+    suspend fun REPO_DELETE_SAVED_ID(inid : String)
+    {
+        indaba.kablesDao().DeleteWithId(inid);
+    }
+
     // +        EVENT REMOTE REPO --------->>-------->>--------->>*** -->>----------->>>>
 
     private val fbdatabase = FirebaseDatabase.getInstance();
@@ -76,49 +97,53 @@ class RepoWheel (private val indaba : Klocalbase )
     /**
     * *         REPO_FB_GET_EVENTS
     */
-    suspend fun REPO_FB_GET_EVENTS(state: String, region: String) : Flow<FireEvent>
+    suspend fun REPO_FB_GET_EVENTS(state: String, region: String) : Flow<BriefFireEvent>
     {
-        return callbackFlow<FireEvent> {
+        return callbackFlow<BriefFireEvent> {
             var refe = fbdatabase.getReference(KONSTANT.evntFireDatabasePath).child(Locale.getDefault().country).child(state).child(region).orderByKey();
             var currlis = refe.addChildEventListener(object: ChildEventListener{
+
                     override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
                         snapshot.getValue(FireEvent::class.java)?.let {
-                            trySendBlocking(it).onFailure { thrit ->
+                            var bit = BriefFireEvent(snapshot.key, it);
+                            trySendBlocking(bit).onFailure { thrit ->
                                 Log.w(TAG, "onChildAdded: EVENT FAILED TO SENT TO CONSUMER ${thrit?.message}");
                             }
                         }
                     }
-
-                    override fun onChildChanged(
-                        snapshot: DataSnapshot,
-                        previousChildName: String?
-                    ) {
+                    override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
                         snapshot.getValue(FireEvent::class.java)?.let {
-                            trySendBlocking(it).onFailure { thrit ->
+                            var bit = BriefFireEvent(snapshot.key, it)
+                            trySendBlocking(bit).onFailure { thrit ->
                                 Log.w(TAG, "onChildAdded: EVENT FAILED TO SENT TO CONSUMER ${thrit?.message}");
                             }
                         }
                     }
-
                     override fun onChildRemoved(snapshot: DataSnapshot) {
                         snapshot.getValue(FireEvent::class.java)?.let {
-                            trySendBlocking(it).onFailure { thrit ->
+                            var bit = BriefFireEvent(snapshot.key, it)
+                            trySendBlocking(bit).onFailure { thrit ->
                                 Log.w(TAG, "onChildAdded: EVENT FAILED TO SENT TO CONSUMER ${thrit?.message}");
                             }
                         }
                     }
-
                     override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {
-
+                        snapshot.getValue(FireEvent::class.java)?.let {
+                            var bit = BriefFireEvent(snapshot.key, it)
+                            trySendBlocking(bit).onFailure { thrit ->
+                                Log.w(TAG, "onChildAdded: EVENT FAILED TO SENT TO CONSUMER ${thrit?.message}");
+                            }
+                        }
                     }
-
                     override fun onCancelled(error: DatabaseError) {
                         Log.e(TAG,"onCancelled: CALLBACK FLOW EVENT DATABASE CANCELLED ${error.message}");
                         cancel(CancellationException("Cancel Exception", error.toException()));
                     }
-
                 })
-            awaitClose { refe.removeEventListener(currlis); }
-        }.buffer(Channel.UNLIMITED)
+            awaitClose {
+                Log.w(TAG, "REPO_FB_GET_EVENTS: Remove listener and stop the flow");
+                refe.removeEventListener(currlis);
+            }
+        }
     }
 }

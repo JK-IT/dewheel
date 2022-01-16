@@ -4,6 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Fts4
 import androidx.room.PrimaryKey
+import desoft.studio.dewheel.kata.FireEvent
 
 /**
  * *            Kuser Table
@@ -49,4 +50,10 @@ data class Kevent(
     @ColumnInfo(name = "event_admin1") val admin1:String?,
     @ColumnInfo(name = "event_zip_code") val zipCode:String?,
     @ColumnInfo(name = "event_country") val country:String?,
+)
+
+@Entity
+data class Ksaved(
+    @PrimaryKey @ColumnInfo(name="saved_id") val id: String,
+    @ColumnInfo(name="fire_evnt") val firevnt : FireEvent?=null
 )

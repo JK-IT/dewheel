@@ -12,9 +12,11 @@
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/main_material_toolbar"
         style="@style/Widget.MaterialComponents.Toolbar.PrimarySurface"
+        android:fitsSystemWindows="true"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/main_nav_host"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 

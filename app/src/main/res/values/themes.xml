@@ -36,6 +36,7 @@
         <!-- Customize your theme here. -->
         <item name="fontFamily">@font/spinnaker</item>
         <item name="android:textSize">18sp</item>
+        <!--<item name="android:windowFullscreen">true</item>-->
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <!--customize button-->

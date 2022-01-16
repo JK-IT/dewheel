@@ -15,12 +15,12 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.core.content.edit
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
-import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.firebase.auth.FirebaseAuth
@@ -127,7 +127,10 @@ class MainActivity : AppCompatActivity()
 	*/
 	private fun UI_SETUP_APPBAR()
 	{
-		var appbar = findViewById<MaterialToolbar>(R.id.main_material_toolbar);
+		var appbar = findViewById<Toolbar>(R.id.main_material_toolbar);
+		if(supportActionBar?.isShowing == true) {
+			supportActionBar?.hide();
+		}
 		setSupportActionBar(appbar);
 		topbar = supportActionBar;
 	}

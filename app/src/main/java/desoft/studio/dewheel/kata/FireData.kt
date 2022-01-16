@@ -1,5 +1,8 @@
 package desoft.studio.dewheel.kata
 
+import android.os.Parcel
+import android.os.Parcelable
+
 /**
  * upload event on database, what u need
  * -----------------------------------------------------------
@@ -46,4 +49,47 @@ data class FireEvent(
     var evntimilli : Long?=null,
     var timestamp: Long?=null,
     var location:String?=null
+) : Parcelable {
+    constructor(parcel: Parcel) : this(
+        parcel.readString(),
+        parcel.readString(),
+        parcel.readString(),
+        parcel.readString(),
+        parcel.readString(),
+        parcel.readValue(Long::class.java.classLoader) as? Long,
+        parcel.readValue(Long::class.java.classLoader) as? Long,
+        parcel.readString()
+    ) {
+    }
+
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeString(name)
+        parcel.writeString(hostname)
+        parcel.writeString(hostid)
+        parcel.writeString(about)
+        parcel.writeString(time)
+        parcel.writeValue(evntimilli)
+        parcel.writeValue(timestamp)
+        parcel.writeString(location)
+    }
+
+    override fun describeContents(): Int {
+        return 0
+    }
+
+    companion object CREATOR : Parcelable.Creator<FireEvent> {
+        override fun createFromParcel(parcel: Parcel): FireEvent {
+            return FireEvent(parcel)
+        }
+
+        override fun newArray(size: Int): Array<FireEvent?> {
+            return arrayOfNulls(size)
+        }
+    }
+
+}
+
+data class BriefFireEvent(
+    var id : String? = null,
+    var fev : FireEvent? = null
 )

@@ -7,12 +7,16 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.FirebaseFirestore
-import desoft.studio.dewheel.kata.FireEvent
+import desoft.studio.dewheel.kata.BriefFireEvent
 import desoft.studio.dewheel.local.Kevent
+import desoft.studio.dewheel.local.Ksaved
 import desoft.studio.dewheel.local.Kuser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -27,6 +31,11 @@ class WedaKontrol(private val repo: RepoWheel) :  ViewModel()
 
     init {
         Log.w(TAG, "Init: ViewMODEL IS CREATED" );
+    }
+
+    override fun onCleared() {
+        super.onCleared();
+        Log.w(TAG, "onCleared: VIEW MODEL IS SHUTTING DOWN");
     }
 
     // + USER DATA REPO CONTROL--------->>-------->>--------->>*** -->>----------->>>>
@@ -93,6 +102,40 @@ class WedaKontrol(private val repo: RepoWheel) :  ViewModel()
         }
     }
 
+    // + SAVED EVENT DATA KONTROL--------->>-------->>--------->>*** -->>----------->>>>
+
+    /**
+    *   *                     VM_ADD_SAVED_EVNT
+    */
+    fun VM_ADD_SAVED_EVNT(saved: Ksaved)
+    {
+        viewModelScope.launch(iodis) {
+            Log.w(TAG, "VM_ADD_SAVED_EVNT: adding saved evnt to database");
+            repo.REPO_ADD_SAVED_EVNT(saved);
+        }
+    }
+
+    fun VM_GET_ALL_SAVED() : List<Ksaved>?
+    {
+        viewModelScope.launch(iodis) {
+            var salst = repo.REPO_GET_ALL_SAVED();
+            Log.w(TAG, "VM_GET_ALL_SAVED: ${salst.size}");
+            if(salst.size != 0){
+                Log.w(TAG, "PRINTING SAVED EVENT ${salst[0].firevnt}" );
+            }
+        }
+        return null;
+    }
+    /**
+    * *                     VM_DELETE_SAVED_EVNT
+    */
+    fun VM_DELETE_SAVED_EVNT(inid: String)
+    {
+        viewModelScope.launch (iodis) {
+            repo.REPO_DELETE_SAVED_ID(inid);
+        }
+    }
+
     // + --------->>-------->>--------->>*** -->>----------->>>>
     // * DATA WHEEL KONTROL FACTORY
     class DataWheelKontrolFactory(private val repoWheel: RepoWheel) : ViewModelProvider.Factory
@@ -112,38 +155,38 @@ class WedaKontrol(private val repo: RepoWheel) :  ViewModel()
     private var fbdata = FirebaseDatabase.getInstance();
     private var fbstore = FirebaseFirestore.getInstance();
 
-    private var evntFlowJob: Job? = null;
-    private var livevnt : MutableLiveData<MutableSet<FireEvent>> = MutableLiveData<MutableSet<FireEvent>>();
-    private var muevntset: MutableSet<FireEvent> = mutableSetOf();
+    var livevntlst : MutableLiveData<MutableSet<BriefFireEvent?>> = MutableLiveData<MutableSet<BriefFireEvent?>>();
+    var livevnt : MutableLiveData<BriefFireEvent?>  = MutableLiveData<BriefFireEvent?>();
+    private var muevntset: MutableSet<BriefFireEvent> = mutableSetOf();
+
     /**
     * *             VM_GET_REMOTE_EVENTS
     */
-    fun VM_GET_REMOTE_EVENTS(state : String, region : String)
+    suspend fun VM_GET_REMOTE_EVENTS(state : String, region : String)
     {
-        evntFlowJob = viewModelScope.launch(iodis) {
+        Log.w(TAG, "VM_GET_REMOTE_EVENTS: Gettng events from designated location == $state, $region");
+        try {
             repo.REPO_FB_GET_EVENTS(state, region)
+                .filter { fev ->
+                    !muevntset.contains(fev);
+                }
                 .onEach {
                     muevntset.add(it);
                 }
+                .buffer(Channel.UNLIMITED)
                 .collect {
-                    Log.d(TAG, "VM_GET_REMOTE_EVENTS: size of evnt ${it}");
+                    Log.w(TAG, "VM_GET_REMOTE_EVENTS: size of evnt ${muevntset.size}");
                     withContext(Dispatchers.Main) {
-                        livevnt.value = muevntset;
+                        //livevntlst.value = muevntset;
+                        livevnt.value = it;
                     }
                 }
-
+        } finally {
+            Log.w(TAG, "VM_GET_REMOTE_EVENTS: FINALLY IM GETTING CANCELLED on $state, $region");
+            muevntset.clear();
+            livevnt.value = null;
+            livevntlst.value = mutableSetOf();
         }
-    }
-
-    /**
-    * *         VM_STOP_DATABASE_EVENT_FETCHING
-     * . stop the current fetching of events from database
-    */
-    fun VM_STOP_DATABASE_EVENT_FETCHING()
-    {
-        Log.i(TAG, "VM_STOP_DATABASE_EVENT_FETCHING: STOP CURRENT FETCHING OF EVENTS");
-        evntFlowJob?.cancel();
-        muevntset.clear();
     }
 
 }
