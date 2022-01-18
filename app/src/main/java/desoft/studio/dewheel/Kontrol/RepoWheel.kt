@@ -85,6 +85,11 @@ class RepoWheel (private val indaba : Klocalbase )
         return indaba.kablesDao().FindSaved(inid);
     }
 
+    suspend fun REPO_GET_SAVED_FROM(inadmin: String, inregion : String): List<Ksaved>
+    {
+        return indaba.kablesDao().ListSavedWith(inadmin, inregion);
+    }
+
     suspend fun REPO_DELETE_SAVED_ID(inid : String)
     {
         indaba.kablesDao().DeleteWithId(inid);
@@ -94,9 +99,6 @@ class RepoWheel (private val indaba : Klocalbase )
 
     private val fbdatabase = FirebaseDatabase.getInstance();
 
-    /**
-    * *         REPO_FB_GET_EVENTS
-    */
     suspend fun REPO_FB_GET_EVENTS(state: String, region: String) : Flow<BriefFireEvent>
     {
         return callbackFlow<BriefFireEvent> {

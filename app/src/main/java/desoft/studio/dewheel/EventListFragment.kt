@@ -31,13 +31,11 @@ import com.google.android.libraries.places.widget.Autocomplete
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import desoft.studio.dewheel.Kontrol.WedaKontrol
-import desoft.studio.dewheel.SubKlass.JollyRecyAdapter
+import desoft.studio.dewheel.SubKlass.WheeListAdapter
 import desoft.studio.dewheel.kata.BriefFireEvent
 import desoft.studio.dewheel.katic.KONSTANT
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancelAndJoin
-import kotlinx.coroutines.launch
+import desoft.studio.dewheel.local.Ksaved
+import kotlinx.coroutines.*
 import java.util.*
 
 class EventListFragment : Fragment() {
@@ -60,16 +58,15 @@ class EventListFragment : Fragment() {
     private lateinit var locationfab : FloatingActionButton;
 
     private lateinit var recyview : RecyclerView;
-    private lateinit var recyadapter : JollyRecyAdapter;
+    private lateinit var recyadapter : WheeListAdapter;
 
     /**
     * *                 onCreate
     */
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+        super.onCreate(savedInstanceState);
         var regiontet = arguments?.getString("regiontext");
         lastlocatet = regiontet;
-        Log.d(TAG, "onCreate: RECEIVED ARGUMENT $regiontet");
 
         appCache = requireContext().getSharedPreferences(resources.getString(R.string.app_cache_preference), Context.MODE_PRIVATE);
         Places.initialize(requireContext(), BuildConfig.GOOG_KEY);
@@ -78,11 +75,17 @@ class EventListFragment : Fragment() {
         lifecycleScope.launch {
             var state = appCache.getString(KONSTANT.userSavedState, "");
             repeatOnLifecycle(Lifecycle.State.STARTED){
-                Log.i(TAG, "onCreate: REPEATE IS CALLED TO GET REMOTE EVENTS");
+                Log.i(TAG, "onCreate: REPEATE IS CALLED TO GET REMOTE EVENTS with regiontet $regiontet");
                 //evntjob?.let { evntjob?.cancelAndJoin(); }
-                evntjob = launch { wedaKontrol.VM_GET_REMOTE_EVENTS(state!!, lastlocatet!!); }
+                evntjob = launch {
+                    withContext(Dispatchers.IO){
+                        wedaKontrol.VM_GET_SAVED_FROM(state!!, lastlocatet!!);
+                    }
+                    wedaKontrol.VM_GET_REMOTE_EVENTS(state!!, lastlocatet!!);
+                }
             }
         }
+        wedaKontrol.savedLiveLst.observe(this, savedEvntObserver);
         wedaKontrol.livevnt.observe(this, evntObserver);
     }
     /**
@@ -114,7 +117,9 @@ class EventListFragment : Fragment() {
 
         recyview = v.findViewById(R.id.evntlst_recyview);
         recyview.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false );
-        recyadapter = JollyRecyAdapter(requireContext(), recyview, wedaKontrol);
+        recyadapter = WheeListAdapter(requireContext(), recyview, wedaKontrol);
+        var admin1 = appCache.getString(KONSTANT.userSavedState,"");
+        recyadapter.KF_UPDATE_AREA(admin1?: "", lastlocatet?: "");
         recyview.adapter = recyadapter;
 
     }
@@ -123,7 +128,6 @@ class EventListFragment : Fragment() {
     */
     override fun onStart() {
         super.onStart();
-        wedaKontrol.VM_GET_ALL_SAVED();
     }
     /**
     * *                     onStop
@@ -131,6 +135,7 @@ class EventListFragment : Fragment() {
     override fun onStop() {
         super.onStop();
         Log.i(TAG, "onStop: Event list Fragment on stope");
+        wedaKontrol.savedLiveLst.value = null;
     }
 
     // + --------->>-------->>--------->>*** -->>----------->>>>
@@ -180,9 +185,13 @@ class EventListFragment : Fragment() {
                         }
                     }
                     recyadapter.KF_CLEAR_EVENT();
+                    recyadapter.KF_UPDATE_AREA(admin1, locaCity?: locaNeighborhood!!);
                     lastlocatet = evntlocationtet.text.toString();
                     lifecycleScope.launch {
                         evntjob?.cancelAndJoin();
+                        withContext(Dispatchers.IO){
+                            wedaKontrol.VM_GET_SAVED_FROM(admin1!!, locaCity?: locaNeighborhood!!);
+                        }
                         evntjob = launch { wedaKontrol.VM_GET_REMOTE_EVENTS(admin1, locaCity?: locaNeighborhood!!);}
                     }
                 }
@@ -195,13 +204,22 @@ class EventListFragment : Fragment() {
     }
 
     /**
-    *               * evntObserver
+    *  *                            evntObserver
      *  . observer for events on server
     */
-    private var evntObserver = Observer<BriefFireEvent?>(){ evnit ->
+    private var evntObserver = Observer<BriefFireEvent?>()  { evnit ->
         Log.i(TAG, "Fire Event Observer: Getting event $evnit");
         evnit?.let { recyadapter.KF_ADD_EVENT(evnit); }
 
+    }
+    /**
+    * *                         savedEvntObserver
+    */
+    private var savedEvntObserver = Observer<List<Ksaved>?>() {
+        it?.let {
+            Log.d(TAG, "Saved Event Observer is called");
+            recyadapter.KF_CONSUME_SAVED_LIST(it);
+        }
     }
     /**
     * *                 KF_SIMPLE_DIALOG

@@ -416,6 +416,8 @@ class DashFragment : Fragment() {
                                         KF_CLEAR_EVNT_FIELDS();
                                         uihandler?.post {
                                             Toast.makeText(requireContext(), "Successful creating event", Toast.LENGTH_SHORT).show();
+                                            uiEvntTitle.clearFocus();
+                                            uiEvntAbout.clearFocus();
                                         }
                                     }.addOnFailureListener {
                                         Log.w(TAG, "EVent uploading failure ${it.message}");

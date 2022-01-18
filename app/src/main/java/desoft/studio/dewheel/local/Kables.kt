@@ -55,5 +55,7 @@ data class Kevent(
 @Entity
 data class Ksaved(
     @PrimaryKey @ColumnInfo(name="saved_id") val id: String,
+    @ColumnInfo(name="saved_area") var area : String?=null,
+    @ColumnInfo(name="saved_admin1") var admin1:String?=null,
     @ColumnInfo(name="fire_evnt") val firevnt : FireEvent?=null
 )

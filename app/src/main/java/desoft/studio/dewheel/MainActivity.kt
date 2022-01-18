@@ -11,6 +11,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.view.Window
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.ActionBar
@@ -66,29 +67,38 @@ class MainActivity : AppCompatActivity()
 	override fun onCreate(savedInstanceState: Bundle?)
 	{
 		super.onCreate(savedInstanceState);
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
+		requestWindowFeature(Window.FEATURE_ACTION_MODE_OVERLAY);
 		setContentView(R.layout.activity_main);
+		UI_SETUP_APPBAR();
 
-		handlerWorker = Handler(Looper.getMainLooper());
-		conmana = getSystemService(ConnectivityManager::class.java);
-		appCache = getSharedPreferences(getString(R.string.app_cache_preference), Context.MODE_PRIVATE);
-		fbauth = FirebaseAuth.getInstance();
+		lifecycleScope.launch{
+			launch {
+				handlerWorker = Handler(Looper.getMainLooper());
+				conmana = getSystemService(ConnectivityManager::class.java);
+				appCache = getSharedPreferences(getString(R.string.app_cache_preference), Context.MODE_PRIVATE);
+				fbauth = FirebaseAuth.getInstance();
 
-		if(KF_CHECK_ONLINE_STAT()) {
-			KF_VERIFY_USER();
-			var cacheid = appCache.getString(KONSTANT.useruid, "");
-			if(cacheid.equals(fbuser?.uid)) {
-				wedaKontrol.VM_FIND_USER_LOCAL(fbuser?.uid!!);
-			} else {
-				appCache.edit {
-					clear();
-					commit();
+				if(KF_CHECK_ONLINE_STAT()) {
+					KF_VERIFY_USER();
+					var cacheid = appCache.getString(KONSTANT.useruid, "");
+					if(cacheid.equals(fbuser?.uid)) {
+						wedaKontrol.VM_FIND_USER_LOCAL(fbuser?.uid!!);
+					} else {
+						appCache.edit {
+							clear();
+							commit();
+						}
+						KF_TO_GATE_ACTIVITY();
+					}
 				}
-				KF_TO_GATE_ACTIVITY();
+			}
+			launch {
+				UI_SETUP_CONNECTION_DIALOG();
+				UI_SETUP_NAVI_HOST();
 			}
 		}
-		UI_SETUP_CONNECTION_DIALOG();
-		UI_SETUP_APPBAR();
-		UI_SETUP_HOST();
+
 	}
 	/**
 	* *						onStart
@@ -128,9 +138,6 @@ class MainActivity : AppCompatActivity()
 	private fun UI_SETUP_APPBAR()
 	{
 		var appbar = findViewById<Toolbar>(R.id.main_material_toolbar);
-		if(supportActionBar?.isShowing == true) {
-			supportActionBar?.hide();
-		}
 		setSupportActionBar(appbar);
 		topbar = supportActionBar;
 	}
@@ -138,7 +145,7 @@ class MainActivity : AppCompatActivity()
 	 * *		UI_SETUP_HOST
 	 *
 	 */
-	private fun UI_SETUP_HOST()
+	private fun UI_SETUP_NAVI_HOST()
 	{
 		navHost = supportFragmentManager.findFragmentById(R.id.main_nav_host) as NavHostFragment;
 		navContro = navHost.navController;

@@ -91,5 +91,6 @@ data class FireEvent(
 
 data class BriefFireEvent(
     var id : String? = null,
-    var fev : FireEvent? = null
+    var fev : FireEvent? = null,
+    var saved: Boolean? =null
 )

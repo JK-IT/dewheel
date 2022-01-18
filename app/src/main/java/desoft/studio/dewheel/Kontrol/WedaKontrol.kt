@@ -104,6 +104,7 @@ class WedaKontrol(private val repo: RepoWheel) :  ViewModel()
 
     // + SAVED EVENT DATA KONTROL--------->>-------->>--------->>*** -->>----------->>>>
 
+    var savedLiveLst : MutableLiveData<List<Ksaved>?> = MutableLiveData<List<Ksaved>?>();
     /**
     *   *                     VM_ADD_SAVED_EVNT
     */
@@ -114,7 +115,9 @@ class WedaKontrol(private val repo: RepoWheel) :  ViewModel()
             repo.REPO_ADD_SAVED_EVNT(saved);
         }
     }
-
+    /**
+    * *                         VM_GET_ALL_SAVED
+    */
     fun VM_GET_ALL_SAVED() : List<Ksaved>?
     {
         viewModelScope.launch(iodis) {
@@ -125,6 +128,27 @@ class WedaKontrol(private val repo: RepoWheel) :  ViewModel()
             }
         }
         return null;
+    }
+    /**
+    * *                             VM_GET_SAVED_FROM
+    */
+    fun VM_GET_SAVED_FROM(inadmin : String, inregion : String)
+    {
+        viewModelScope.launch(iodis) {
+            var lstsaved : List<Ksaved> = mutableListOf();
+            withContext(Dispatchers.Main){
+                savedLiveLst.value = null;
+            }
+            withContext(iodis) {
+                lstsaved = repo.REPO_GET_SAVED_FROM(inadmin, inregion);
+                Log.w(TAG, "VM_GET_SAVED_FROM: $inregion, ${lstsaved.size?: 0}");
+                if(lstsaved.size != 0) {
+                    withContext(Dispatchers.Main){
+                        savedLiveLst.value = lstsaved;
+                    }
+                }
+            }
+        }
     }
     /**
     * *                     VM_DELETE_SAVED_EVNT

@@ -47,6 +47,9 @@ interface KablesDao {
     @Query("SELECT * FROM Ksaved WHERE saved_id = :inid")
     suspend fun FindSaved(inid : String): Ksaved;
 
+    @Query("SELECT * FROM Ksaved WHERE saved_area = :inregion AND saved_admin1 = :inadmin")
+    suspend fun ListSavedWith(inadmin:String, inregion : String): List<Ksaved>;
+
     @Query("SELECT * FROM Ksaved")
     suspend fun GetAllSaved(): List<Ksaved>;
 
