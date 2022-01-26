@@ -39,7 +39,7 @@ data class Kevent(
     @PrimaryKey(autoGenerate = true) val id : Long,
     @ColumnInfo(name = "event_name") val name:String,
     @ColumnInfo(name = "event_description") val description:String?=null,
-    @ColumnInfo(name = "event_type") val type:Int,
+    /*@ColumnInfo(name = "event_type") val type:Int,*/
     @ColumnInfo(name = "event_time") var time:String?=null,
     @ColumnInfo(name = "event_time_inmilli") var timeInMilli:Long?=null,
     @ColumnInfo(name = "event_location") val location:String,

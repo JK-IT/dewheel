@@ -32,5 +32,10 @@
         <!-- Customize your theme here. -->
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
+        <!--edge to edge style-->
+        <item name="android:navigationBarColor">
+            @android:color/transparent
+        </item>
+
     </style>
 </resources>

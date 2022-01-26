@@ -30,7 +30,7 @@ import com.google.android.libraries.places.api.net.PlacesClient
 import com.google.android.libraries.places.widget.Autocomplete
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import desoft.studio.dewheel.Kontrol.WedaKontrol
+import desoft.studio.dewheel.DataKenter.WedaKontrol
 import desoft.studio.dewheel.SubKlass.WheeListAdapter
 import desoft.studio.dewheel.kata.BriefFireEvent
 import desoft.studio.dewheel.katic.KONSTANT

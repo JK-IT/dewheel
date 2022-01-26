@@ -1,4 +1,4 @@
-package desoft.studio.dewheel.Kontrol
+package desoft.studio.dewheel.DataKenter
 
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
@@ -8,16 +8,14 @@ import androidx.lifecycle.viewModelScope
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.FirebaseFirestore
 import desoft.studio.dewheel.kata.BriefFireEvent
+import desoft.studio.dewheel.kata.FireEvent
 import desoft.studio.dewheel.local.Kevent
 import desoft.studio.dewheel.local.Ksaved
 import desoft.studio.dewheel.local.Kuser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.buffer
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.system.measureTimeMillis
@@ -213,6 +211,31 @@ class WedaKontrol(private val repo: RepoWheel) :  ViewModel()
         }
     }
 
+    private var realevnt : MutableLiveData<FireEvent?> = MutableLiveData<FireEvent?>();
+    /**
+    * *                     VM_TEMPORARY_GET_LIVE_EVENTS
+     * // TODO: fix it later
+    */
+    fun VM_TEMPORARY_GET_LIVE_EVENTS(state: String, city: String)
+    {
+        viewModelScope.launch() {
+            repo.REPO_FB_GET_EVENTS(state, city).map {
+                it?.let {
+                    KF_CONVERT_FIREVNT(it);
+                }
+            }.flowOn(iodis).buffer(Channel.UNLIMITED).onEach {
+                it?.let {
+                    Log.w(TAG, "VM_TEMPORARY_GET_LIVE_EVENTS: evnt $it");
+                    realevnt.value = it;
+                }
+            }.flowOn(Dispatchers.Main).collect ();
+        }
+    }
+
+    private suspend fun KF_CONVERT_FIREVNT(inpar : BriefFireEvent): FireEvent
+    {
+        return inpar.fev!!;
+    }
 }
 // Log.i("TIME MEASURING $time");
 val time = measureTimeMillis {

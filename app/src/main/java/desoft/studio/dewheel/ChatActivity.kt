@@ -23,7 +23,6 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.ktx.Firebase
-import desoft.studio.dewheel.Kontrol.DataControl
 import desoft.studio.dewheel.SubKlass.ChatRowAdapter
 import desoft.studio.dewheel.kata.Kmessage
 import desoft.studio.dewheel.kata.WheelJolly
@@ -37,7 +36,6 @@ class ChatActivity : AppCompatActivity() {
     private var jollyta: WheelJolly? = null;
     private var roomid : String? = null;
     private var fbuser: FirebaseUser? = null;
-    private var kiewmodel : DataControl? = null;
     private var appisOnline : Boolean = false;
     private var chatAdapter : ChatRowAdapter? = null;
     private var ime : InputMethodManager? = null;
@@ -74,11 +72,9 @@ class ChatActivity : AppCompatActivity() {
         lifecycleScope.launch {
         // _ register firebase server connection observer when application is at least started state
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                kiewmodel?.infostate?.addValueEventListener(fbLinkWatcher);
             }
         }
         //_ register for msg reference on database
-        kiewmodel?.romLiveMsg?.observe(this, msgWatcher);
     }
 
     /**
@@ -166,8 +162,6 @@ class ChatActivity : AppCompatActivity() {
         if (Firebase.auth.currentUser != null) {
             if (Firebase.auth.currentUser!!.isAnonymous != true) {
                 fbuser = Firebase.auth.currentUser!!;
-                kiewmodel = DataControl(application);
-                kiewmodel!!.KF_VM_SETUP_USER_FROM_FIREBASE();
             } else {
                 backtogate = true;
             }
@@ -205,7 +199,6 @@ class ChatActivity : AppCompatActivity() {
             if(state) {
                 Log.d(TAG, "onDataChange: CONNTECTED TO Firebase DATABAE and ROOM ID $roomid");
                 appisOnline = true;
-                roomid?.let { kiewmodel?.KF_VM_SEND_DUMMY_MSG(it) };
             }
             else {
                 Log.d(TAG, "onDataChange: NO CONNECTION TO DATABASE");

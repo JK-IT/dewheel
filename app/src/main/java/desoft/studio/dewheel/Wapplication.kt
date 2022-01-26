@@ -2,7 +2,7 @@ package desoft.studio.dewheel
 
 import android.app.Application
 import androidx.appcompat.app.AppCompatDelegate
-import desoft.studio.dewheel.Kontrol.RepoWheel
+import desoft.studio.dewheel.DataKenter.RepoWheel
 import desoft.studio.dewheel.local.Klocalbase
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.SynchronousQueue

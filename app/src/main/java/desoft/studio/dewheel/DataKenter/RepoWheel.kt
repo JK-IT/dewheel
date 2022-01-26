@@ -1,4 +1,4 @@
-package desoft.studio.dewheel.Kontrol
+package desoft.studio.dewheel.DataKenter
 
 import android.util.Log
 import com.google.firebase.database.ChildEventListener
@@ -104,7 +104,6 @@ class RepoWheel (private val indaba : Klocalbase )
         return callbackFlow<BriefFireEvent> {
             var refe = fbdatabase.getReference(KONSTANT.evntFireDatabasePath).child(Locale.getDefault().country).child(state).child(region).orderByKey();
             var currlis = refe.addChildEventListener(object: ChildEventListener{
-
                     override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
                         snapshot.getValue(FireEvent::class.java)?.let {
                             var bit = BriefFireEvent(snapshot.key, it);

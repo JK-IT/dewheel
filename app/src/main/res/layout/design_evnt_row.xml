@@ -67,7 +67,9 @@
          <TextView
              android:id="@+id/evnt_row_title"
              android:hint="Event Title"
-             android:inputType="text|textCapWords|textNoSuggestions"
+             android:maxLines="2"
+             android:ellipsize="end"
+             android:inputType="text|textCapWords|textNoSuggestions|textMultiLine"
              style="@style/TextAppearance.MaterialComponents.Headline5"
              android:layout_marginVertical="5dp"
              android:paddingHorizontal="5dp"
@@ -75,6 +77,9 @@
              android:layout_height="wrap_content"/>
          <TextView
              android:id="@+id/evnt_row_about"
+             android:inputType="text|textNoSuggestions|textMultiLine"
+             android:maxLines="3"
+             android:ellipsize="end"
              android:layout_marginVertical="1dp"
              android:paddingHorizontal="5dp"
              android:layout_width="match_parent"
@@ -84,7 +89,6 @@
              android:hint="Event Location"
              android:inputType="text|textMultiLine|textNoSuggestions"
              android:maxLines="4"
-             android:lines="4"
              android:gravity="center_vertical"
              android:textSize="@dimen/bodyText1"
              android:layout_marginVertical="5dp"

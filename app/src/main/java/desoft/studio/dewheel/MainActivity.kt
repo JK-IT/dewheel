@@ -26,8 +26,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import desoft.studio.dewheel.Kontrol.DataControl
-import desoft.studio.dewheel.Kontrol.WedaKontrol
+import desoft.studio.dewheel.DataKenter.WedaKontrol
 import desoft.studio.dewheel.kata.FireUser
 import desoft.studio.dewheel.kata.Kadress
 import desoft.studio.dewheel.kata.WheelJolly
@@ -37,7 +36,7 @@ import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity()
 {
-	private val TAG = "-des- <<++ MAIN ACTIVITY ++>>";
+	private val TAG = "-des- <<-++ MAIN ACTIVITY ++->>";
 	private var iodis = Dispatchers.IO;
 
 	private lateinit var handlerWorker : Handler;
@@ -48,7 +47,6 @@ class MainActivity : AppCompatActivity()
 	private lateinit var appCache: SharedPreferences;
 	private val wedaKontrol : WedaKontrol by viewModels{WedaKontrol.DataWheelKontrolFactory((application as Wapplication).repo)};
 
-	private val dataKontrol : DataControl by viewModels { DataControl.DataFactory(application) }
 	private lateinit var navHost : NavHostFragment;
 	private lateinit var navContro : NavController;
 	private var loosingBottomDialog : BottomSheetDialog? = null;
@@ -266,7 +264,6 @@ class MainActivity : AppCompatActivity()
 	fun KF_UPuserTOstore(usr : FireUser)
 	{
 		Log.d(TAG, "KF_UPuserTOstore: == Get user to upload $usr");
-		dataKontrol.KF_VM_UP_USER(usr);
 	}
 	
 	/**
@@ -299,7 +296,6 @@ class MainActivity : AppCompatActivity()
 	 * 	! UPLOADING JOLLY EVENT TO DATABASE
 	*/
 	fun KF_UPLOAD_JOLLY(iname: String, iaddr:String, itime:Long, ivenue : Kadress) {
-		dataKontrol.KF_VM_UP_JOLLY(iname, iaddr, itime, ivenue);
 	}
 
 	/**
@@ -342,18 +338,7 @@ class MainActivity : AppCompatActivity()
 		}
 		inte.putExtra(ChatActivity.chatIntentkey, bund);
 		lifecycleScope.launch(iodis) {
-			var done = dataKontrol.KF_VM_CHATROOM(evnt.jid!! ,evnt);
 
-			when(done) {
-				is DataControl.ResultBox.RoomExist -> {
-					if(done.yesorno) startActivity(inte);
-				}
-				is DataControl.ResultBox.VoidResult -> {
-					done.resu.addOnSuccessListener {
-						startActivity(inte);
-					}
-				}
-			}
 		}
 	}
 

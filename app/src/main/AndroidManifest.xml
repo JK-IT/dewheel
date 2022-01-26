@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="desoft.studio.dewheel">
 
+   <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
    <uses-permission-sdk-23 android:name="android.permission.INTERNET" />
    <uses-permission-sdk-23 android:name="android.permission.ACCESS_NETWORK_STATE" />
    <uses-permission-sdk-23 android:name="android.permission.ACCESS_COARSE_LOCATION" />
@@ -18,30 +20,40 @@
        android:theme="@style/Theme.Dewheel"
        android:usesCleartextTraffic="true">
       <activity
-          android:theme="@style/Theme.Dewheel.Chat"
-          android:name=".ChatActivity"
+          android:name=".LiveWheelActivity"
+          android:theme="@style/dewheel.maps.theme"
           android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
           android:exported="false" />
       <activity
+          android:name=".ChatActivity"
+          android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+          android:exported="false"
+          android:theme="@style/Theme.Dewheel.Chat" />
+      <activity
+          android:name=".MainActivity"
+          android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+          android:exported="false"
+          />
+
+      <activity
           android:name=".GateActivity"
+          android:exported="true"
           android:launchMode="singleTask"
-          android:noHistory="true"
-          android:exported="true">
+          android:noHistory="true">
          <intent-filter>
             <action android:name="android.intent.action.MAIN" />
-
             <category android:name="android.intent.category.LAUNCHER" />
          </intent-filter>
       </activity>
-      <activity
-          android:theme="@style/Theme.Dewheel"
-          android:name=".MainActivity"
-          android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
-          android:exported="false"></activity>
-
       <meta-data
           android:name="preloaded_fonts"
           android:resource="@array/preloaded_fonts" />
+      <meta-data
+          android:name="com.google.android.geo.API_KEY"
+          android:value="${GOOG_KEY}" />
+      <meta-data
+          android:name="com.google.android.gms.version"
+          android:value="@integer/google_play_services_version" />
    </application>
 
 </manifest>

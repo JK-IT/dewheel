@@ -31,6 +31,7 @@
 
         <!-- Status bar color. -->
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimary</item>
+
         <!--toolbar style-->
         <!--<item name="android:toolbarStyle">@style/dewheel.widget.toobar</item>-->
         <!-- Customize your theme here. -->
@@ -121,5 +122,19 @@
         <item name="colorOnSecondaryContainer">@color/md_theme_light_onPrimaryContainer</item>
     </style>
     <!-- +      filter chip style       -->
+
+    <!--*           MAPS ACTIVITY STYLE THEME-->
+    <style name="dewheel.maps.theme" parent="Theme.Dewheel">
+        <!--<item name="android:navigationBarColor">
+            @android:color/transparent
+        </item>-->
+
+        <!-- Optional, if your app is drawing behind the status bar also. -->
+        <item name="android:statusBarColor">
+            @android:color/transparent
+        </item>
+    </style>
+
+    <!--+           MAPS ACTIVITY STYLE-->
 
 </resources>

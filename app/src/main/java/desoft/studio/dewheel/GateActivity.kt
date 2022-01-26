@@ -13,7 +13,6 @@ import android.widget.Button
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.core.content.edit
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -29,8 +28,7 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import desoft.studio.dewheel.Kontrol.DataControl
-import desoft.studio.dewheel.Kontrol.WedaKontrol
+import desoft.studio.dewheel.DataKenter.WedaKontrol
 import desoft.studio.dewheel.katic.KONSTANT
 import desoft.studio.dewheel.local.Kuser
 import kotlinx.coroutines.Dispatchers
@@ -41,7 +39,6 @@ class GateActivity : AppCompatActivity()
 {
 	private val TAG = "-des- <<++ GATE ACTIVITY ++>>";
 
-	private val dataKontrol : DataControl by viewModels{DataControl.DataFactory(application)};
 	private val wedaKontrol : WedaKontrol by viewModels {WedaKontrol.DataWheelKontrolFactory((application as Wapplication).repo)};
 	private lateinit var fbauth : FirebaseAuth;
 	private val fstore  = Firebase.firestore;

@@ -29,6 +29,9 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.MapView
+import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.AddressComponents
@@ -43,7 +46,8 @@ import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.*
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.FirebaseFirestore
-import desoft.studio.dewheel.Kontrol.WedaKontrol
+import com.google.maps.android.ktx.awaitMap
+import desoft.studio.dewheel.DataKenter.WedaKontrol
 import desoft.studio.dewheel.SubKlass.WimePicker
 import desoft.studio.dewheel.kata.FireEvent
 import desoft.studio.dewheel.kata.FireUser
@@ -110,16 +114,13 @@ class DashFragment : Fragment() {
     private lateinit var uiEvntTitleLout : TextInputLayout;
     private lateinit var uiEvntTitle : TextInputEditText;
     private lateinit var uiEvntAbout : TextInputEditText;
-    private var uiEvntType : Int = KONSTANT.evntRegularType;
-    private lateinit var uiEvntChipRegular : Chip;
-    private lateinit var uiEvntChipInstant : Chip;
     private lateinit var uiEvntTime : TextView;
     private lateinit var uiEvntLocation: TextView;
     private lateinit var uiEvntCreateBtn : Button;
     private var evntCale = Calendar.getInstance();
     private var evntAddrcomponent : AddressComponents? = null;
     private var evntLatlng : LatLng? = null;
-
+    
     private lateinit var uiDeleBtn : Button;
 
     private var uihandler : Handler? = null;
@@ -145,7 +146,7 @@ class DashFragment : Fragment() {
         gooInOption = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(getString(R.string.default_web_client_id))
             .requestId().requestEmail().build();
-        gooInClient = GoogleSignIn.getClient(activity, gooInOption);
+        gooInClient = GoogleSignIn.getClient(requireActivity(), gooInOption);
 
         fbuser = FirebaseAuth.getInstance().currentUser;
         wedakontrol.userLivedata.observe(this, userObserver);
@@ -333,8 +334,6 @@ class DashFragment : Fragment() {
         uiEvntAbout = v.findViewById(R.id.dashboard_evnt_description);
         uiEvntAbout.imeOptions = (EditorInfo.IME_ACTION_DONE);
         uiEvntAbout.setRawInputType(InputType.TYPE_CLASS_TEXT);
-        uiEvntChipRegular = v.findViewById(R.id.dashboard_chip_regular);
-        uiEvntChipInstant = v.findViewById(R.id.dashboard_chip_instant);
         uiEvntTime = v.findViewById(R.id.dashboard_evnt_time);
         uiEvntLocation = v.findViewById(R.id.dashboard_evnt_location);
         uiEvntCreateBtn= v.findViewById(R.id.dashboard_evnt_create_btn);
@@ -347,20 +346,7 @@ class DashFragment : Fragment() {
                 v.findViewById<TextInputLayout>(R.id.dashboard_evnt_title_lout).error = null;
             }
         }
-        uiEvntChipInstant.setOnCheckedChangeListener { buttonView, isChecked ->
-            if(isChecked) {
-                uiEvntTime.isEnabled = false;
-                uiEvntLocation.isEnabled = false;
-                uiEvntType = KONSTANT.evntInstantType;
-            }
-        }
-        uiEvntChipRegular.setOnCheckedChangeListener { buttonView, isChecked ->
-            if(isChecked) {
-                uiEvntTime.isEnabled = true;
-                uiEvntLocation.isEnabled = true;
-                uiEvntType = KONSTANT.evntInstantType;
-            }
-        }
+        
         uiEvntTime.setOnClickListener {
             WimePicker().show(childFragmentManager, WimePicker.fragtag);
         }
@@ -369,6 +355,16 @@ class DashFragment : Fragment() {
             var autointe = Autocomplete.IntentBuilder(AutocompleteActivityMode.FULLSCREEN, fielst)
                 .setCountry(Locale.getDefault().country).build(requireContext());
             pickEvntLocationLaunchin.launch(autointe);
+        }
+        // . Live Wheel Button
+        (v.findViewById<TextView>(R.id.dashboard_goreal_btn)).setOnClickListener {
+            if(uiUser == null || (appCache?.getBoolean(KONSTANT.useronstore, false) == false)) {
+                KF_SIMPLE_INFORM_DIALOG("Please log in as Google user and fill out information to continue").show();
+            }
+            else {
+                var inte = Intent(requireContext(), LiveWheelActivity::class.java);
+                startActivity(inte);
+            }
         }
             // . put evnt to rom, upload to fb
         uiEvntCreateBtn.setOnClickListener {
@@ -399,7 +395,7 @@ class DashFragment : Fragment() {
                                 comlst["country"] =  comp.name;
                             }
                         }
-                        var evnk = Kevent(0, uiEvntTitle.text.toString(), uiEvntAbout.text.toString(), uiEvntType, uiEvntTime.text.toString(), evntCale.timeInMillis, uiEvntLocation.text.toString(), evntLatlng!!.latitude, evntLatlng!!.longitude,
+                        var evnk = Kevent(0, uiEvntTitle.text.toString(), uiEvntAbout.text.toString(), uiEvntTime.text.toString(), evntCale.timeInMillis, uiEvntLocation.text.toString(), evntLatlng!!.latitude, evntLatlng!!.longitude,
                             comlst["locality"], comlst["neighborhood"], comlst["admin1"], comlst["zipcode"], comlst["country"]);
 
                         //var remoteupload =
@@ -686,7 +682,6 @@ class DashFragment : Fragment() {
         uiEvntTitle.text = null;
         uiEvntTitleLout.error = null;
         uiEvntAbout.text = null;
-        uiEvntType = KONSTANT.evntRegularType;
         uiEvntLocation.text = null;
         uiEvntTime.text = null;
     }
