@@ -15,6 +15,9 @@ interface KablesDao {
     @Query("SELECT * FROM Kuser WHERE fuid = :uid")
     suspend fun FindUser(uid : String): Kuser?;
 
+    @Query("SELECT * FROM Kuser")
+    suspend fun GetUser() : Kuser?;
+    
     @Query("DELETE FROM Kuser")
     suspend fun DeleteAllUser();
 

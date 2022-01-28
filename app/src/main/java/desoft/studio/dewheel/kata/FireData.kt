@@ -40,6 +40,15 @@ data class FireUser(
     var about: String?=null
 )
 
+data class FireReal(
+    var rid: String?=null,
+    var rname : String?=null,
+    var rdetail: String?=null,
+    var rtype: String?=null,
+    var userfid: String?=null,
+    var username: String?=null
+)
+
 data class FireEvent(
     var name:String?=null,
     var hostname:String?=null,

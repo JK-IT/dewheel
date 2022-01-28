@@ -12,20 +12,15 @@ import desoft.studio.dewheel.kata.FireEvent
 import desoft.studio.dewheel.local.Kevent
 import desoft.studio.dewheel.local.Ksaved
 import desoft.studio.dewheel.local.Kuser
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlin.system.measureTimeMillis
 
 class WedaKontrol(private val repo: RepoWheel) :  ViewModel()
 {
     private val TAG = "-des- k-- WEDA CONTROL ( VIEW MODEL) -->l"
     private val iodis = Dispatchers.IO;
-
-    val userLivedata : MutableLiveData<Kuser?> = MutableLiveData<Kuser?>();
 
     init {
         Log.w(TAG, "Init: ViewMODEL IS CREATED" );
@@ -37,6 +32,10 @@ class WedaKontrol(private val repo: RepoWheel) :  ViewModel()
     }
 
     // + USER DATA REPO CONTROL--------->>-------->>--------->>*** -->>----------->>>>
+    
+    var wantedLiveUser : MutableLiveData<Kuser?> = MutableLiveData<Kuser?>();
+    var currLiveUser : MutableLiveData<Kuser?> = MutableLiveData<Kuser?>();
+    
     /**
     * *             VM_ADD_USER_LOCAL
     */
@@ -59,6 +58,16 @@ class WedaKontrol(private val repo: RepoWheel) :  ViewModel()
     }
 
     /**
+    * *                     VM_GET_USER_LOCAL
+    */
+    fun VM_GET_USER_LOCAL()
+    {
+        viewModelScope.launch {
+            var getusertsk = async { repo.REPO_LOCAL_GET_USER() };
+            currLiveUser.value = async { repo.REPO_LOCAL_GET_USER() }.await();
+        }
+    }
+    /**
     * *         VM_FIND_USER_LOCAL
     */
     fun VM_FIND_USER_LOCAL(inid : String)
@@ -66,7 +75,7 @@ class WedaKontrol(private val repo: RepoWheel) :  ViewModel()
         viewModelScope.launch() {
             var resuser  = repo.REPO_LOCAL_FIND_USER(inid);
             Log.w(TAG, "VM_FIND_USER: found user $resuser" );
-            userLivedata.value = resuser?: null;
+            wantedLiveUser.value = resuser?: null;
         }
     }
 

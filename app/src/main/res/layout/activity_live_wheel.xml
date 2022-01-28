@@ -13,43 +13,72 @@
        app:layout_constraintBottom_toBottomOf="parent"
        android:layout_width="match_parent"
        android:layout_height="match_parent">
-      <!--MAP LAYOUT-->
-      <androidx.coordinatorlayout.widget.CoordinatorLayout
-          android:id="@+id/livevnt_map_grp"
-          android:layout_width="match_parent"
-          android:layout_height="match_parent">
-
+   
+      <!--map container-->
       <androidx.fragment.app.FragmentContainerView
-          android:id="@+id/goo_maps"
-          map:layout_anchor="@id/livevnt_botsheet_grp"
-          xmlns:map="http://schemas.android.com/apk/res-auto"
-          android:name="com.google.android.gms.maps.SupportMapFragment"
-          map:cameraZoom="11"
-          map:useViewLifecycle="true"
-          map:uiTiltGestures="true"
-          map:uiZoomControls="false"
-          map:uiZoomGestures="true"
-          android:layout_width="match_parent"
-          android:layout_height="match_parent"/>
-         
-      <LinearLayout
-          android:id="@+id/livevnt_botsheet_grp"
-          android:orientation="vertical"
-          android:fitsSystemWindows="true"
-          app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content">
-         <TextView
-             android:text="Thisis  bottom sheet"
-             android:layout_width="match_parent"
-             android:layout_height="wrap_content"/>
-      </LinearLayout>
-   </androidx.coordinatorlayout.widget.CoordinatorLayout>
+         android:id="@+id/goo_maps"
+         xmlns:map="http://schemas.android.com/apk/res-auto"
+         android:name="com.google.android.gms.maps.SupportMapFragment"
+         map:cameraZoom="11"
+         map:useViewLifecycle="true"
+         map:uiTiltGestures="true"
+         map:uiZoomControls="false"
+         map:uiZoomGestures="true"
+         android:layout_width="match_parent"
+         android:layout_height="match_parent"/>
+      <!--bottom sheet layer-->
+      <androidx.coordinatorlayout.widget.CoordinatorLayout
+         android:layout_width="match_parent"
+         android:layout_height="wrap_content">
+         <LinearLayout
+            android:id="@+id/livevnt_top_btn_grp"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <Button
+               android:text="Search this area"
+               android:textSize="14sp"
+               style="@style/dewheel.button.tona.cut"
+               android:layout_gravity="center"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"/>
+         </LinearLayout>
+         <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+            android:id="@+id/livevnt_ext_flobtn"
+            app:icon="@drawable/ic_baseline_unfold_more_24"
+            android:layout_marginHorizontal="10dp"
+            android:layout_marginBottom="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+         <LinearLayout
+            android:id="@+id/livevnt_botsheet_grp"
+            android:orientation="vertical"
+            android:fitsSystemWindows="true"
+            app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
+            android:background="@drawable/top_round_corner"
+            app:behavior_hideable="true"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <!--<View
+					 android:id="@+id/livevnt_map_anchor"
+					 app:layout_anchor="@id/livevnt_botsheet_grp"
+					 app:layout_anchorGravity="top"
+					 android:background="#00FFFFFF"
+					 android:layout_width="match_parent"
+					 android:layout_height="30dp"/>-->
+            <include layout="@layout/design_map_activity_botsheet"/>
+         </LinearLayout>
+      </androidx.coordinatorlayout.widget.CoordinatorLayout>
+      </FrameLayout>
+      
+      
       <!--PERMISSION LAYOUT-->
       <LinearLayout
           android:id="@+id/livevnt_location_perm_grp"
           android:gravity="bottom"
           android:padding="10dp"
+          android:visibility="gone"
           android:background="@color/white"
           android:fitsSystemWindows="true"
           android:layout_width="match_parent"
@@ -107,5 +136,4 @@
       </LinearLayout>
 
    </LinearLayout>
-   </FrameLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

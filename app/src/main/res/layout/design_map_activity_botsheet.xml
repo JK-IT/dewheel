@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	xmlns:app="http://schemas.android.com/apk/res-auto">
+	
+	<FrameLayout
+		app:layout_constraintTop_toTopOf="parent"
+		app:layout_constraintBottom_toBottomOf="parent"
+		app:layout_constraintEnd_toEndOf="parent"
+		app:layout_constraintStart_toStartOf="parent"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content">
+		
+		<LinearLayout
+			android:padding="10dp"
+			android:orientation="vertical"
+			android:layout_gravity="center_vertical"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content">
+			<TextView
+				android:text="Realtime Event Details"
+				android:inputType="textCapWords"
+				android:textAppearance="@style/dewheel.title.small"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"/>
+			
+			<com.google.android.material.textfield.TextInputLayout
+				android:id="@+id/map_bot_real_title_lout"
+				app:hintEnabled="true"
+				android:hint="Event Title"
+				app:hintTextColor="#CBDADADA"
+				android:layout_marginVertical="5dp"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content">
+				<com.google.android.material.textfield.TextInputEditText
+					android:id="@+id/map_bot_real_title"
+					android:inputType="textCapWords"
+					android:imeOptions="actionNext"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"/>
+			</com.google.android.material.textfield.TextInputLayout>
+			
+			<com.google.android.material.textfield.TextInputLayout
+				app:hintEnabled="true"
+				app:hintTextColor="#CBDADADA"
+				android:hint="About event: location, time, activities..."
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content">
+				<com.google.android.material.textfield.TextInputEditText
+					android:id="@+id/map_bot_real_about"
+					android:inputType="textMultiLine"
+					android:maxLines="3"
+					android:ellipsize="end"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"/>
+			</com.google.android.material.textfield.TextInputLayout>
+			<View
+				android:layout_gravity="center"
+				android:layout_margin="5dp"
+				android:background="@color/grey"
+				android:layout_width="20dp"
+				android:layout_height="5dp"/>
+			<TextView
+				android:text="Event Type"
+				android:textStyle="bold"
+				android:layout_marginVertical="5dp"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"/>
+			<com.google.android.material.chip.ChipGroup
+				android:id="@+id/map_bot_real_chipgrp"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content">
+				<com.google.android.material.chip.Chip
+					android:text="Food &amp; Drink"
+					style="@style/dewheel.chip.filter"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"/>
+				<com.google.android.material.chip.Chip
+					android:text="Outdoor"
+					style="@style/dewheel.chip.filter"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"/>
+				<com.google.android.material.chip.Chip
+					android:text="Indoor"
+					style="@style/dewheel.chip.filter"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"/>
+				<com.google.android.material.chip.Chip
+					android:text="Gym"
+					style="@style/dewheel.chip.filter"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"/>
+				<com.google.android.material.chip.Chip
+					android:text="Movie"
+					style="@style/dewheel.chip.filter"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"/>
+				<com.google.android.material.chip.Chip
+					android:text="Chilling/Talk/Relax"
+					style="@style/dewheel.chip.filter"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"/>
+				<com.google.android.material.chip.Chip
+					android:text="Entertaiment"
+					style="@style/dewheel.chip.filter"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"/>
+				<com.google.android.material.chip.Chip
+					android:text="Snack"
+					style="@style/dewheel.chip.filter"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"/>
+				<com.google.android.material.chip.Chip
+					android:text="Exploring"
+					style="@style/dewheel.chip.filter"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"/>
+			</com.google.android.material.chip.ChipGroup>
+			
+			<LinearLayout
+				android:orientation="horizontal"
+				android:layout_gravity="end"
+				android:layout_margin="10dp"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content">
+				<Button
+					android:id="@+id/map_bot_real_online_btn"
+					android:text="Go Online"
+					android:layout_marginHorizontal="5dp"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"/>
+			</LinearLayout>
+		</LinearLayout>
+		
+		
+	</FrameLayout>
+	
+</androidx.constraintlayout.widget.ConstraintLayout>

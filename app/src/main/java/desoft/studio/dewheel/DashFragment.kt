@@ -29,9 +29,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
-import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.MapView
-import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.AddressComponents
@@ -40,13 +37,11 @@ import com.google.android.libraries.places.api.model.TypeFilter
 import com.google.android.libraries.places.api.net.PlacesClient
 import com.google.android.libraries.places.widget.Autocomplete
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
-import com.google.android.material.chip.Chip
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.*
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.maps.android.ktx.awaitMap
 import desoft.studio.dewheel.DataKenter.WedaKontrol
 import desoft.studio.dewheel.SubKlass.WimePicker
 import desoft.studio.dewheel.kata.FireEvent
@@ -149,7 +144,7 @@ class DashFragment : Fragment() {
         gooInClient = GoogleSignIn.getClient(requireActivity(), gooInOption);
 
         fbuser = FirebaseAuth.getInstance().currentUser;
-        wedakontrol.userLivedata.observe(this, userObserver);
+        wedakontrol.wantedLiveUser.observe(this, userObserver);
 
         childFragmentManager.setFragmentResultListener(KONSTANT.timePickerReqKey, requireActivity()){ key, bund ->
             if(key == KONSTANT.timePickerReqKey) {

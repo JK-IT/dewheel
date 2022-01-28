@@ -44,16 +44,22 @@ class RepoWheel (private val indaba : Klocalbase )
             indaba.kablesDao().UpdateUser(inuer);
         }
     }
-
+    
     suspend fun REPO_LOCAL_FIND_USER(inid : String): Kuser?
     {
         return (indaba.kablesDao().FindUser(inid));
     }
 
+    suspend fun REPO_LOCAL_GET_USER() : Kuser?
+    {
+        return indaba.kablesDao().GetUser();
+    }
+    
     suspend fun REPO_LOCAL_DELETE_ALL_USER()
     {
         indaba.kablesDao().DeleteAllUser();
     }
+    //_    USER LOCAL REPO --------->>-------->>--------->>*** -->>----------->>>>
     // +        EVENT LOCAL REPO --------->>-------->>--------->>*** -->>----------->>>>
 
     suspend fun REPO_LOCAL_ADD_EVENT(evnt: Kevent) : Long
@@ -68,7 +74,7 @@ class RepoWheel (private val indaba : Klocalbase )
     {
         indaba.kablesDao().DeleteAllEvent();
     }
-
+    // _        EVENT LOCAL REPO --------->>-------->>--------->>*** -->>----------->>>>
     // +        SAVED EVENT LOCAL REPO--------->>-------->>--------->>*** -->>----------->>>>
     suspend fun REPO_ADD_SAVED_EVNT(sevnt : Ksaved)
     {
@@ -94,7 +100,7 @@ class RepoWheel (private val indaba : Klocalbase )
     {
         indaba.kablesDao().DeleteWithId(inid);
     }
-
+    // _        SAVED EVENT LOCAL REPO--------->>-------->>--------->>*** -->>----------->>>>
     // +        EVENT REMOTE REPO --------->>-------->>--------->>*** -->>----------->>>>
 
     private val fbdatabase = FirebaseDatabase.getInstance();
@@ -147,4 +153,5 @@ class RepoWheel (private val indaba : Klocalbase )
             }
         }
     }
+    // _        EVENT REMOTE REPO --------->>-------->>--------->>*** -->>----------->>>>
 }

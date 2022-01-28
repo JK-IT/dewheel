@@ -15,6 +15,7 @@ import android.provider.Settings
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowInsetsController
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.LinearLayout
@@ -26,10 +27,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.coordinatorlayout.widget.CoordinatorLayout
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.updateLayoutParams
+import androidx.core.view.*
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
@@ -38,12 +36,18 @@ import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.tasks.CancellationTokenSource
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
+import com.google.firebase.database.FirebaseDatabase
 import com.google.maps.android.SphericalUtil
 import com.google.maps.android.clustering.ClusterManager
 import com.google.maps.android.clustering.view.ClusterRenderer
@@ -53,16 +57,20 @@ import desoft.studio.dewheel.DataKenter.WedaKontrol
 import desoft.studio.dewheel.Kluster.KiveEvent
 import desoft.studio.dewheel.Kluster.KlusterRenderer
 import desoft.studio.dewheel.kata.FireEvent
+import desoft.studio.dewheel.kata.FireReal
+import desoft.studio.dewheel.local.Kuser
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlin.system.measureTimeMillis
 
 
-class LiveWheelActivity : AppCompatActivity(), OnMapReadyCallback {
+class LiveWheelActivity : AppCompatActivity() {
 
     private val TAG = "-des- <<-++ LIVE WHEEL ACTIVITY ++->>";
     private val wekontrol : WedaKontrol by viewModels { WedaKontrol.DataWheelKontrolFactory((application as Wapplication).repo) }
-
+    private var currUser : Kuser? = null;
+    private var fbrealtime = FirebaseDatabase.getInstance();
+    
     private val permlauncher = KF_PERM_LAUNCHER();
     private val locasetlauncher = KF_LOCA_SETT_LAUNCHER();
     private lateinit var fusedLocation : FusedLocationProviderClient;
@@ -91,6 +99,9 @@ class LiveWheelActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var uiLocationRationalGrp : LinearLayout;
     private lateinit var uiMapgrp : CoordinatorLayout;
     private lateinit var uiMapfrag : SupportMapFragment;
+    private lateinit var uiBotBehavior : BottomSheetBehavior<LinearLayout>;
+    private var realtypeSet = arrayListOf<String>();
+    private lateinit var uiShowHidebtn : ExtendedFloatingActionButton;
 
     private lateinit var uiGrantbtn : Button;
     private lateinit var uiOpenSetbtn: Button;
@@ -103,33 +114,39 @@ class LiveWheelActivity : AppCompatActivity(), OnMapReadyCallback {
 
         pKgeoder = Geocoder(this);
         uiHandler = Handler(Looper.getMainLooper());
-        /*disable drawing in cutout mode layout*/
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            window.attributes.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+        
+        lifecycleScope.launch {
+            wekontrol.VM_GET_USER_LOCAL();
         }
+        wekontrol.currLiveUser.observe(this){
+            currUser = it;
+        }
+        /*disable drawing in cutout mode layout*/
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             /*window?.insetsController?.let {
                 //it.systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
             }*/
             window.statusBarColor = Color.TRANSPARENT;
             WindowCompat.setDecorFitsSystemWindows(window, false);
+            window.decorView.windowInsetsController?.setSystemBarsAppearance(WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS or WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS, WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS or WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS);
+            
         } else {
             @Suppress("DEPRECATION")
             window?.apply {
-                clearFlags(/*WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION or*/ WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+                clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
                 addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-                decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+                decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
                 statusBarColor = Color.TRANSPARENT
-                /*navigationBarColor= Color.TRANSPARENT*/
             }
         }
         Log.i(TAG, "onCreate: GETTING WINDOW INSETS");
         ViewCompat.setOnApplyWindowInsetsListener(window.decorView){ _, insets ->
             //Log.d(TAG, "onCreate: Insets value ${insets.getInsets(WindowInsetsCompat.Type.systemBars())}");
-            (findViewById<LinearLayout>(R.id.livevnt_map_grp)).updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                //bottomMargin = insets.systemWindowInsetBottom
-                bottomMargin = insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom;
-            }
+//            (findViewById<LinearLayout>(R.id.livevnt_map_grp)).updateLayoutParams<ViewGroup.MarginLayoutParams> {
+//                //bottomMargin = insets.systemWindowInsetBottom
+//                bottomMargin = insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom;
+//            }
             (findViewById<LinearLayout>(R.id.livevnt_location_content_perm_grp)).updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 bottomMargin = insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom;
             }
@@ -204,12 +221,28 @@ class LiveWheelActivity : AppCompatActivity(), OnMapReadyCallback {
                 }
             }
         }
-
+/*
         uiMapgrp = findViewById(R.id.livevnt_map_grp);
+*/
         uiLocationRationalGrp = findViewById(R.id.livevnt_location_perm_grp);
         //uiLocationRationalGrp.visibility = View.GONE;
+        //. bottom sheet behavior from view
+        uiBotBehavior = BottomSheetBehavior.from(findViewById(R.id.livevnt_botsheet_grp));
+        uiBotBehavior.let {
+            //it.peekHeight = 200;
+            it.state = BottomSheetBehavior.STATE_HALF_EXPANDED;
+            it.isFitToContents = true;
+            it.halfExpandedRatio = .2f;
+        }
         
-
+        uiShowHidebtn = findViewById(R.id.livevnt_ext_flobtn);
+        uiShowHidebtn.setOnClickListener {
+            if(uiBotBehavior.state == BottomSheetBehavior.STATE_HALF_EXPANDED || uiBotBehavior.state == BottomSheetBehavior.STATE_HIDDEN) {
+                uiBotBehavior.state = BottomSheetBehavior.STATE_EXPANDED;
+            } else {
+                uiBotBehavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED;
+            }
+        }
         uiGrantbtn = findViewById(R.id.livevnt_grant_btn);
         uiGrantbtn.setOnClickListener {
             permlauncher.launch(arrayOf(android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION));
@@ -225,6 +258,62 @@ class LiveWheelActivity : AppCompatActivity(), OnMapReadyCallback {
         uiCancelbtn.setOnClickListener {
             //KF_SHOW_LOCATION_RATIONALE(false);
             finish();
+        }
+        //.         ------      bottom sheet layout         -----
+        var realtitlelout = findViewById<TextInputLayout>(R.id.map_bot_real_title_lout);
+        var realtitle = findViewById<TextInputEditText>(R.id.map_bot_real_title);
+        var realbout = findViewById<TextInputEditText>(R.id.map_bot_real_about);
+        var realchipgrp = findViewById<ChipGroup>(R.id.map_bot_real_chipgrp);
+        var realonlinebtn = findViewById<Button>(R.id.map_bot_real_online_btn);
+        
+        realchipgrp.let {
+            it.isSelectionRequired = true;
+        }
+        realchipgrp.forEach {
+            if(it is Chip) {
+                it.layoutDirection = View.LAYOUT_DIRECTION_LOCALE;
+                it.setOnCheckedChangeListener { buttonView, isChecked ->
+                    if(isChecked) {
+                        //Log.i(TAG, "KF_SETUP_VIEW: check id of chip ${it.id}");
+                        realtypeSet.add(it.text.toString());
+                    } else {
+                        realtypeSet.remove(it.text.toString());
+                    }
+                    Log.d(TAG, "KF_SETUP_VIEW: ${realtypeSet.toString()}");
+                }
+                if(realtypeSet.isEmpty()) {
+                    if(it.id == 1)  it.isChecked = true;
+                }
+            }
+        }
+        
+        realonlinebtn.setOnClickListener {
+            if(realtitle.text.isNullOrBlank()) {
+                realtitlelout.error = "This field is required";
+                //return@setOnClickListener;
+            } else {
+                realtitlelout.error = null;
+            }
+            //Log.i(TAG, "KF_SETUP_VIEW: current user ${currUser.toString()};")
+            if(currUser != null ) {
+                var freal = FireReal(System.currentTimeMillis().toString(), realtitle.text.toString(), realbout.text.toString()?: "", realtypeSet.toString(), currUser?.fuid, currUser?.local_username?: currUser?.remote_username);
+                KF_GET_FRESH_LOCATION();
+                if(useRealocation == null ) {
+                    KF_SHOW_DIALOG("Cannot get your current location. Please try again");
+                    return@setOnClickListener;
+                }
+                var adrlst = pKgeoder.getFromLocation(useRealocation?.latitude?: 0.0, useRealocation?.longitude?: 0.0,1);
+                if(adrlst[0] != null ) {
+                    adrlst[0].let {
+                        Log.d(TAG, "KF_SETUP_VIEW: ${it.adminArea} ${it.locality} ${it.subLocality}");
+                    }
+                }
+            } else {
+                KF_SHOW_DIALOG("You are signed out. Please login again");
+                var inte = Intent(this, GateActivity::class.java);
+                startActivity(inte);
+                finish();
+            }
         }
     }
 
@@ -304,34 +393,17 @@ class LiveWheelActivity : AppCompatActivity(), OnMapReadyCallback {
             .setCancelable(true).create();
         aledi.show();
     }
+    
     /**
-    * *                     onMapReady
+    * *                     KF_SHOW_DIALOG
     */
-    @SuppressLint("MissingPermission")
-    override fun onMapReady(gmap: GoogleMap) {
-        kgmap = gmap;
-        /*kgmap.isMyLocationEnabled = true;
-        kgmap.uiSettings.apply {
-            isCompassEnabled = true;
-        }
-        if(currinsets != null) {
-            Log.i(TAG, "onMapReady: Current top inset ${currinsets!!.getInsets(WindowInsetsCompat.Type.statusBars())};")
-            kgmap.setPadding(0,
-                (currinsets!!.getInsets(WindowInsetsCompat.Type.systemBars()).top?: 0), 10,0);
-        }
-        else {
-            kgmap.setPadding(0, 144, 10,0);
-        }
-        kgmap.setOnMyLocationButtonClickListener {
-            permlauncher.launch(arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION , android.Manifest.permission.ACCESS_COARSE_LOCATION));
-            false;
-        }
-        //clusterManag = ClusterManager(this, kgmap);
-        tempmanag = ClusterManager<TempItem>(this, kgmap);
-        kgmap.setOnCameraIdleListener(tempmanag);
-        kgmap.setOnMarkerClickListener(tempmanag);*/
+    private fun KF_SHOW_DIALOG( inmsg : String )
+    {
+        AlertDialog.Builder(this).setMessage(inmsg)
+            .setPositiveButton("Ok") {dia, _ ->
+                dia.dismiss();
+            }.show();
     }
-
     /**
     * *                     KF_CENTER_TO_BOUND
      * . calculate the bound from latlng center and radius
