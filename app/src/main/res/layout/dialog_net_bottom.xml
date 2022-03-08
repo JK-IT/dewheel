@@ -6,36 +6,24 @@
 
     <LinearLayout
         android:id="@+id/dialog_net_symbol_head"
+       android:layout_margin="10dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/dialog_net_info_head"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="100dp">
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
         <FrameLayout
             android:layout_marginHorizontal="5dp"
-            android:layout_gravity="center_vertical"
+            android:layout_gravity="center"
             android:layout_weight="1"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content">
             <ImageView
                 android:src="@drawable/ic_baseline_signal_wifi_off_24"
                 android:scaleType="fitCenter"
                 android:layout_gravity="end"
-                android:layout_width="60dp"
-                android:layout_height="60dp"/>
-        </FrameLayout>
-        <FrameLayout
-            android:layout_marginHorizontal="5dp"
-            android:layout_gravity="center_vertical"
-            android:layout_weight="1"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content">
-            <ImageView
-                android:src="@drawable/ic_baseline_mobiledata_off_24"
-                android:scaleType="fitCenter"
-                android:layout_gravity="start"
                 android:layout_width="60dp"
                 android:layout_height="60dp"/>
         </FrameLayout>

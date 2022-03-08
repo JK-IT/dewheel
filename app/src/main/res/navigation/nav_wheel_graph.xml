@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:id="@+id/nav_wheel_graph"
+	app:startDestination="@id/doorFragment">
+	
+	<fragment
+		android:id="@+id/doorFragment"
+		android:name="desoft.studio.dewheel.DoorFragment"
+		android:label="frag_door"
+		tools:layout="@layout/frag_door" >
+	<action
+		android:id="@+id/action_doorFragment_to_dashFragment"
+		app:destination="@id/dashFragment" />
+	</fragment>
+	<fragment
+		android:id="@+id/dashFragment"
+		android:name="desoft.studio.dewheel.DashFragment"
+		android:label="frag_dash"
+		tools:layout="@layout/frag_dash" />
+</navigation>

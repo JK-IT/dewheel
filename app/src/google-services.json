@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "312225800234",
+    "firebase_url": "https://de-wheel-default-rtdb.firebaseio.com",
+    "project_id": "de-wheel",
+    "storage_bucket": "de-wheel.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:312225800234:android:b36b02ee55ad0b0020a353",
+        "android_client_info": {
+          "package_name": "desoft.studio.dewheel.debug"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "312225800234-rq4raskmp2p2597d40ti9b5r6n1vlh2q.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "desoft.studio.dewheel.debug",
+            "certificate_hash": "cbece33890c450f4f00122dce4f1a3004975d7a8"
+          }
+        },
+        {
+          "client_id": "312225800234-ma4shum70em5sgnv4qfnb895oo5j3evf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDyRvFyd1T--FOMbmHUCY-fP9lnY088PiA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "312225800234-ma4shum70em5sgnv4qfnb895oo5j3evf.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

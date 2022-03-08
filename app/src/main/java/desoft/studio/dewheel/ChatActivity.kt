@@ -178,7 +178,7 @@ class ChatActivity : AppCompatActivity() {
     private fun KF_BACKTO_GATE()
     {
         Log.i(TAG, "KF_BACKTO_GATE: is called");
-        var inte = Intent(this, GateActivity::class.java);
+        var inte = Intent(this, DELETEGateActivity::class.java);
         inte.apply {
             flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK;
         }

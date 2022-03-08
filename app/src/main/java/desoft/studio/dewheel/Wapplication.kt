@@ -11,9 +11,11 @@ import java.util.concurrent.TimeUnit
 
 class Wapplication : Application() {
 
-    val localbase by lazy { Klocalbase.GetdbINS(this) };
+    //val localbase by lazy { Klocalbase.GetdbINS(this) };
+    lateinit var localbase : Klocalbase;
     // repo will have instance of database to get dao
-    val repo by lazy { RepoWheel(localbase) };
+    //val repo by lazy { RepoWheel(localbase) };
+    lateinit var repo : RepoWheel;
 
     private val corenum = Runtime.getRuntime().availableProcessors();
     private val workqueue : BlockingQueue<Runnable> = SynchronousQueue<Runnable>();
@@ -25,5 +27,8 @@ class Wapplication : Application() {
     override fun onCreate() {
         super.onCreate();
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        //. init database and repo
+        localbase = Klocalbase.GetdbINS(this);
+        repo = RepoWheel(localbase);
     }
 }

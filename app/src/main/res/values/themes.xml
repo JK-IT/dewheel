@@ -1,6 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <!-- * main theme style-->
+    <!-- ?main theme style-->
     <style name="Theme.Dewheel"  parent="Theme.Material3.Light.NoActionBar">
         <item name="colorPrimary">@color/md_theme_light_primary</item>
         <item name="colorOnPrimary">@color/md_theme_light_onPrimary</item>
@@ -38,22 +38,22 @@
         <item name="fontFamily">@font/spinnaker</item>
         <item name="android:textSize">18sp</item>
         <!--<item name="android:windowFullscreen">true</item>-->
-        <!--<item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>-->
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
         <!--customize button-->
         <item name="materialButtonStyle">@style/dewheel.button.filled</item>
         <!--text appearance'-->
 
     </style>
-            <!-- + main theme style-->
+    <!-- * main theme style-->
 
-    <!-- *  chat activity style-->
+    <!-- ?  chat activity style-->
     <style name="Theme.Dewheel.Chat" parent="Theme.MaterialComponents.Light.NoActionBar.Bridge">
         <item name="windowActionBar">false</item>
     </style>
-    <!-- +  chat activity style-->
+    <!-- *  chat activity style-->
 
-    <!-- * typo style-->
+    <!-- ? typo style-->
 
     <style name="dewheel.text.headlineLarge" parent="TextAppearance.Material3.HeadlineLarge">
         <item name="fontFamily">@font/aldrich</item>
@@ -75,9 +75,9 @@
         <item name="fontFamily">@font/spinnaker</item>
         <item name="android:fontFamily">@font/spinnaker </item>
     </style>
-    <!--+ typo style-->
+    <!--* typo style-->
 
-    <!--* button style-->
+    <!--? button style-->
     <style name="dewheel.button.filled" parent="Widget.Material3.Button">
         <item name="shapeAppearance">@style/dewheel.cutshape.leftright</item>
     </style>
@@ -86,9 +86,9 @@
         <item name="shapeAppearance">@style/dewheel.cutshape.leftright</item>
     </style>
 
-    <!--+ button style-->
+    <!--* button style-->
 
-    <!-- *      shape style     -->
+    <!-- ?      shape style     -->
     <style name="dewheel.cutshape.leftright" parent="ShapeAppearance.Material3.SmallComponent">
         <item name="cornerFamilyTopLeft">cut</item>
         <item name="cornerFamilyBottomRight">cut</item>
@@ -100,16 +100,16 @@
         <item name="cornerFamily">cut</item>
         <item name="cornerSize">7dp</item>
     </style>
-    <!-- +      shape style-->
+    <!-- *      shape style-->
 
-    <!-- *      card style     -->
+    <!-- ?      card style     -->
     <style name="dewheel.card.elevated" parent="Widget.Material3.CardView.Elevated">
         <item name="cardElevation">5dp</item>
         <item name="cardCornerRadius">13dp</item>
     </style>
-    <!-- +      card style-->
+    <!-- *     card style-->
 
-    <!-- *      filter chip style     -->
+    <!-- ?     filter chip style     -->
     <style name="dewheel.chip.filter" parent="Widget.Material3.Chip.Filter">
         <item name="materialThemeOverlay">@style/ThemeOverlay.dewheel.chip</item>
         <item name="chipBackgroundColor">@color/chip_state_color</item>
@@ -121,9 +121,9 @@
         <item name="colorOnSurface">@color/md_theme_light_primaryContainer</item>
         <item name="colorOnSecondaryContainer">@color/md_theme_light_onPrimaryContainer</item>
     </style>
-    <!-- +      filter chip style       -->
+    <!-- *      filter chip style       -->
 
-    <!--*           MAPS ACTIVITY STYLE THEME-->
+    <!--?           MAPS ACTIVITY STYLE THEME-->
     <style name="dewheel.maps.theme" parent="Theme.Dewheel">
         <!--<item name="android:navigationBarColor">
             @android:color/transparent
@@ -135,6 +135,6 @@
         </item>
     </style>
 
-    <!--+           MAPS ACTIVITY STYLE-->
+    <!--*           MAPS ACTIVITY STYLE-->
 
 </resources>

@@ -310,7 +310,7 @@ class LiveWheelActivity : AppCompatActivity() {
                 }
             } else {
                 KF_SHOW_DIALOG("You are signed out. Please login again");
-                var inte = Intent(this, GateActivity::class.java);
+                var inte = Intent(this, DELETEGateActivity::class.java);
                 startActivity(inte);
                 finish();
             }

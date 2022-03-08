@@ -34,7 +34,7 @@ import desoft.studio.dewheel.katic.KONSTANT
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class MainActivity : AppCompatActivity()
+class DELETEMainActivity : AppCompatActivity()
 {
 	private val TAG = "-des- <<-++ MAIN ACTIVITY ++->>";
 	private var iodis = Dispatchers.IO;
@@ -67,7 +67,7 @@ class MainActivity : AppCompatActivity()
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		requestWindowFeature(Window.FEATURE_ACTION_MODE_OVERLAY);
-		setContentView(R.layout.activity_main);
+		setContentView(R.layout.delete_activity_main);
 		UI_SETUP_APPBAR();
 
 		lifecycleScope.launch{
@@ -173,7 +173,7 @@ class MainActivity : AppCompatActivity()
 	*/
 	fun KF_TO_GATE_ACTIVITY()
 	{
-		var inte = Intent(this, GateActivity::class.java);
+		var inte = Intent(this, DELETEGateActivity::class.java);
 		startActivity(inte);
 	}
 	//#region NETWORK AREA
@@ -222,7 +222,7 @@ class MainActivity : AppCompatActivity()
 		currentActiveNet = conmana.activeNetwork;
 		if(currentActiveNet == null)
 		{// showing no connection dialog
-			GateActivity.ShowingNOCONNECTIONdialog(this);
+			KF_NOINTERNET_DIALOG();
 			return false;
 		} else
 		{
@@ -254,6 +254,21 @@ class MainActivity : AppCompatActivity()
 	}
 
 	// + --------->>-------->>--------->>*** -->>----------->>>>
+	
+	/**
+	* ?                     UTILITY
+	*/
+	
+	/**
+	* *                 KF_NOINTERNET_DIALOG
+	*/
+	private fun KF_NOINTERNET_DIALOG()
+	{
+		var dial = BottomSheetDialog(this);
+		dial.apply {
+		
+		}
+	}
 /**
  * ?VIEW MODEL - DATA CONTROL RELATED
  */

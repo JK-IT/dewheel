@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:id="@+id/nav_main_graph"
+	app:startDestination="@id/dashFragmentDELETE">
+	
+	<fragment
+		android:id="@+id/dashFragmentDELETE"
+		android:name="desoft.studio.dewheel.DashFragment"
+		android:label="frag_dash"
+		tools:layout="@layout/frag_dash" >
+		<action
+			android:id="@+id/action_dashFragment_to_eventListFragmentDELETE"
+			app:destination="@id/eventListFragmentDELETE" />
+	</fragment>
+	<fragment
+		android:id="@+id/eventListFragmentDELETE"
+		android:name="desoft.studio.dewheel.EventListFragment"
+		android:label="frag_event_list"
+		tools:layout="@layout/frag_event_list" >
+		<action
+			android:id="@+id/action_eventListFragment_to_dashFragmentDELETE"
+			app:destination="@id/dashFragmentDELETE" />
+	</fragment>
+</navigation>

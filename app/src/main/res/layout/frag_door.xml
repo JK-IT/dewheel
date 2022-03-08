@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:background="?attr/colorPrimary"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	tools:context=".DoorFragment"
+	>
+	<com.google.android.material.card.MaterialCardView
+		android:layout_gravity="bottom|center"
+		android:layout_marginBottom="20dp"
+		app:strokeColor="@color/white"
+		app:strokeWidth="0dp"
+		android:minWidth="300dp"
+		app:cardCornerRadius="20dp"
+		app:cardBackgroundColor="@color/white"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content">
+		<LinearLayout
+			android:orientation="vertical"
+			android:padding="5dp"
+			android:layout_gravity="bottom|center"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content">
+			<TextView
+				android:text="Welcome to DeWheel"
+				style="@style/dewheel.text.labelLarge"
+				android:padding="10dp"
+				android:layout_gravity="center"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"/>
+			<Button
+				android:text="Google Login"
+				style="@style/Widget.Material3.Button"
+				android:layout_gravity="center"
+				android:layout_margin="5dp"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"/>
+			
+			<Button
+				android:text="Guest Login"
+				style="@style/Widget.Material3.Button.TextButton"
+				android:layout_gravity="center"
+				android:layout_margin="5dp"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"/>
+		</LinearLayout>
+	</com.google.android.material.card.MaterialCardView>
+	
+
+</FrameLayout>

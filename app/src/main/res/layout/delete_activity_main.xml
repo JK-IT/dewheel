@@ -7,7 +7,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context=".MainActivity">
+    tools:context=".DELETEMainActivity">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/main_appbar_lout"
@@ -30,7 +30,7 @@
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/main_nav_host"
         android:name="androidx.navigation.fragment.NavHostFragment"
-        app:navGraph="@navigation/main_naviga_diagram"
+        app:navGraph="@navigation/nav_main_graph"
         app:defaultNavHost="true"
         android:fitsSystemWindows="true"
         app:layout_constraintTop_toBottomOf="@id/main_appbar_lout"

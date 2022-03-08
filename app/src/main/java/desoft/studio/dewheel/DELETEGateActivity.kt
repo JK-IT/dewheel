@@ -1,5 +1,6 @@
 package desoft.studio.dewheel
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -35,7 +36,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class GateActivity : AppCompatActivity()
+class DELETEGateActivity : AppCompatActivity()
 {
 	private val TAG = "-des- <<++ GATE ACTIVITY ++>>";
 
@@ -52,6 +53,8 @@ class GateActivity : AppCompatActivity()
 	private lateinit var appCache : SharedPreferences;
 	private var goobtn : SignInButton? = null;
 	private var guestbtn : Button?=null;
+	
+	private var botsheet : BottomSheetDialog?=null;
 
 	/**
 	* *				onCreate
@@ -62,16 +65,17 @@ class GateActivity : AppCompatActivity()
 	 * 					.start authentication process, setup view
 	 * 		-> no: popup dialog saying user is offline, ask them to reconnect
 	*/
+	@SuppressLint("MissingPermission")
 	override fun onCreate(savedInstanceState: Bundle?)
 	{
 		super.onCreate(savedInstanceState)
-		setContentView(R.layout.activity_gate);
+		setContentView(R.layout.delete_activity_gate);
 		
 		connmana = getSystemService(ConnectivityManager::class.java);
-		if(KF_CHECK_ONLINE())
-		{
-			appCache = getSharedPreferences(getString(R.string.app_cache_preference), Context.MODE_PRIVATE);
-			
+		appCache = getSharedPreferences(getString(R.string.app_cache_preference), Context.MODE_PRIVATE);
+		KF_SETUP_VIEW();
+		if(connmana.activeNetwork != null) {
+			Log.d(TAG, "onCreate: default net is actvie");
 			gooInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
 				.requestIdToken(getString(R.string.default_web_client_id))
 				.requestId().requestEmail().build();
@@ -79,11 +83,10 @@ class GateActivity : AppCompatActivity()
 			
 			fbauth = FirebaseAuth.getInstance();
 			fbuser = fbauth.currentUser;
-
-			goobtn = findViewById(R.id.gate_google_btn);
-			guestbtn = findViewById(R.id.gate_guest_btn);
-
 			KF_QUICK_CHECK_USER();
+		}
+		else {
+			KF_NO_INTERNET_DIALOG(this);
 		}
 	}
 /**
@@ -102,28 +105,9 @@ class GateActivity : AppCompatActivity()
 	override fun onStart()
 	{
 		super.onStart();
-		Log.d(TAG, "onStart: ")
-		KF_SETUP_VIEW();
 	}
 
 	// + --------->>-------->>--------->>*** -->>----------->>>>
-	/**
-	 * *		KF_CHECK_ONLINE
-	 * Check for connection
-	 * FAIL => SHOWING DIALOG FRAGMENT
-	 * SUCCESS => RETURN;
-	 */
-	private fun KF_CHECK_ONLINE() : Boolean
-	{
-		//Log.i(TAG, "CheckConnection: Active network null ?${connmana.activeNetwork == null} and curr net active ?${connmana.isDefaultNetworkActive}");
-		if(connmana.activeNetwork == null)  {
-			ShowingNOCONNECTIONdialog(this);
-			return false;
-		}
-		else  {
-			return true;
-		}
-	}
 	/**
 	 * *		KF_QUICK_CHECK_USER
 	 * . check share reference for verification
@@ -144,6 +128,9 @@ class GateActivity : AppCompatActivity()
 	*/
 	private fun KF_SETUP_VIEW()
 	{
+		goobtn = findViewById(R.id.gate_google_btn);
+		guestbtn = findViewById(R.id.gate_guest_btn);
+		
 		var exist = appCache.getBoolean(KONSTANT.userexist, false);
 		if(exist == true && fbuser != null) {
 			Log.i(TAG, "KF_SETUP_VIEW: user is NOT NULL");
@@ -334,36 +321,37 @@ class GateActivity : AppCompatActivity()
 	 */
 	private fun KF_START_WHEEL()
 	{
-		var inte = Intent(this, MainActivity::class.java);
+		var inte = Intent(this, DELETEMainActivity::class.java);
 		startActivity(inte);
 	}
 	
-	
-	companion object	{
-		/**
-		 * NO INTERNET CONNECTION BOTTOM SHEET DIALOG
-		 */
-		fun ShowingNOCONNECTIONdialog(acti: Activity)
-		{
-			var botshee = BottomSheetDialog(acti);
-			botshee.apply {
-				setContentView(R.layout.dialog_net_bottom);
-				setCancelable(false);
-				setCanceledOnTouchOutside(false);
-			}
-			var okbtn = botshee.findViewById<Button>(R.id.dialog_net_ok_btn);
-			okbtn?.setOnClickListener {
-				botshee.dismiss();
-				acti.finish();
-			}
-			var beha = botshee.behavior;
-			beha.apply {
-				isHideable = false;
-				isFitToContents = true;
-				state = BottomSheetBehavior.STATE_EXPANDED;
-			}
-			botshee.show();
+	/**
+	 * *NO INTERNET CONNECTION BOTTOM SHEET DIALOG
+	 */
+	private fun KF_NO_INTERNET_DIALOG(acti: Activity)
+	{
+		botsheet = BottomSheetDialog(acti);
+		botsheet?.apply {
+			setContentView(R.layout.dialog_net_bottom);
+			setCancelable(false);
+			setCanceledOnTouchOutside(false);
 		}
+		var okbtn = botsheet?.findViewById<Button>(R.id.dialog_net_ok_btn);
+		okbtn?.setOnClickListener {
+			botsheet?.dismiss();
+			finishAndRemoveTask();
+			startActivity(Intent(this, DELETEGateActivity::class.java));
+		}
+		var beha = botsheet?.behavior;
+		beha?.apply {
+			isHideable = false;
+			isFitToContents = true;
+			state = BottomSheetBehavior.STATE_EXPANDED;
+		}
+		botsheet?.show();
+	}
+	companion object	{
+	
 	}
 	
 	

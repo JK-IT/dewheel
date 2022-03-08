@@ -314,8 +314,8 @@ class DashFragment : Fragment() {
                         }*/
                         lastUserLocation = uiUserLocationTet.text.toString();
                     }
-                    var desact = DashFragmentDirections.actionDashFragmentToEventListFragment(uiUserLocationTet.text.toString());
-                    navKontroller.navigate(desact);
+                    //var desact = DashFragmentDirections.actionDashFragmentToEventListFragment(uiUserLocationTet.text.toString());
+                    //navKontroller.navigate(desact);
                     /*if (region.isNullOrBlank() && !sub.isNullOrBlank())
                         wedakontrol.VM_GET_REMOTE_EVENTS(state, sub);
                     else
@@ -722,7 +722,7 @@ class DashFragment : Fragment() {
                     wedakontrol.VM_DELETE_ALL_USER_LOCAL();
                     wedakontrol.VM_DELETE_ALL_EVENT_LOCAL();
                     Log.i(TAG, "Done deleting user");
-                    var inte = Intent(requireContext(), GateActivity::class.java);
+                    var inte = Intent(requireContext(), DELETEGateActivity::class.java);
                     startActivity(inte);
                 }
                 ?.addOnFailureListener {
@@ -746,7 +746,7 @@ class DashFragment : Fragment() {
                                     }
                                     wedakontrol.VM_DELETE_ALL_USER_LOCAL();
                                     Log.i(TAG, "Done deleting user");
-                                    var inte = Intent(requireContext(), GateActivity::class.java);
+                                    var inte = Intent(requireContext(), DELETEGateActivity::class.java);
                                     startActivity(inte);
                                 }
                                 else if(reexception is FirebaseAuthInvalidCredentialsException) {
